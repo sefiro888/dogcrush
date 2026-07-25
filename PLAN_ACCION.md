@@ -11,6 +11,7 @@ Este documento es la hoja de ruta de referencia del proyecto. Se actualizará al
 - Escena actual: `Assets/_DogCrush/Scenes/Gameplay.unity`
 - Configuración actual: tablero `7x9`, 5 tipos, 60 segundos
 - Referencia visual: `ejemplo/resultadodeseado.png`
+- Referencia adicional guardada: `Assets/_DogCrush/Art/References/dogcrush-reference-2026-07-26.png`
 
 ## Diagnóstico confirmado
 
