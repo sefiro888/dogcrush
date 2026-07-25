@@ -71,6 +71,8 @@ namespace DogCrush.EditorTool
             PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.None;
             PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Disabled;
             PlayerSettings.WebGL.template = "APPLICATION:Default";
+            PlayerSettings.SetIl2CppCompilerConfiguration(UnityEditor.Build.NamedBuildTarget.WebGL, UnityEditor.Il2CppCompilerConfiguration.Master);
+            PlayerSettings.SetIl2CppCodeGeneration(UnityEditor.Build.NamedBuildTarget.WebGL, UnityEditor.Build.Il2CppCodeGeneration.OptimizeSize);
 
             BuildPlayerOptions buildOptions = new BuildPlayerOptions();
             buildOptions.scenes = new string[] { "Assets/_DogCrush/Scenes/Gameplay.unity" };
