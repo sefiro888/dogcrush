@@ -27,20 +27,20 @@ Este documento es la hoja de ruta de referencia del proyecto. Se actualizará al
 - [x] Auditar el estado del repositorio.
 - [x] Confirmar que local y `origin/main` coincidían.
 - [x] Crear la rama `codex/fase1-estabilizacion`.
-- [ ] Crear el primer commit de esta hoja de ruta.
+- [x] Crear el primer commit de esta hoja de ruta.
 - [ ] No publicar en `main` hasta validar la fase.
 
 ## Fase 1 — Recuperar una base jugable estable
 
-- [ ] Reparar y fijar TextMeshPro con una fuente incluida.
-- [ ] Corregir textos mal codificados.
+- [x] Reparar y fijar TextMeshPro con una fuente incluida.
+- [x] Corregir textos mal codificados.
 - [ ] Obtener stack traces de desarrollo y localizar el origen exacto de `ArgumentNullException`.
 - [ ] Unificar la fuente de las cinco fichas y eliminar referencias ambiguas.
 - [ ] Conseguir 63 fichas visibles, con sprite válido y collider activo.
 - [ ] Validar selección por arrastre y cancelación.
 - [ ] Validar eliminación, gravedad y reposición.
 - [ ] Validar puntuación, combos y temporizador.
-- [ ] Añadir una prueba PlayMode de llenado del tablero.
+- [x] Añadir una prueba PlayMode de llenado del tablero.
 - [ ] Conseguir WebGL sin excepciones de consola.
 
 **Criterio de salida:** una partida completa puede iniciarse, jugarse y reiniciarse, mostrando 63 fichas interactivas y HUD legible.
