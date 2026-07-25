@@ -50,6 +50,8 @@ Este documento es la hoja de ruta de referencia del proyecto. Se actualizará al
 
 La prueba PlayMode también verifica ahora que cada sprite tiene geometría superior a 0,5 unidades, además de collider e interacción.
 
+Actualización 25/07/2026: la compilación WebGL limpia posterior a la corrección de importación de sprites terminó correctamente (`Build Finished, Result: Success`; auditoría: `errors: 0`). La comprobación local solo conserva la advertencia conocida del shader FSR; queda pendiente decidir si se elimina antes de publicar.
+
 ## Fase 2 — Escena y arquitectura limpias
 
 - [ ] Crear una escena de trabajo limpia sin destruir UI en tiempo de ejecución.
