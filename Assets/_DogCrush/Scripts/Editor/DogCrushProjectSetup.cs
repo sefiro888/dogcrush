@@ -381,7 +381,11 @@ namespace DogCrush.EditorTool
             {
                 GameObject es = new GameObject("[EventSystem]");
                 es.AddComponent<UnityEngine.EventSystems.EventSystem>();
+#if ENABLE_INPUT_SYSTEM
+                es.AddComponent<UnityEngine.InputSystem.UI.InputSystemUIInputModule>();
+#else
                 es.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
+#endif
             }
 
             return canvas;
