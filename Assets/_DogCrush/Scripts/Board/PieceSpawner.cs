@@ -24,6 +24,20 @@ namespace DogCrush.Board
 
         private readonly Queue<PieceView> pool = new Queue<PieceView>();
 
+        private void Awake()
+        {
+            LoadSpritesIfNull();
+        }
+
+        public void LoadSpritesIfNull()
+        {
+            if (dogSprite == null) dogSprite = Resources.Load<Sprite>("Pieces/dog_icon");
+            if (boneSprite == null) boneSprite = Resources.Load<Sprite>("Pieces/bone_icon");
+            if (ballSprite == null) ballSprite = Resources.Load<Sprite>("Pieces/ball_icon");
+            if (foodSprite == null) foodSprite = Resources.Load<Sprite>("Pieces/food_icon");
+            if (collarSprite == null) collarSprite = Resources.Load<Sprite>("Pieces/collar_icon");
+        }
+
         public PieceView SpawnPiece(PieceType type, int gridX, int gridY, Vector3 spawnWorldPos)
         {
             PieceView piece;

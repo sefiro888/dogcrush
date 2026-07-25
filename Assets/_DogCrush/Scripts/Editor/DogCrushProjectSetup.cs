@@ -696,10 +696,7 @@ namespace DogCrush.EditorTool
 
             GameObject panelGo = new GameObject("BoardPanel");
             panelGo.transform.position = new Vector3(0f, -0.3f, 2f);
-            SpriteRenderer panelSr = panelGo.AddComponent<SpriteRenderer>();
-            panelSr.sprite = boardPanel;
-            panelSr.sortingOrder = 0;
-            panelGo.transform.localScale = new Vector3(1.62f, 1.66f, 1f);
+            panelGo.SetActive(false);
 
             // 4. Game Managers
             GameObject managerGo = new GameObject("[GameManager]");
