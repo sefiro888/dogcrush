@@ -57,9 +57,22 @@ namespace DogCrush.UI
                     Transform child = canvas.transform.GetChild(i);
                     if (!child.name.EndsWith("_RT"))
                     {
-                        // Clean inside sub-panels like SafeAreaPanel
                         DisableAllChildrenRecursive(child);
                         child.gameObject.SetActive(false);
+                    }
+                }
+            }
+
+            // Also find and disable any legacy SpriteRenderers or GameObjects in world space drawing bars
+            SpriteRenderer[] srs = FindObjectsByType<SpriteRenderer>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (SpriteRenderer sr in srs)
+            {
+                string n = sr.gameObject.name.ToLower();
+                if (n.Contains("timer") || n.Contains("bar") || n.Contains("header") || n.Contains("bottom") || n.Contains("panel") || n.Contains("hud") || n.Contains("frame"))
+                {
+                    if (!sr.gameObject.name.EndsWith("_RT") && sr.gameObject.name != "DogParkBackground" && sr.gameObject.name != "BoardFrame")
+                    {
+                        sr.gameObject.SetActive(false);
                     }
                 }
             }

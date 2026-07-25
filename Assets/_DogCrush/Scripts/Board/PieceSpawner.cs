@@ -68,15 +68,7 @@ namespace DogCrush.Board
 
         public Color GetColorForType(PieceType type)
         {
-            switch (type)
-            {
-                case PieceType.Dog: return dogColor;
-                case PieceType.Bone: return boneColor;
-                case PieceType.Ball: return ballColor;
-                case PieceType.Food: return foodColor;
-                case PieceType.Collar: return collarColor;
-                default: return Color.white;
-            }
+            return Color.white;
         }
     }
 }
