@@ -30,6 +30,11 @@ namespace DogCrush.Tests.PlayMode
                     activePieces++;
                     Assert.That(piece.GetComponent<Collider2D>(), Is.Not.Null,
                         "Every board piece must remain interactive.");
+                    SpriteRenderer renderer = piece.GetComponent<SpriteRenderer>();
+                    Assert.That(renderer, Is.Not.Null);
+                    Assert.That(renderer.sprite, Is.Not.Null, "Every board piece must have a sprite.");
+                    Assert.That(renderer.sprite.bounds.size.x, Is.GreaterThan(0.5f),
+                        "Piece sprite geometry must be large enough to be visible on the board.");
                 }
             }
 

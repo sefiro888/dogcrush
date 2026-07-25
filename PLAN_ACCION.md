@@ -48,6 +48,8 @@ Este documento es la hoja de ruta de referencia del proyecto. Se actualizará al
 
 **Nota de progreso:** Unity EditMode (5/5) y PlayMode (1/1) pasan. La primera compilación WebGL se completó sin errores; la recompilación limpia después de corregir las texturas quedó detenida durante el postprocesado prolongado de shaders y aún debe repetirse de forma controlada.
 
+La prueba PlayMode también verifica ahora que cada sprite tiene geometría superior a 0,5 unidades, además de collider e interacción.
+
 ## Fase 2 — Escena y arquitectura limpias
 
 - [ ] Crear una escena de trabajo limpia sin destruir UI en tiempo de ejecución.
