@@ -15,7 +15,7 @@ Este documento es la hoja de ruta de referencia del proyecto. Se actualizará al
 
 ## Diagnóstico confirmado
 
-- WebGL ya muestra las 63 fichas y el HUD; queda pendiente retirar la advertencia visual del shader FSR.
+- WebGL ya muestra las 63 fichas y el HUD. Se fijó el escalado lineal para WebGL; en una sesión de navegador todavía puede aparecer una advertencia FSR heredada de la caché o del pipeline de URP, pero no bloquea la partida.
 - El arranque produce `ArgumentNullException` y una advertencia de shader FSR.
 - TextMeshPro no tiene una fuente esencial claramente incluida en `Assets`.
 - El HUD se destruye y se reconstruye dinámicamente durante `Awake`.
@@ -51,7 +51,7 @@ Este documento es la hoja de ruta de referencia del proyecto. Se actualizará al
 
 La prueba PlayMode también verifica ahora que cada sprite tiene geometría superior a 0,5 unidades, además de collider e interacción.
 
-Actualización 26/07/2026: se reparó el reinicio para reciclar las fichas anteriores y se añadió una prueba PlayMode específica. URP WebGL quedó fijado a escalado lineal para evitar el shader FSR no compatible. La compilación WebGL resultante terminó correctamente (`Build Finished, Result: Success`; auditoría: `errors: 0`) y se verificó visualmente el tablero completo en navegador.
+Actualización 26/07/2026: se reparó el reinicio para reciclar las fichas anteriores y se añadió una prueba PlayMode específica. URP WebGL quedó fijado a escalado lineal. La compilación WebGL resultante terminó correctamente (`Build Finished, Result: Success`; auditoría: `errors: 0`) y se verificó visualmente el tablero completo en navegador. La advertencia FSR se ha vuelto a comprobar y queda anotada como limpieza técnica no bloqueante para una sesión posterior.
 
 ## Fase 2 — Escena y arquitectura limpias
 
