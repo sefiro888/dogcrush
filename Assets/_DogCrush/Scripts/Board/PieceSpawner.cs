@@ -31,20 +31,35 @@ namespace DogCrush.Board
 
         public void LoadSpritesIfNull()
         {
-            if (dogSprite == null) dogSprite = LoadResourceSprite("Pieces/dog_icon");
-            if (boneSprite == null) boneSprite = LoadResourceSprite("Pieces/bone_icon");
-            if (ballSprite == null) ballSprite = LoadResourceSprite("Pieces/ball_icon");
-            if (foodSprite == null) foodSprite = LoadResourceSprite("Pieces/food_icon");
-            if (collarSprite == null) collarSprite = LoadResourceSprite("Pieces/collar_icon");
+            // Prefer the Resources copies at runtime. This avoids relying on a
+            // serialized Sprite sub-asset reference that can be stripped or
+            // become invalid in a WebGL build.
+            dogSprite = LoadResourceSprite("Pieces/dog_icon") ?? dogSprite;
+            boneSprite = LoadResourceSprite("Pieces/bone_icon") ?? boneSprite;
+            ballSprite = LoadResourceSprite("Pieces/ball_icon") ?? ballSprite;
+            foodSprite = LoadResourceSprite("Pieces/food_icon") ?? foodSprite;
+            collarSprite = LoadResourceSprite("Pieces/collar_icon") ?? collarSprite;
         }
 
         private static Sprite LoadResourceSprite(string path)
         {
+            Sprite[] sprites = Resources.LoadAll<Sprite>(path);
+            if (sprites != null && sprites.Length > 0)
+                return sprites[0];
+
             Sprite sprite = Resources.Load<Sprite>(path);
             if (sprite != null) return sprite;
 
-            Sprite[] sprites = Resources.LoadAll<Sprite>(path);
-            return sprites != null && sprites.Length > 0 ? sprites[0] : null;
+            // Last-resort WebGL-safe fallback: load the texture and create the
+            // Sprite explicitly when Unity did not expose the PNG sub-asset.
+            Texture2D texture = Resources.Load<Texture2D>(path);
+            if (texture == null) return null;
+
+            return Sprite.Create(
+                texture,
+                new Rect(0f, 0f, texture.width, texture.height),
+                new Vector2(0.5f, 0.5f),
+                100f);
         }
 
         public PieceView SpawnPiece(PieceType type, int gridX, int gridY, Vector3 spawnWorldPos)

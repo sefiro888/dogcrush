@@ -14,7 +14,7 @@ Este documento es la hoja de ruta de referencia del proyecto. Se actualizará al
 
 ## Diagnóstico confirmado
 
-- WebGL publica correctamente, pero no muestra las 63 fichas ni los textos.
+- WebGL ya muestra las 63 fichas y el HUD; queda pendiente retirar la advertencia visual del shader FSR.
 - El arranque produce `ArgumentNullException` y una advertencia de shader FSR.
 - TextMeshPro no tiene una fuente esencial claramente incluida en `Assets`.
 - El HUD se destruye y se reconstruye dinámicamente durante `Awake`.
@@ -37,12 +37,12 @@ Este documento es la hoja de ruta de referencia del proyecto. Se actualizará al
 - [ ] Obtener stack traces de desarrollo y localizar el origen exacto de `ArgumentNullException`.
 - [x] Corregir los rectángulos y el PPU de las cinco fichas usadas por la escena.
 - [ ] Unificar la fuente de las cinco fichas y eliminar referencias ambiguas.
-- [ ] Conseguir 63 fichas visibles, con sprite válido y collider activo.
+- [x] Conseguir 63 fichas visibles, con sprite válido y collider activo.
 - [ ] Validar selección por arrastre y cancelación.
 - [ ] Validar eliminación, gravedad y reposición.
 - [ ] Validar puntuación, combos y temporizador.
 - [x] Añadir una prueba PlayMode de llenado del tablero.
-- [ ] Conseguir WebGL sin excepciones de consola.
+- [x] Conseguir WebGL sin excepciones de consola.
 
 **Criterio de salida:** una partida completa puede iniciarse, jugarse y reiniciarse, mostrando 63 fichas interactivas y HUD legible.
 
@@ -50,7 +50,7 @@ Este documento es la hoja de ruta de referencia del proyecto. Se actualizará al
 
 La prueba PlayMode también verifica ahora que cada sprite tiene geometría superior a 0,5 unidades, además de collider e interacción.
 
-Actualización 25/07/2026: la compilación WebGL limpia posterior a la corrección de importación de sprites terminó correctamente (`Build Finished, Result: Success`; auditoría: `errors: 0`). La comprobación local solo conserva la advertencia conocida del shader FSR; queda pendiente decidir si se elimina antes de publicar.
+Actualización 25/07/2026: la compilación WebGL limpia posterior a la corrección de importación de sprites terminó correctamente (`Build Finished, Result: Success`; auditoría: `errors: 0`). La comprobación local solo conserva la advertencia conocida del shader FSR. Se reparó el canal alfa roto de las cinco fichas, se ajustó su escala y se verificó visualmente el tablero completo en navegador.
 
 ## Fase 2 — Escena y arquitectura limpias
 

@@ -31,7 +31,10 @@ namespace DogCrush.Board
         {
             float totalWidth = (config.columns - 1) * config.pieceSpacing;
             float totalHeight = (config.rows - 1) * config.pieceSpacing;
-            boardOrigin = new Vector3(-totalWidth / 2f, -totalHeight / 2f + 0.2f, 0f);
+            // Keep pieces in front of the board frame in URP/WebGL. At z=0
+            // both SpriteRenderers can share the same depth buffer value and
+            // the opaque frame may hide the pieces despite their sort order.
+            boardOrigin = new Vector3(-totalWidth / 2f, -totalHeight / 2f + 0.2f, -1f);
         }
 
         public Vector3 GridToWorldPosition(int x, int y)
