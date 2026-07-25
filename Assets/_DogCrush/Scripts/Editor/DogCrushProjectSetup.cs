@@ -18,15 +18,15 @@ namespace DogCrush.EditorTool
         [MenuItem("DOGCRUSH/Build Playable Prototype")]
         public static void BuildPrototype()
         {
-            Debug.Log("[DOGCRUSH] Starting v0.2 visual redesign & mobile layout setup...");
+            Debug.Log("[DOGCRUSH] Building v0.3 Ultra-Fluid Pro Mobile Edition...");
 
             EnsureDirectoriesExist();
 
-            Sprite dogSprite = CreateIconTexture("dog_icon", 256, IconShape.Dog);
-            Sprite boneSprite = CreateIconTexture("bone_icon", 256, IconShape.Bone);
-            Sprite ballSprite = CreateIconTexture("ball_icon", 256, IconShape.Ball);
-            Sprite foodSprite = CreateIconTexture("food_icon", 256, IconShape.Food);
-            Sprite collarSprite = CreateIconTexture("collar_icon", 256, IconShape.Collar);
+            Sprite dogSprite = CreateIconTexture("dog_icon", 512, IconShape.Dog);
+            Sprite boneSprite = CreateIconTexture("bone_icon", 512, IconShape.Bone);
+            Sprite ballSprite = CreateIconTexture("ball_icon", 512, IconShape.Ball);
+            Sprite foodSprite = CreateIconTexture("food_icon", 512, IconShape.Food);
+            Sprite collarSprite = CreateIconTexture("collar_icon", 512, IconShape.Collar);
 
             Sprite glowSprite = CreateGlowTexture("piece_glow", 256);
             Sprite pawParticleSprite = CreatePawParticleTexture("paw_particle", 128);
@@ -46,7 +46,7 @@ namespace DogCrush.EditorTool
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
-            Debug.Log("[DOGCRUSH] v0.2 Visual Redesign completed successfully! Open Assets/_DogCrush/Scenes/Gameplay.unity and press Play.");
+            Debug.Log("[DOGCRUSH] v0.3 Ultra-Fluid Pro Mobile Edition built successfully! Open Assets/_DogCrush/Scenes/Gameplay.unity and press Play.");
         }
 
         private static void EnsureDirectoriesExist()
@@ -94,104 +94,130 @@ namespace DogCrush.EditorTool
                     bool outerBody = false;
                     bool whiteBorder = false;
                     bool shadow = false;
-                    bool innerFeature = false;
+                    Color featureColor = Color.clear;
+                    bool hasFeature = false;
 
-                    // Drop Shadow offset
-                    float sdx = dx + 6f;
-                    float sdy = dy + 8f;
+                    // Drop Shadow offset (downwards right)
+                    float sdx = dx + 10f;
+                    float sdy = dy + 14f;
                     float sdist = Mathf.Sqrt(sdx * sdx + sdy * sdy);
 
                     switch (shape)
                     {
                         case IconShape.Dog:
-                            // Puppy face: Circle head + two floppy ears + snout + nose
+                            // Puppy face: Rounded Head + Floppy ears + Snout + Eyes + Nose + Tongue
                             bool head = dist <= radius;
-                            bool earL = Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.75f, radius * 0.5f)) <= radius * 0.45f;
-                            bool earR = Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.75f, radius * 0.5f)) <= radius * 0.45f;
+                            bool earL = Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.72f, radius * 0.42f)) <= radius * 0.46f;
+                            bool earR = Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.72f, radius * 0.42f)) <= radius * 0.46f;
 
-                            bool shearL = Vector2.Distance(new Vector2(sdx, sdy), new Vector2(-radius * 0.75f, radius * 0.5f)) <= radius * 0.45f;
-                            bool shearR = Vector2.Distance(new Vector2(sdx, sdy), new Vector2(radius * 0.75f, radius * 0.5f)) <= radius * 0.45f;
+                            bool shearL = Vector2.Distance(new Vector2(sdx, sdy), new Vector2(-radius * 0.72f, radius * 0.42f)) <= radius * 0.46f;
+                            bool shearR = Vector2.Distance(new Vector2(sdx, sdy), new Vector2(radius * 0.72f, radius * 0.42f)) <= radius * 0.46f;
 
                             outerBody = head || earL || earR;
                             shadow = (sdist <= radius || shearL || shearR) && !outerBody;
 
-                            // White border
-                            whiteBorder = (dist <= radius + 6f && dist >= radius - 3f) ||
-                                          (Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.75f, radius * 0.5f)) <= radius * 0.45f + 5f &&
-                                           Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.75f, radius * 0.5f)) >= radius * 0.45f - 3f) ||
-                                          (Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.75f, radius * 0.5f)) <= radius * 0.45f + 5f &&
-                                           Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.75f, radius * 0.5f)) >= radius * 0.45f - 3f);
+                            // White Sticker Border
+                            whiteBorder = (dist <= radius + 10f && dist >= radius - 4f) ||
+                                          (Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.72f, radius * 0.42f)) <= radius * 0.46f + 8f &&
+                                           Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.72f, radius * 0.42f)) >= radius * 0.46f - 4f) ||
+                                          (Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.72f, radius * 0.42f)) <= radius * 0.46f + 8f &&
+                                           Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.72f, radius * 0.42f)) >= radius * 0.46f - 4f);
 
-                            // Eyes & nose
-                            bool eyeL = Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.35f, radius * 0.2f)) <= radius * 0.12f;
-                            bool eyeR = Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.35f, radius * 0.2f)) <= radius * 0.12f;
-                            bool nose = Vector2.Distance(new Vector2(dx, dy), new Vector2(0f, -radius * 0.15f)) <= radius * 0.18f;
-                            bool snout = Vector2.Distance(new Vector2(dx, dy), new Vector2(0f, -radius * 0.22f)) <= radius * 0.38f;
-                            innerFeature = eyeL || eyeR || nose;
+                            // Inner Features
+                            bool snout = Vector2.Distance(new Vector2(dx, dy), new Vector2(0f, -radius * 0.24f)) <= radius * 0.38f;
+                            bool nose = Vector2.Distance(new Vector2(dx, dy), new Vector2(0f, -radius * 0.12f)) <= radius * 0.14f;
+                            bool eyeL = Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.34f, radius * 0.18f)) <= radius * 0.11f;
+                            bool eyeR = Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.34f, radius * 0.18f)) <= radius * 0.11f;
+                            bool specL = Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.31f, radius * 0.22f)) <= radius * 0.04f;
+                            bool specR = Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.31f, radius * 0.22f)) <= radius * 0.04f;
+                            bool tongue = dy < -radius * 0.35f && dy > -radius * 0.58f && Mathf.Abs(dx) <= radius * 0.14f;
+
+                            if (specL || specR) { hasFeature = true; featureColor = Color.white; }
+                            else if (eyeL || eyeR || nose) { hasFeature = true; featureColor = new Color(0.12f, 0.10f, 0.14f); }
+                            else if (tongue) { hasFeature = true; featureColor = new Color(0.98f, 0.42f, 0.55f); }
+                            else if (snout) { hasFeature = true; featureColor = new Color(0.98f, 0.94f, 0.88f); }
                             break;
 
                         case IconShape.Bone:
-                            // Dog Bone: rounded bar + 4 corner circles
-                            bool bar = Mathf.Abs(dy) <= radius * 0.32f && Mathf.Abs(dx) <= radius * 0.75f;
-                            bool c1 = Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.72f, radius * 0.42f)) <= radius * 0.38f;
-                            bool c2 = Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.72f, -radius * 0.42f)) <= radius * 0.38f;
-                            bool c3 = Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.72f, radius * 0.42f)) <= radius * 0.38f;
-                            bool c4 = Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.72f, -radius * 0.42f)) <= radius * 0.38f;
+                            // Dog Bone: rounded bar + 4 corner knobs
+                            bool bar = Mathf.Abs(dy) <= radius * 0.35f && Mathf.Abs(dx) <= radius * 0.76f;
+                            bool c1 = Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.74f, radius * 0.44f)) <= radius * 0.38f;
+                            bool c2 = Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.74f, -radius * 0.44f)) <= radius * 0.38f;
+                            bool c3 = Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.74f, radius * 0.44f)) <= radius * 0.38f;
+                            bool c4 = Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.74f, -radius * 0.44f)) <= radius * 0.38f;
                             outerBody = bar || c1 || c2 || c3 || c4;
 
-                            bool sbar = Mathf.Abs(sdy) <= radius * 0.32f && Mathf.Abs(sdx) <= radius * 0.75f;
-                            bool sc1 = Vector2.Distance(new Vector2(sdx, sdy), new Vector2(-radius * 0.72f, radius * 0.42f)) <= radius * 0.38f;
-                            bool sc2 = Vector2.Distance(new Vector2(sdx, sdy), new Vector2(-radius * 0.72f, -radius * 0.42f)) <= radius * 0.38f;
-                            bool sc3 = Vector2.Distance(new Vector2(sdx, sdy), new Vector2(radius * 0.72f, radius * 0.42f)) <= radius * 0.38f;
-                            bool sc4 = Vector2.Distance(new Vector2(sdx, sdy), new Vector2(radius * 0.72f, -radius * 0.42f)) <= radius * 0.38f;
+                            bool sbar = Mathf.Abs(sdy) <= radius * 0.35f && Mathf.Abs(sdx) <= radius * 0.76f;
+                            bool sc1 = Vector2.Distance(new Vector2(sdx, sdy), new Vector2(-radius * 0.74f, radius * 0.44f)) <= radius * 0.38f;
+                            bool sc2 = Vector2.Distance(new Vector2(sdx, sdy), new Vector2(-radius * 0.74f, -radius * 0.44f)) <= radius * 0.38f;
+                            bool sc3 = Vector2.Distance(new Vector2(sdx, sdy), new Vector2(radius * 0.74f, radius * 0.44f)) <= radius * 0.38f;
+                            bool sc4 = Vector2.Distance(new Vector2(sdx, sdy), new Vector2(radius * 0.74f, -radius * 0.44f)) <= radius * 0.38f;
                             shadow = (sbar || sc1 || sc2 || sc3 || sc4) && !outerBody;
+
+                            // Glossy Center Shading
+                            float boneHighlight = Mathf.Clamp01(1f - (Mathf.Abs(dy) / (radius * 0.35f)));
+                            if (outerBody && dy > 0) { hasFeature = true; featureColor = Color.Lerp(new Color(0.96f, 0.96f, 0.98f), Color.white, boneHighlight * 0.4f); }
                             break;
 
                         case IconShape.Ball:
-                            // Dog Tennis Ball: Circle + S-curved stripe seams
+                            // Tennis Play Ball: Sphere + Curved White Seams
                             outerBody = dist <= radius;
                             shadow = (sdist <= radius) && !outerBody;
-                            float stripe1 = Mathf.Abs(dy - Mathf.Sin(dx * 0.05f) * radius * 0.4f);
-                            innerFeature = stripe1 <= radius * 0.14f && outerBody;
+
+                            float curveY = Mathf.Sin(dx * 0.03f) * radius * 0.35f;
+                            bool seam1 = Mathf.Abs(dy - curveY) <= radius * 0.12f;
+                            if (seam1 && outerBody) { hasFeature = true; featureColor = Color.white; }
                             break;
 
                         case IconShape.Food:
-                            // Kibble Bowl: Trapezoid bowl + kibble mound on top
-                            bool bowlBottom = dy <= radius * 0.1f && dy >= -radius * 0.7f && Mathf.Abs(dx) <= (radius * 0.85f - (dy * 0.2f));
-                            bool kibbleMound = dy > radius * 0.05f && dist <= radius * 0.85f;
-                            outerBody = bowlBottom || kibbleMound;
-                            bool sbowlBottom = sdy <= radius * 0.1f && sdy >= -radius * 0.7f && Mathf.Abs(sdx) <= (radius * 0.85f - (sdy * 0.2f));
-                            bool skibbleMound = sdy > radius * 0.05f && sdist <= radius * 0.85f;
-                            shadow = (sbowlBottom || skibbleMound) && !outerBody;
-                            bool boneIconOnBowl = Vector2.Distance(new Vector2(dx, dy), new Vector2(0f, -radius * 0.3f)) <= radius * 0.18f;
-                            innerFeature = boneIconOnBowl;
+                            // Kibble Bowl: Bowl + Kibble Heap + Bone Badge
+                            bool bowl = dy <= radius * 0.1f && dy >= -radius * 0.72f && Mathf.Abs(dx) <= (radius * 0.88f - (dy * 0.22f));
+                            bool heap = dy > radius * 0.05f && dist <= radius * 0.85f;
+                            outerBody = bowl || heap;
+
+                            bool sbowl = sdy <= radius * 0.1f && sdy >= -radius * 0.72f && Mathf.Abs(sdx) <= (radius * 0.88f - (sdy * 0.22f));
+                            bool sheap = sdy > radius * 0.05f && sdist <= radius * 0.85f;
+                            shadow = (sbowl || sheap) && !outerBody;
+
+                            bool heapKibble = heap && (Mathf.Sin(dx * 0.15f) * Mathf.Cos(dy * 0.15f) > 0.1f);
+                            bool boneBadge = Vector2.Distance(new Vector2(dx, dy), new Vector2(0f, -radius * 0.32f)) <= radius * 0.22f;
+
+                            if (boneBadge) { hasFeature = true; featureColor = Color.white; }
+                            else if (heapKibble) { hasFeature = true; featureColor = new Color(0.72f, 0.45f, 0.18f); }
                             break;
 
                         case IconShape.Collar:
-                            // Dog Collar: Ring + Golden medal tag at bottom
-                            bool ring = dist <= radius && dist >= radius * 0.5f;
-                            bool tag = Vector2.Distance(new Vector2(dx, dy), new Vector2(0f, -radius * 0.65f)) <= radius * 0.32f;
+                            // Dog Collar: Leather Ring + Golden Medal Tag
+                            bool ring = dist <= radius && dist >= radius * 0.48f;
+                            bool tag = Vector2.Distance(new Vector2(dx, dy), new Vector2(0f, -radius * 0.62f)) <= radius * 0.34f;
                             outerBody = ring || tag;
-                            bool sring = sdist <= radius && sdist >= radius * 0.5f;
-                            bool stag = Vector2.Distance(new Vector2(sdx, sdy), new Vector2(0f, -radius * 0.65f)) <= radius * 0.32f;
+
+                            bool sring = sdist <= radius && sdist >= radius * 0.48f;
+                            bool stag = Vector2.Distance(new Vector2(sdx, sdy), new Vector2(0f, -radius * 0.62f)) <= radius * 0.34f;
                             shadow = (sring || stag) && !outerBody;
-                            bool tagHole = Vector2.Distance(new Vector2(dx, dy), new Vector2(0f, -radius * 0.65f)) <= radius * 0.12f;
-                            innerFeature = tagHole;
+
+                            bool tagCenter = Vector2.Distance(new Vector2(dx, dy), new Vector2(0f, -radius * 0.62f)) <= radius * 0.26f;
+                            bool starInTag = tagCenter && Mathf.Abs(dx) * Mathf.Abs(dy + radius * 0.62f) < 40f;
+
+                            if (starInTag) { hasFeature = true; featureColor = new Color(0.98f, 0.82f, 0.2f); }
+                            else if (tagCenter) { hasFeature = true; featureColor = new Color(1.0f, 0.92f, 0.4f); }
                             break;
                     }
 
                     int idx = y * size + x;
 
-                    if (innerFeature)
+                    if (hasFeature)
                     {
-                        pixels[idx] = (shape == IconShape.Dog || shape == IconShape.Collar) ? new Color(0.15f, 0.12f, 0.15f, 1f) : Color.white;
+                        pixels[idx] = featureColor;
                     }
                     else if (outerBody)
                     {
-                        // Glossy sheen highlight gradient
-                        float sheen = Mathf.Clamp01(1f - (dist / radius)) * 0.25f;
+                        // 3D Sphere/Radial Gradient Lighting
+                        float radialLighting = Mathf.Clamp01(1f - (dist / radius));
+                        float specularSheen = Mathf.Pow(Mathf.Clamp01(1f - (Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.3f, radius * 0.3f)) / (radius * 0.8f))), 3f) * 0.35f;
+
                         Color baseColor = Color.white;
-                        pixels[idx] = new Color(baseColor.r + sheen, baseColor.g + sheen, baseColor.b + sheen, 1f);
+                        pixels[idx] = new Color(baseColor.r + specularSheen, baseColor.g + specularSheen, baseColor.b + specularSheen, 1f);
                     }
                     else if (whiteBorder)
                     {
@@ -240,7 +266,7 @@ namespace DogCrush.EditorTool
                 {
                     float dist = Vector2.Distance(new Vector2(x, y), new Vector2(center, center));
                     float alpha = Mathf.Clamp01(1f - (dist / maxDist));
-                    alpha = Mathf.Pow(alpha, 2f);
+                    alpha = Mathf.Pow(alpha, 2.2f);
                     pixels[y * size + x] = new Color(1f, 1f, 1f, alpha);
                 }
             }
@@ -278,9 +304,7 @@ namespace DogCrush.EditorTool
                     float dx = x - center;
                     float dy = y - center;
 
-                    // Main paw pad
                     bool mainPad = Vector2.Distance(new Vector2(dx, dy), new Vector2(0f, -size * 0.1f)) <= radius;
-                    // 4 Toe pads
                     bool toe1 = Vector2.Distance(new Vector2(dx, dy), new Vector2(-size * 0.28f, size * 0.22f)) <= radius * 0.38f;
                     bool toe2 = Vector2.Distance(new Vector2(dx, dy), new Vector2(-size * 0.1f, size * 0.35f)) <= radius * 0.38f;
                     bool toe3 = Vector2.Distance(new Vector2(dx, dy), new Vector2(size * 0.1f, size * 0.35f)) <= radius * 0.38f;
@@ -320,26 +344,24 @@ namespace DogCrush.EditorTool
             Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
             Color[] pixels = new Color[width * height];
 
-            Color skyTop = new Color(0.28f, 0.58f, 0.88f); // Soft Sky Blue
-            Color skyBottom = new Color(0.68f, 0.86f, 0.98f);
-            Color grassTop = new Color(0.35f, 0.78f, 0.45f); // Soft Mint Grass
-            Color grassBottom = new Color(0.22f, 0.58f, 0.32f);
+            Color skyTop = new Color(0.22f, 0.52f, 0.85f); // Deep Sky Blue
+            Color skyBottom = new Color(0.65f, 0.85f, 0.98f);
+            Color grassTop = new Color(0.32f, 0.78f, 0.42f); // Vibrant Mint Grass
+            Color grassBottom = new Color(0.18f, 0.52f, 0.28f);
 
             for (int y = 0; y < height; y++)
             {
                 float t = (float)y / height;
                 Color rowColor;
 
-                if (t > 0.35f)
+                if (t > 0.38f)
                 {
-                    // Sky gradient
-                    float skyT = (t - 0.35f) / 0.65f;
+                    float skyT = (t - 0.38f) / 0.62f;
                     rowColor = Color.Lerp(skyBottom, skyTop, skyT);
                 }
                 else
                 {
-                    // Grassy hill gradient with subtle wave
-                    float grassT = t / 0.35f;
+                    float grassT = t / 0.38f;
                     rowColor = Color.Lerp(grassBottom, grassTop, grassT);
                 }
 
@@ -372,14 +394,14 @@ namespace DogCrush.EditorTool
             Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
             Color[] pixels = new Color[width * height];
 
-            Color woodOuter = new Color(0.58f, 0.38f, 0.22f); // Cozy Warm Wood
-            Color woodInner = new Color(0.72f, 0.48f, 0.28f);
+            Color woodOuter = new Color(0.55f, 0.35f, 0.18f); // Rich Warm Mahogany Wood
+            Color woodInner = new Color(0.75f, 0.48f, 0.26f);
 
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    bool border = (x < 18 || x >= width - 18 || y < 18 || y >= height - 18);
+                    bool border = (x < 22 || x >= width - 22 || y < 22 || y >= height - 22);
                     if (border)
                     {
                         pixels[y * width + x] = Color.Lerp(woodOuter, woodInner, (float)x / width);
@@ -414,7 +436,7 @@ namespace DogCrush.EditorTool
             Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
             Color[] pixels = new Color[width * height];
 
-            Color panelBg = new Color(0.12f, 0.16f, 0.22f, 0.85f); // Cozy Semi-transparent dark slate panel
+            Color panelBg = new Color(0.10f, 0.14f, 0.20f, 0.88f); // Translucent Dark Slate Panel
 
             for (int i = 0; i < pixels.Length; i++)
             {
@@ -477,7 +499,7 @@ namespace DogCrush.EditorTool
                 config.rows = 9;
                 config.typeCount = 5;
                 config.pieceSpacing = 1.15f;
-                config.fallSpeed = 15.0f;
+                config.fallSpeed = 16.0f;
                 config.minChainLength = 3;
                 config.gameDurationSeconds = 60.0f;
                 AssetDatabase.CreateAsset(config, path);
@@ -500,9 +522,9 @@ namespace DogCrush.EditorTool
             glowGo.transform.SetParent(go.transform, false);
             SpriteRenderer glowSr = glowGo.AddComponent<SpriteRenderer>();
             glowSr.sprite = glowSprite;
-            glowSr.color = new Color(1f, 0.9f, 0.2f, 0.75f);
+            glowSr.color = new Color(1f, 0.88f, 0.15f, 0.85f);
             glowSr.sortingOrder = 9;
-            glowGo.transform.localScale = Vector3.one * 1.35f;
+            glowGo.transform.localScale = Vector3.one * 1.40f;
             glowGo.SetActive(false);
 
             PieceView view = go.AddComponent<PieceView>();
@@ -569,7 +591,7 @@ namespace DogCrush.EditorTool
             FeedbackController feedbackController = managerGo.AddComponent<FeedbackController>();
             AudioPlaceholderController audioController = managerGo.AddComponent<AudioPlaceholderController>();
             ParticleEffectController particleController = managerGo.AddComponent<ParticleEffectController>();
-            particleController.particleSprite = pawParticle;
+            particleController.pawSprite = pawParticle;
             GameBootstrap bootstrap = managerGo.AddComponent<GameBootstrap>();
 
             // 5. Piece Spawner
@@ -584,10 +606,10 @@ namespace DogCrush.EditorTool
             spawner.foodSprite = food;
             spawner.collarSprite = collar;
 
-            spawner.dogColor = new Color(1.0f, 0.62f, 0.15f);  // Warm Orange
+            spawner.dogColor = new Color(1.0f, 0.60f, 0.12f);  // Warm Orange
             spawner.boneColor = new Color(0.96f, 0.96f, 0.98f); // Soft Bone White
-            spawner.ballColor = new Color(0.2f, 0.78f, 0.95f); // Bright Cyan
-            spawner.foodColor = new Color(0.95f, 0.32f, 0.38f); // Coral Red
+            spawner.ballColor = new Color(0.18f, 0.78f, 0.95f); // Bright Cyan
+            spawner.foodColor = new Color(0.96f, 0.32f, 0.38f); // Coral Red
             spawner.collarColor = new Color(0.28f, 0.85f, 0.48f); // Mint Green
 
             // 6. Line View
@@ -595,10 +617,10 @@ namespace DogCrush.EditorTool
             LineRenderer lr = lineGo.AddComponent<LineRenderer>();
             ChainLineView lineView = lineGo.AddComponent<ChainLineView>();
             lineView.lineRenderer = lr;
-            lr.startColor = new Color(1f, 0.85f, 0.2f, 0.95f);
-            lr.endColor = new Color(1f, 0.5f, 0.1f, 0.95f);
-            lr.startWidth = 0.24f;
-            lr.endWidth = 0.24f;
+            lr.startColor = new Color(1f, 0.85f, 0.15f, 0.95f);
+            lr.endColor = new Color(1f, 0.48f, 0.1f, 0.95f);
+            lr.startWidth = 0.26f;
+            lr.endWidth = 0.26f;
 
             // Wire Controller Dependencies
             boardController.config = config;
@@ -663,20 +685,20 @@ namespace DogCrush.EditorTool
             headerRect.sizeDelta = Vector2.zero;
 
             Image headerBg = headerGo.GetComponent<Image>();
-            headerBg.color = new Color(0.08f, 0.12f, 0.18f, 0.75f);
+            headerBg.color = new Color(0.08f, 0.12f, 0.18f, 0.82f);
 
             // DOGCRUSH Logo Badge
-            CreateTMPText("LogoBadge", headerGo.transform, "🐶 DOGCRUSH", 40, TextAlignmentOptions.Center, new Vector2(0.02f, 0.52f), new Vector2(0.38f, 0.95f));
+            CreateTMPText("LogoBadge", headerGo.transform, "🐶 DOGCRUSH", 42, TextAlignmentOptions.Center, new Vector2(0.02f, 0.52f), new Vector2(0.38f, 0.95f));
 
             // Score & High Score
-            uiController.scoreText = CreateTMPText("ScoreText", headerGo.transform, "0", 44, TextAlignmentOptions.Left, new Vector2(0.42f, 0.5f), new Vector2(0.72f, 0.95f));
+            uiController.scoreText = CreateTMPText("ScoreText", headerGo.transform, "0", 46, TextAlignmentOptions.Left, new Vector2(0.42f, 0.5f), new Vector2(0.72f, 0.95f));
             uiController.scoreText.color = new Color(1f, 0.92f, 0.35f);
 
             uiController.highScoreText = CreateTMPText("HighScoreText", headerGo.transform, "RÉCORD: 0", 24, TextAlignmentOptions.Left, new Vector2(0.42f, 0.05f), new Vector2(0.72f, 0.48f));
             uiController.highScoreText.color = new Color(0.85f, 0.85f, 0.9f);
 
             // Timer Text
-            uiController.timerText = CreateTMPText("TimerText", headerGo.transform, "60s", 48, TextAlignmentOptions.Right, new Vector2(0.75f, 0.52f), new Vector2(0.96f, 0.95f));
+            uiController.timerText = CreateTMPText("TimerText", headerGo.transform, "60s", 50, TextAlignmentOptions.Right, new Vector2(0.75f, 0.52f), new Vector2(0.96f, 0.95f));
 
             // Visual Timer Bar
             GameObject barBgGo = new GameObject("TimerBarBg", typeof(RectTransform), typeof(Image));
@@ -709,7 +731,7 @@ namespace DogCrush.EditorTool
             uiController.chainInfoText = CreateTMPText("ChainInfoText", safeGo.transform, "Cadena: 0", 34, TextAlignmentOptions.Center, new Vector2(0.15f, 0.82f), new Vector2(0.85f, 0.87f));
 
             // Combo Floating Banner Text
-            uiController.comboBannerText = CreateTMPText("ComboBannerText", safeGo.transform, "COMBO x2!", 56, TextAlignmentOptions.Center, new Vector2(0.1f, 0.45f), new Vector2(0.9f, 0.58f));
+            uiController.comboBannerText = CreateTMPText("ComboBannerText", safeGo.transform, "COMBO x2!", 60, TextAlignmentOptions.Center, new Vector2(0.1f, 0.45f), new Vector2(0.9f, 0.58f));
             uiController.comboBannerText.color = new Color(1f, 0.85f, 0.2f);
             uiController.comboBannerText.gameObject.SetActive(false);
 
@@ -733,11 +755,11 @@ namespace DogCrush.EditorTool
             goRect.sizeDelta = Vector2.zero;
 
             Image bgImg = gameOverGo.GetComponent<Image>();
-            bgImg.color = new Color(0.06f, 0.08f, 0.12f, 0.92f);
+            bgImg.color = new Color(0.06f, 0.08f, 0.12f, 0.94f);
 
             CreateTMPText("GameOverTitle", gameOverGo.transform, "¡TIEMPO AGOTADO!", 64, TextAlignmentOptions.Center, new Vector2(0.05f, 0.72f), new Vector2(0.95f, 0.85f));
-            uiController.finalScoreText = CreateTMPText("FinalScoreText", gameOverGo.transform, "Puntuación Final\n0", 46, TextAlignmentOptions.Center, new Vector2(0.05f, 0.52f), new Vector2(0.95f, 0.68f));
-            uiController.newRecordBanner = CreateTMPText("NewRecordBanner", gameOverGo.transform, "★ ¡NUEVO RÉCORD! ★", 40, TextAlignmentOptions.Center, new Vector2(0.05f, 0.44f), new Vector2(0.95f, 0.51f));
+            uiController.finalScoreText = CreateTMPText("FinalScoreText", gameOverGo.transform, "Puntuación Final\n0", 48, TextAlignmentOptions.Center, new Vector2(0.05f, 0.52f), new Vector2(0.95f, 0.68f));
+            uiController.newRecordBanner = CreateTMPText("NewRecordBanner", gameOverGo.transform, "★ ¡NUEVO RÉCORD! ★", 42, TextAlignmentOptions.Center, new Vector2(0.05f, 0.44f), new Vector2(0.95f, 0.51f));
             uiController.newRecordBanner.color = new Color(1f, 0.85f, 0.2f);
 
             GameObject playAgainBtn = CreateSimpleButton("PlayAgainButton", gameOverGo.transform, "¡JUGAR OTRA VEZ!", new Vector2(0.18f, 0.24f), new Vector2(0.82f, 0.36f), new Color(0.2f, 0.75f, 0.38f));

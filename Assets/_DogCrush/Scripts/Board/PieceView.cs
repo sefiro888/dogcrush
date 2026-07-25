@@ -81,7 +81,7 @@ namespace DogCrush.Board
         {
             while (true)
             {
-                float scale = 1.18f + Mathf.Sin(Time.time * 9f) * 0.08f;
+                float scale = 1.22f + Mathf.Sin(Time.time * 12f) * 0.08f;
                 transform.localScale = defaultScale * scale;
                 yield return null;
             }
@@ -94,7 +94,7 @@ namespace DogCrush.Board
 
             if (gameObject.activeInHierarchy)
             {
-                moveCoroutine = StartCoroutine(MoveWithBounceRoutine(targetPos, speed, onComplete));
+                moveCoroutine = StartCoroutine(MoveWithFluidBounceRoutine(targetPos, speed, onComplete));
             }
             else
             {
@@ -103,26 +103,56 @@ namespace DogCrush.Board
             }
         }
 
-        private IEnumerator MoveWithBounceRoutine(Vector3 targetPos, float speed, System.Action onComplete)
+        private IEnumerator MoveWithFluidBounceRoutine(Vector3 targetPos, float speed, System.Action onComplete)
         {
-            while (Vector3.Distance(transform.position, targetPos) > 0.02f)
+            Vector3 startPos = transform.position;
+            float totalDistance = Vector3.Distance(startPos, targetPos);
+            if (totalDistance < 0.001f)
             {
-                transform.position = Vector3.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);
+                transform.position = targetPos;
+                onComplete?.Invoke();
+                yield break;
+            }
+
+            float duration = Mathf.Clamp(totalDistance / speed, 0.08f, 0.45f);
+            float elapsed = 0f;
+
+            // Accelerated Ease-In Falling Curve (Candy Crush feel)
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / duration;
+                float easedT = t * t; // Quadratic acceleration
+                transform.position = Vector3.Lerp(startPos, targetPos, easedT);
                 yield return null;
             }
 
             transform.position = targetPos;
 
-            // Landing Bounce Effect (Squash & Stretch)
-            float bounceTime = 0.12f;
-            float elapsed = 0f;
-            Vector3 squashScale = new Vector3(defaultScale.x * 1.15f, defaultScale.y * 0.85f, defaultScale.z);
+            // Double Elastic Landing Bounce (Compress -> Overshoot -> Settle)
+            float bounceTime = 0.16f;
+            elapsed = 0f;
+            Vector3 compressScale = new Vector3(defaultScale.x * 1.22f, defaultScale.y * 0.78f, defaultScale.z);
+            Vector3 stretchScale = new Vector3(defaultScale.x * 0.90f, defaultScale.y * 1.12f, defaultScale.z);
 
             while (elapsed < bounceTime)
             {
                 elapsed += Time.deltaTime;
-                float t = elapsed / bounceTime;
-                transform.localScale = Vector3.Lerp(defaultScale, squashScale, Mathf.Sin(t * Mathf.PI));
+                float b = elapsed / bounceTime;
+
+                if (b < 0.4f)
+                {
+                    transform.localScale = Vector3.Lerp(defaultScale, compressScale, b / 0.4f);
+                }
+                else if (b < 0.75f)
+                {
+                    transform.localScale = Vector3.Lerp(compressScale, stretchScale, (b - 0.4f) / 0.35f);
+                }
+                else
+                {
+                    transform.localScale = Vector3.Lerp(stretchScale, defaultScale, (b - 0.75f) / 0.25f);
+                }
+
                 yield return null;
             }
 
@@ -148,7 +178,7 @@ namespace DogCrush.Board
             float elapsed = 0f;
             float duration = 0.18f;
             Vector3 startScale = transform.localScale;
-            Vector3 popScale = startScale * 1.25f;
+            Vector3 popScale = startScale * 1.35f;
 
             while (elapsed < duration)
             {

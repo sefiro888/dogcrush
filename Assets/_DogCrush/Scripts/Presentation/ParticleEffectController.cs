@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,11 +7,12 @@ namespace DogCrush.Presentation
     public class ParticleEffectController : MonoBehaviour
     {
         public ParticleSystem particlePrefab;
-        public Sprite particleSprite;
+        public Sprite pawSprite;
+        public Sprite starSprite;
 
         private readonly Queue<ParticleSystem> pool = new Queue<ParticleSystem>();
 
-        public void PlayMatchBurst(Vector3 position, Color color, int count = 12)
+        public void PlayMatchBurst(Vector3 position, Color color, int count = 14)
         {
             ParticleSystem ps = GetParticleSystem();
             ps.transform.position = position;
@@ -38,22 +40,23 @@ namespace DogCrush.Presentation
 
         private ParticleSystem CreateNewParticleSystem()
         {
-            GameObject go = new GameObject("PawParticleSystem");
+            GameObject go = new GameObject("CandyMatchParticleSystem");
             go.transform.SetParent(transform);
 
             ParticleSystem ps = go.AddComponent<ParticleSystem>();
             var main = ps.main;
-            main.duration = 0.5f;
+            main.duration = 0.45f;
             main.loop = false;
-            main.startLifetime = 0.6f;
-            main.startSpeed = new ParticleSystem.MinMaxCurve(3f, 6f);
-            main.startSize = new ParticleSystem.MinMaxCurve(0.25f, 0.45f);
-            main.gravityModifier = 0.5f;
+            main.startLifetime = 0.55f;
+            main.startSpeed = new ParticleSystem.MinMaxCurve(4f, 8f);
+            main.startSize = new ParticleSystem.MinMaxCurve(0.35f, 0.65f);
+            main.startRotation = new ParticleSystem.MinMaxCurve(0f, 360f * Mathf.Deg2Rad);
+            main.gravityModifier = 0.35f;
             main.simulationSpace = ParticleSystemSimulationSpace.World;
 
             var shape = ps.shape;
             shape.shapeType = ParticleSystemShapeType.Circle;
-            shape.radius = 0.3f;
+            shape.radius = 0.4f;
 
             var colorOverLifetime = ps.colorOverLifetime;
             colorOverLifetime.enabled = true;
@@ -64,21 +67,29 @@ namespace DogCrush.Presentation
             );
             colorOverLifetime.color = grad;
 
+            var sizeOverLifetime = ps.sizeOverLifetime;
+            sizeOverLifetime.enabled = true;
+            AnimationCurve sizeCurve = new AnimationCurve();
+            sizeCurve.AddKey(0.0f, 1.0f);
+            sizeCurve.AddKey(0.7f, 1.2f);
+            sizeCurve.AddKey(1.0f, 0.0f);
+            sizeOverLifetime.size = new ParticleSystem.MinMaxCurve(1.0f, sizeCurve);
+
             ParticleSystemRenderer psr = go.GetComponent<ParticleSystemRenderer>();
             psr.renderMode = ParticleSystemRenderMode.Billboard;
-            psr.sortingOrder = 20;
+            psr.sortingOrder = 30;
 
-            if (particleSprite != null)
+            if (pawSprite != null)
             {
                 Material mat = new Material(Shader.Find("Sprites/Default"));
-                mat.mainTexture = particleSprite.texture;
+                mat.mainTexture = pawSprite.texture;
                 psr.material = mat;
             }
 
             return ps;
         }
 
-        private System.Collections.IEnumerator RecycleRoutine(ParticleSystem ps, float delay)
+        private IEnumerator RecycleRoutine(ParticleSystem ps, float delay)
         {
             yield return new WaitForSeconds(delay);
             ps.gameObject.SetActive(false);
