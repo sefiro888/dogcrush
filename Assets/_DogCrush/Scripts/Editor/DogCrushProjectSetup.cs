@@ -49,6 +49,48 @@ namespace DogCrush.EditorTool
             Debug.Log("[DOGCRUSH] v0.4 Ultra-Perfect Mobile Edition built successfully! Open Assets/_DogCrush/Scenes/Gameplay.unity and press Play.");
         }
 
+        [MenuItem("DOGCRUSH/Build WebGL for GitHub Pages")]
+        public static void BuildWebGL()
+        {
+            Debug.Log("[DOGCRUSH] Starting WebGL Build for GitHub Pages...");
+
+            // First ensure prototype is built & updated
+            BuildPrototype();
+
+            string outputFolder = Path.Combine(Directory.GetCurrentDirectory(), "docs");
+            if (!Directory.Exists(outputFolder))
+            {
+                Directory.CreateDirectory(outputFolder);
+            }
+
+            // Ensure active build target is set to WebGL
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.WebGL, BuildTarget.WebGL);
+
+            // Disable compression for seamless GitHub Pages compatibility without server header tweaks
+            PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Disabled;
+            PlayerSettings.WebGL.template = "APPLICATION:Default";
+
+            BuildPlayerOptions buildOptions = new BuildPlayerOptions();
+            buildOptions.scenes = new string[] { "Assets/_DogCrush/Scenes/Gameplay.unity" };
+            buildOptions.locationPathName = outputFolder;
+            buildOptions.target = BuildTarget.WebGL;
+            buildOptions.targetGroup = BuildTargetGroup.WebGL;
+            buildOptions.options = BuildOptions.None;
+
+            var report = BuildPipeline.BuildPlayer(buildOptions);
+
+            if (report.summary.result == UnityEditor.Build.Reporting.BuildResult.Succeeded)
+            {
+                // Create .nojekyll to prevent GitHub Pages from ignoring Unity WebGL files
+                File.WriteAllText(Path.Combine(outputFolder, ".nojekyll"), "");
+                Debug.Log("[DOGCRUSH] WebGL Build Succeeded! Output saved in 'docs/' folder for GitHub Pages.");
+            }
+            else
+            {
+                Debug.LogError($"[DOGCRUSH] WebGL Build Failed: {report.summary.totalErrors} errors.");
+            }
+        }
+
         private static void EnsureDirectoriesExist()
         {
             string[] dirs = new string[]
