@@ -1,5 +1,6 @@
 using System.Collections;
 using DogCrush.Board;
+using DogCrush.Core;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -39,6 +40,34 @@ namespace DogCrush.Tests.PlayMode
             }
 
             Assert.That(activePieces, Is.EqualTo(63), "The initial board must contain 63 active pieces.");
+        }
+
+        [UnityTest]
+        public IEnumerator RestartingMatch_RecyclesPreviousPieces()
+        {
+            SceneManager.LoadScene("Gameplay", LoadSceneMode.Single);
+            yield return null;
+            yield return null;
+
+            GameBootstrap bootstrap = Object.FindAnyObjectByType<GameBootstrap>();
+            Assert.That(bootstrap, Is.Not.Null);
+
+            bootstrap.RestartGame();
+            yield return null;
+            yield return null;
+
+            PieceView[] pieces = Object.FindObjectsByType<PieceView>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            int activePieces = 0;
+            foreach (PieceView piece in pieces)
+            {
+                if (piece != null && piece.gameObject.activeInHierarchy)
+                {
+                    activePieces++;
+                }
+            }
+
+            Assert.That(activePieces, Is.EqualTo(63),
+                "Restarting a match must leave exactly one active set of 63 pieces.");
         }
     }
 }

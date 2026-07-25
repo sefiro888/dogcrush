@@ -22,6 +22,14 @@ namespace DogCrush.Board
                 config = ScriptableObject.CreateInstance<BoardConfig>();
             }
 
+            // A restart replaces the grid array. Recycle the previous grid
+            // first, otherwise its active PieceViews remain behind the new
+            // board and the scene accumulates duplicate visual pieces.
+            if (grid != null)
+            {
+                ClearBoard();
+            }
+
             grid = new PieceView[config.columns, config.rows];
             CalculateBoardOrigin();
             FillInitialBoard();
