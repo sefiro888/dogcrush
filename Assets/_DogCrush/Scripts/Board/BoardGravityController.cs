@@ -16,9 +16,11 @@ namespace DogCrush.Board
             IsResolving = true;
 
             // 1. Despawn removed pieces
-            int pendingDespawns = removedPieces.Count;
+            int pendingDespawns = 0;
             foreach (var piece in removedPieces)
             {
+                if (piece == null) continue;
+                pendingDespawns++;
                 boardController.SetPieceAt(piece.gridX, piece.gridY, null);
                 piece.AnimateDespawn(() =>
                 {

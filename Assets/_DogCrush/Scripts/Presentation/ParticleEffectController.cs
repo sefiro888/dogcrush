@@ -79,12 +79,18 @@ namespace DogCrush.Presentation
             psr.renderMode = ParticleSystemRenderMode.Billboard;
             psr.sortingOrder = 30;
 
-            if (pawSprite != null)
+            // Use safe shader lookup - avoid Shader.Find which returns null in stripped WebGL builds
+            try
             {
-                Material mat = new Material(Shader.Find("Sprites/Default"));
-                mat.mainTexture = pawSprite.texture;
-                psr.material = mat;
+                Shader spriteShader = Shader.Find("Sprites/Default");
+                if (spriteShader != null)
+                {
+                    Material mat = new Material(spriteShader);
+                    if (pawSprite != null) mat.mainTexture = pawSprite.texture;
+                    psr.material = mat;
+                }
             }
+            catch (System.Exception) { /* Silently handle shader not found in stripped builds */ }
 
             return ps;
         }
