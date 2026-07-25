@@ -243,9 +243,12 @@ namespace DogCrush.EditorTool
 
             // 1. Camera Setup
             GameObject camGo = new GameObject("Main Camera");
+            camGo.transform.position = new Vector3(0f, 0f, -10f);
             Camera cam = camGo.AddComponent<Camera>();
             cam.orthographic = true;
             cam.orthographicSize = 6.8f;
+            cam.nearClipPlane = 0.1f;
+            cam.farClipPlane = 1000f;
             cam.backgroundColor = new Color(0.08f, 0.12f, 0.18f); // Dark cozy background
             cam.tag = "MainCamera";
             camGo.AddComponent<AudioListener>();
