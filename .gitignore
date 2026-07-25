@@ -4,6 +4,7 @@ Temp/
 Obj/
 Build/
 Builds/
+BuildPreview-*/
 Logs/
 UserSettings/
 MemoryCaptures/
