@@ -3,7 +3,8 @@
     "rootNamespace": "DogCrush.EditorTool",
     "references": [
         "DogCrush.Runtime",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [
         "Editor"
