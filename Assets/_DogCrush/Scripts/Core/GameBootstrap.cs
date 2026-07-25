@@ -20,6 +20,7 @@ namespace DogCrush.Core
         [Header("Presentation & UI")]
         public GameplayUIController uiController;
         public FeedbackController feedbackController;
+        public ParticleEffectController particleController;
         public AudioPlaceholderController audioController;
 
         private void Start()
@@ -53,7 +54,12 @@ namespace DogCrush.Core
                 {
                     if (feedbackController != null)
                     {
-                        feedbackController.TriggerCameraShake(0.12f, 0.2f);
+                        feedbackController.TriggerCameraShake(0.15f, 0.25f);
+                    }
+                    if (uiController != null)
+                    {
+                        Color comboColor = mult >= 4 ? new Color(1f, 0.3f, 0.8f) : new Color(1f, 0.85f, 0.2f);
+                        uiController.ShowComboBanner(text, comboColor);
                     }
                     if (audioController != null)
                     {
@@ -66,7 +72,7 @@ namespace DogCrush.Core
             {
                 gameTimer.OnTimerTick += (remaining) =>
                 {
-                    if (uiController != null) uiController.UpdateTimer(remaining);
+                    if (uiController != null) uiController.UpdateTimer(remaining, gameTimer.Progress01);
                 };
                 gameTimer.OnTenSecondsLeft += () =>
                 {
@@ -141,10 +147,25 @@ namespace DogCrush.Core
 
             int pointsGained = scoreController != null ? scoreController.AddChainScore(chain.Count) : 0;
 
-            if (feedbackController != null && chain.Count > 0)
+            if (chain != null && chain.Count > 0)
             {
                 Vector3 centerPos = chain[chain.Count / 2].transform.position;
-                feedbackController.SpawnFloatingText(centerPos, $"+{pointsGained:N0}", Color.yellow, 32f);
+
+                if (feedbackController != null)
+                {
+                    feedbackController.SpawnFloatingText(centerPos, $"+{pointsGained:N0}", Color.yellow, 36f);
+                }
+
+                if (particleController != null)
+                {
+                    foreach (var piece in chain)
+                    {
+                        if (piece != null)
+                        {
+                            particleController.PlayMatchBurst(piece.transform.position, Color.yellow, 10);
+                        }
+                    }
+                }
             }
 
             if (audioController != null)
@@ -172,7 +193,6 @@ namespace DogCrush.Core
         {
             if (gravityController != null && gravityController.IsResolving)
             {
-                // Wait for gravity resolution to finish before triggering GameOver
                 return;
             }
             EndMatch();

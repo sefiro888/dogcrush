@@ -8,6 +8,8 @@ namespace DogCrush.Core
         public float RemainingTime { get; private set; }
         public bool IsRunning { get; private set; }
 
+        public float Progress01 => durationSeconds > 0 ? Mathf.Clamp01(RemainingTime / durationSeconds) : 0f;
+
         public System.Action<float> OnTimerTick;
         public System.Action OnTenSecondsLeft;
         public System.Action OnTimerExpired;
@@ -16,7 +18,8 @@ namespace DogCrush.Core
 
         public void StartTimer(float customDuration = -1f)
         {
-            RemainingTime = customDuration > 0 ? customDuration : durationSeconds;
+            durationSeconds = customDuration > 0 ? customDuration : 60.0f;
+            RemainingTime = durationSeconds;
             IsRunning = true;
             warningFired = false;
             OnTimerTick?.Invoke(RemainingTime);
