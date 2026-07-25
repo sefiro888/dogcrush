@@ -18,27 +18,35 @@ namespace DogCrush.EditorTool
         [MenuItem("DOGCRUSH/Build Playable Prototype")]
         public static void BuildPrototype()
         {
-            Debug.Log("[DOGCRUSH] Starting automated prototype setup...");
+            Debug.Log("[DOGCRUSH] Starting v0.2 visual redesign & mobile layout setup...");
 
             EnsureDirectoriesExist();
-            Sprite dogSprite = CreateIconTexture("dog_icon", 128, Color.white, IconShape.Dog);
-            Sprite boneSprite = CreateIconTexture("bone_icon", 128, Color.white, IconShape.Bone);
-            Sprite ballSprite = CreateIconTexture("ball_icon", 128, Color.white, IconShape.Ball);
-            Sprite foodSprite = CreateIconTexture("food_icon", 128, Color.white, IconShape.Food);
-            Sprite collarSprite = CreateIconTexture("collar_icon", 128, Color.white, IconShape.Collar);
-            Sprite glowSprite = CreateGlowTexture("piece_glow", 128);
+
+            Sprite dogSprite = CreateIconTexture("dog_icon", 256, IconShape.Dog);
+            Sprite boneSprite = CreateIconTexture("bone_icon", 256, IconShape.Bone);
+            Sprite ballSprite = CreateIconTexture("ball_icon", 256, IconShape.Ball);
+            Sprite foodSprite = CreateIconTexture("food_icon", 256, IconShape.Food);
+            Sprite collarSprite = CreateIconTexture("collar_icon", 256, IconShape.Collar);
+
+            Sprite glowSprite = CreateGlowTexture("piece_glow", 256);
+            Sprite pawParticleSprite = CreatePawParticleTexture("paw_particle", 128);
+            Sprite bgSprite = CreateDogParkBackgroundTexture("dog_park_bg", 512, 1024);
+            Sprite frameSprite = CreateBoardFrameTexture("board_frame", 512, 640);
+            Sprite panelSprite = CreateBoardPanelTexture("board_panel", 512, 640);
+            Sprite timerFillSprite = CreateBarFillTexture("timer_bar_fill", 256, 32);
 
             BoardConfig config = CreateOrLoadBoardConfig();
             PieceView piecePrefab = CreateOrUpdatePiecePrefab(glowSprite);
 
-            SetupGameplayScene(config, piecePrefab, dogSprite, boneSprite, ballSprite, foodSprite, collarSprite);
+            SetupGameplayScene(config, piecePrefab, dogSprite, boneSprite, ballSprite, foodSprite, collarSprite,
+                pawParticleSprite, bgSprite, frameSprite, panelSprite, timerFillSprite);
 
             AddSceneToBuildSettings("Assets/_DogCrush/Scenes/Gameplay.unity");
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
-            Debug.Log("[DOGCRUSH] Prototype setup completed successfully! Open Assets/_DogCrush/Scenes/Gameplay.unity and press Play.");
+            Debug.Log("[DOGCRUSH] v0.2 Visual Redesign completed successfully! Open Assets/_DogCrush/Scenes/Gameplay.unity and press Play.");
         }
 
         private static void EnsureDirectoriesExist()
@@ -48,6 +56,7 @@ namespace DogCrush.EditorTool
                 "Assets/_DogCrush/Art/Pieces",
                 "Assets/_DogCrush/Art/Backgrounds",
                 "Assets/_DogCrush/Art/UI",
+                "Assets/_DogCrush/Art/Effects",
                 "Assets/_DogCrush/Data",
                 "Assets/_DogCrush/Prefabs/Pieces",
                 "Assets/_DogCrush/Prefabs/UI",
@@ -65,14 +74,14 @@ namespace DogCrush.EditorTool
 
         private enum IconShape { Dog, Bone, Ball, Food, Collar }
 
-        private static Sprite CreateIconTexture(string name, int size, Color color, IconShape shape)
+        private static Sprite CreateIconTexture(string name, int size, IconShape shape)
         {
             string path = $"Assets/_DogCrush/Art/Pieces/{name}.png";
             Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
             Color[] pixels = new Color[size * size];
 
             float center = size / 2f;
-            float radius = size * 0.42f;
+            float radius = size * 0.40f;
 
             for (int y = 0; y < size; y++)
             {
@@ -82,58 +91,125 @@ namespace DogCrush.EditorTool
                     float dy = y - center;
                     float dist = Mathf.Sqrt(dx * dx + dy * dy);
 
-                    bool draw = false;
+                    bool outerBody = false;
+                    bool whiteBorder = false;
+                    bool shadow = false;
+                    bool innerFeature = false;
+
+                    // Drop Shadow offset
+                    float sdx = dx + 6f;
+                    float sdy = dy + 8f;
+                    float sdist = Mathf.Sqrt(sdx * sdx + sdy * sdy);
 
                     switch (shape)
                     {
                         case IconShape.Dog:
-                            // Circle head + two ear protrusions
-                            draw = (dist <= radius) ||
-                                   (dx < -center * 0.3f && dy > center * 0.1f && dist <= radius * 1.25f) ||
-                                   (dx > center * 0.3f && dy > center * 0.1f && dist <= radius * 1.25f);
+                            // Puppy face: Circle head + two floppy ears + snout + nose
+                            bool head = dist <= radius;
+                            bool earL = Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.75f, radius * 0.5f)) <= radius * 0.45f;
+                            bool earR = Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.75f, radius * 0.5f)) <= radius * 0.45f;
+
+                            bool shearL = Vector2.Distance(new Vector2(sdx, sdy), new Vector2(-radius * 0.75f, radius * 0.5f)) <= radius * 0.45f;
+                            bool shearR = Vector2.Distance(new Vector2(sdx, sdy), new Vector2(radius * 0.75f, radius * 0.5f)) <= radius * 0.45f;
+
+                            outerBody = head || earL || earR;
+                            shadow = (sdist <= radius || shearL || shearR) && !outerBody;
+
+                            // White border
+                            whiteBorder = (dist <= radius + 6f && dist >= radius - 3f) ||
+                                          (Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.75f, radius * 0.5f)) <= radius * 0.45f + 5f &&
+                                           Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.75f, radius * 0.5f)) >= radius * 0.45f - 3f) ||
+                                          (Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.75f, radius * 0.5f)) <= radius * 0.45f + 5f &&
+                                           Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.75f, radius * 0.5f)) >= radius * 0.45f - 3f);
+
+                            // Eyes & nose
+                            bool eyeL = Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.35f, radius * 0.2f)) <= radius * 0.12f;
+                            bool eyeR = Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.35f, radius * 0.2f)) <= radius * 0.12f;
+                            bool nose = Vector2.Distance(new Vector2(dx, dy), new Vector2(0f, -radius * 0.15f)) <= radius * 0.18f;
+                            bool snout = Vector2.Distance(new Vector2(dx, dy), new Vector2(0f, -radius * 0.22f)) <= radius * 0.38f;
+                            innerFeature = eyeL || eyeR || nose;
                             break;
 
                         case IconShape.Bone:
-                            // Rounded bar + 4 corner circles
-                            bool bar = Mathf.Abs(dy) <= radius * 0.3f && Mathf.Abs(dx) <= radius * 0.8f;
-                            bool c1 = Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.7f, radius * 0.4f)) <= radius * 0.35f;
-                            bool c2 = Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.7f, -radius * 0.4f)) <= radius * 0.35f;
-                            bool c3 = Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.7f, radius * 0.4f)) <= radius * 0.35f;
-                            bool c4 = Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.7f, -radius * 0.4f)) <= radius * 0.35f;
-                            draw = bar || c1 || c2 || c3 || c4;
+                            // Dog Bone: rounded bar + 4 corner circles
+                            bool bar = Mathf.Abs(dy) <= radius * 0.32f && Mathf.Abs(dx) <= radius * 0.75f;
+                            bool c1 = Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.72f, radius * 0.42f)) <= radius * 0.38f;
+                            bool c2 = Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.72f, -radius * 0.42f)) <= radius * 0.38f;
+                            bool c3 = Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.72f, radius * 0.42f)) <= radius * 0.38f;
+                            bool c4 = Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.72f, -radius * 0.42f)) <= radius * 0.38f;
+                            outerBody = bar || c1 || c2 || c3 || c4;
+
+                            bool sbar = Mathf.Abs(sdy) <= radius * 0.32f && Mathf.Abs(sdx) <= radius * 0.75f;
+                            bool sc1 = Vector2.Distance(new Vector2(sdx, sdy), new Vector2(-radius * 0.72f, radius * 0.42f)) <= radius * 0.38f;
+                            bool sc2 = Vector2.Distance(new Vector2(sdx, sdy), new Vector2(-radius * 0.72f, -radius * 0.42f)) <= radius * 0.38f;
+                            bool sc3 = Vector2.Distance(new Vector2(sdx, sdy), new Vector2(radius * 0.72f, radius * 0.42f)) <= radius * 0.38f;
+                            bool sc4 = Vector2.Distance(new Vector2(sdx, sdy), new Vector2(radius * 0.72f, -radius * 0.42f)) <= radius * 0.38f;
+                            shadow = (sbar || sc1 || sc2 || sc3 || sc4) && !outerBody;
                             break;
 
                         case IconShape.Ball:
-                            // Circle + tennis ball curved stripe
-                            draw = dist <= radius;
+                            // Dog Tennis Ball: Circle + S-curved stripe seams
+                            outerBody = dist <= radius;
+                            shadow = (sdist <= radius) && !outerBody;
+                            float stripe1 = Mathf.Abs(dy - Mathf.Sin(dx * 0.05f) * radius * 0.4f);
+                            innerFeature = stripe1 <= radius * 0.14f && outerBody;
                             break;
 
                         case IconShape.Food:
-                            // Bowl shape (half circle)
-                            draw = (dist <= radius && dy <= radius * 0.2f) || (Mathf.Abs(dx) <= radius * 0.8f && dy >= radius * 0.2f && dy <= radius * 0.4f);
+                            // Kibble Bowl: Trapezoid bowl + kibble mound on top
+                            bool bowlBottom = dy <= radius * 0.1f && dy >= -radius * 0.7f && Mathf.Abs(dx) <= (radius * 0.85f - (dy * 0.2f));
+                            bool kibbleMound = dy > radius * 0.05f && dist <= radius * 0.85f;
+                            outerBody = bowlBottom || kibbleMound;
+                            bool sbowlBottom = sdy <= radius * 0.1f && sdy >= -radius * 0.7f && Mathf.Abs(sdx) <= (radius * 0.85f - (sdy * 0.2f));
+                            bool skibbleMound = sdy > radius * 0.05f && sdist <= radius * 0.85f;
+                            shadow = (sbowlBottom || skibbleMound) && !outerBody;
+                            bool boneIconOnBowl = Vector2.Distance(new Vector2(dx, dy), new Vector2(0f, -radius * 0.3f)) <= radius * 0.18f;
+                            innerFeature = boneIconOnBowl;
                             break;
 
                         case IconShape.Collar:
-                            // Ring shape
-                            draw = dist <= radius && dist >= radius * 0.45f;
+                            // Dog Collar: Ring + Golden medal tag at bottom
+                            bool ring = dist <= radius && dist >= radius * 0.5f;
+                            bool tag = Vector2.Distance(new Vector2(dx, dy), new Vector2(0f, -radius * 0.65f)) <= radius * 0.32f;
+                            outerBody = ring || tag;
+                            bool sring = sdist <= radius && sdist >= radius * 0.5f;
+                            bool stag = Vector2.Distance(new Vector2(sdx, sdy), new Vector2(0f, -radius * 0.65f)) <= radius * 0.32f;
+                            shadow = (sring || stag) && !outerBody;
+                            bool tagHole = Vector2.Distance(new Vector2(dx, dy), new Vector2(0f, -radius * 0.65f)) <= radius * 0.12f;
+                            innerFeature = tagHole;
                             break;
                     }
 
-                    if (draw)
+                    int idx = y * size + x;
+
+                    if (innerFeature)
                     {
-                        // Add smooth anti-aliased edge & white inner icon highlight
-                        pixels[y * size + x] = Color.white;
+                        pixels[idx] = (shape == IconShape.Dog || shape == IconShape.Collar) ? new Color(0.15f, 0.12f, 0.15f, 1f) : Color.white;
+                    }
+                    else if (outerBody)
+                    {
+                        // Glossy sheen highlight gradient
+                        float sheen = Mathf.Clamp01(1f - (dist / radius)) * 0.25f;
+                        Color baseColor = Color.white;
+                        pixels[idx] = new Color(baseColor.r + sheen, baseColor.g + sheen, baseColor.b + sheen, 1f);
+                    }
+                    else if (whiteBorder)
+                    {
+                        pixels[idx] = Color.white;
+                    }
+                    else if (shadow)
+                    {
+                        pixels[idx] = new Color(0f, 0f, 0f, 0.35f);
                     }
                     else
                     {
-                        pixels[y * size + x] = Color.clear;
+                        pixels[idx] = Color.clear;
                     }
                 }
             }
 
             tex.SetPixels(pixels);
             tex.Apply();
-
             File.WriteAllBytes(path, tex.EncodeToPNG());
             AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
 
@@ -186,6 +262,210 @@ namespace DogCrush.EditorTool
             return AssetDatabase.LoadAssetAtPath<Sprite>(path);
         }
 
+        private static Sprite CreatePawParticleTexture(string name, int size)
+        {
+            string path = $"Assets/_DogCrush/Art/Effects/{name}.png";
+            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[size * size];
+
+            float center = size / 2f;
+            float radius = size * 0.28f;
+
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float dx = x - center;
+                    float dy = y - center;
+
+                    // Main paw pad
+                    bool mainPad = Vector2.Distance(new Vector2(dx, dy), new Vector2(0f, -size * 0.1f)) <= radius;
+                    // 4 Toe pads
+                    bool toe1 = Vector2.Distance(new Vector2(dx, dy), new Vector2(-size * 0.28f, size * 0.22f)) <= radius * 0.38f;
+                    bool toe2 = Vector2.Distance(new Vector2(dx, dy), new Vector2(-size * 0.1f, size * 0.35f)) <= radius * 0.38f;
+                    bool toe3 = Vector2.Distance(new Vector2(dx, dy), new Vector2(size * 0.1f, size * 0.35f)) <= radius * 0.38f;
+                    bool toe4 = Vector2.Distance(new Vector2(dx, dy), new Vector2(size * 0.28f, size * 0.22f)) <= radius * 0.38f;
+
+                    if (mainPad || toe1 || toe2 || toe3 || toe4)
+                    {
+                        pixels[y * size + x] = Color.white;
+                    }
+                    else
+                    {
+                        pixels[y * size + x] = Color.clear;
+                    }
+                }
+            }
+
+            tex.SetPixels(pixels);
+            tex.Apply();
+            File.WriteAllBytes(path, tex.EncodeToPNG());
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+
+            TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (importer != null)
+            {
+                importer.textureType = TextureImporterType.Sprite;
+                importer.spriteImportMode = SpriteImportMode.Single;
+                importer.alphaIsTransparency = true;
+                importer.SaveAndReimport();
+            }
+
+            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        }
+
+        private static Sprite CreateDogParkBackgroundTexture(string name, int width, int height)
+        {
+            string path = $"Assets/_DogCrush/Art/Backgrounds/{name}.png";
+            Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[width * height];
+
+            Color skyTop = new Color(0.28f, 0.58f, 0.88f); // Soft Sky Blue
+            Color skyBottom = new Color(0.68f, 0.86f, 0.98f);
+            Color grassTop = new Color(0.35f, 0.78f, 0.45f); // Soft Mint Grass
+            Color grassBottom = new Color(0.22f, 0.58f, 0.32f);
+
+            for (int y = 0; y < height; y++)
+            {
+                float t = (float)y / height;
+                Color rowColor;
+
+                if (t > 0.35f)
+                {
+                    // Sky gradient
+                    float skyT = (t - 0.35f) / 0.65f;
+                    rowColor = Color.Lerp(skyBottom, skyTop, skyT);
+                }
+                else
+                {
+                    // Grassy hill gradient with subtle wave
+                    float grassT = t / 0.35f;
+                    rowColor = Color.Lerp(grassBottom, grassTop, grassT);
+                }
+
+                for (int x = 0; x < width; x++)
+                {
+                    pixels[y * width + x] = rowColor;
+                }
+            }
+
+            tex.SetPixels(pixels);
+            tex.Apply();
+            File.WriteAllBytes(path, tex.EncodeToPNG());
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+
+            TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (importer != null)
+            {
+                importer.textureType = TextureImporterType.Sprite;
+                importer.spriteImportMode = SpriteImportMode.Single;
+                importer.alphaIsTransparency = true;
+                importer.SaveAndReimport();
+            }
+
+            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        }
+
+        private static Sprite CreateBoardFrameTexture(string name, int width, int height)
+        {
+            string path = $"Assets/_DogCrush/Art/UI/{name}.png";
+            Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[width * height];
+
+            Color woodOuter = new Color(0.58f, 0.38f, 0.22f); // Cozy Warm Wood
+            Color woodInner = new Color(0.72f, 0.48f, 0.28f);
+
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    bool border = (x < 18 || x >= width - 18 || y < 18 || y >= height - 18);
+                    if (border)
+                    {
+                        pixels[y * width + x] = Color.Lerp(woodOuter, woodInner, (float)x / width);
+                    }
+                    else
+                    {
+                        pixels[y * width + x] = Color.clear;
+                    }
+                }
+            }
+
+            tex.SetPixels(pixels);
+            tex.Apply();
+            File.WriteAllBytes(path, tex.EncodeToPNG());
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+
+            TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (importer != null)
+            {
+                importer.textureType = TextureImporterType.Sprite;
+                importer.spriteImportMode = SpriteImportMode.Single;
+                importer.alphaIsTransparency = true;
+                importer.SaveAndReimport();
+            }
+
+            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        }
+
+        private static Sprite CreateBoardPanelTexture(string name, int width, int height)
+        {
+            string path = $"Assets/_DogCrush/Art/UI/{name}.png";
+            Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[width * height];
+
+            Color panelBg = new Color(0.12f, 0.16f, 0.22f, 0.85f); // Cozy Semi-transparent dark slate panel
+
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                pixels[i] = panelBg;
+            }
+
+            tex.SetPixels(pixels);
+            tex.Apply();
+            File.WriteAllBytes(path, tex.EncodeToPNG());
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+
+            TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (importer != null)
+            {
+                importer.textureType = TextureImporterType.Sprite;
+                importer.spriteImportMode = SpriteImportMode.Single;
+                importer.alphaIsTransparency = true;
+                importer.SaveAndReimport();
+            }
+
+            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        }
+
+        private static Sprite CreateBarFillTexture(string name, int width, int height)
+        {
+            string path = $"Assets/_DogCrush/Art/UI/{name}.png";
+            Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
+            Color[] pixels = new Color[width * height];
+
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                pixels[i] = Color.white;
+            }
+
+            tex.SetPixels(pixels);
+            tex.Apply();
+            File.WriteAllBytes(path, tex.EncodeToPNG());
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+
+            TextureImporter importer = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (importer != null)
+            {
+                importer.textureType = TextureImporterType.Sprite;
+                importer.spriteImportMode = SpriteImportMode.Single;
+                importer.alphaIsTransparency = true;
+                importer.SaveAndReimport();
+            }
+
+            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        }
+
         private static BoardConfig CreateOrLoadBoardConfig()
         {
             string path = "Assets/_DogCrush/Data/DefaultBoardConfig.asset";
@@ -197,7 +477,7 @@ namespace DogCrush.EditorTool
                 config.rows = 9;
                 config.typeCount = 5;
                 config.pieceSpacing = 1.15f;
-                config.fallSpeed = 14.0f;
+                config.fallSpeed = 15.0f;
                 config.minChainLength = 3;
                 config.gameDurationSeconds = 60.0f;
                 AssetDatabase.CreateAsset(config, path);
@@ -211,18 +491,18 @@ namespace DogCrush.EditorTool
 
             GameObject go = new GameObject("PiecePrefab");
             SpriteRenderer mainSr = go.AddComponent<SpriteRenderer>();
-            mainSr.sortingOrder = 5;
+            mainSr.sortingOrder = 10;
 
             CircleCollider2D col = go.AddComponent<CircleCollider2D>();
-            col.radius = 0.45f;
+            col.radius = 0.52f;
 
             GameObject glowGo = new GameObject("SelectionGlow");
             glowGo.transform.SetParent(go.transform, false);
             SpriteRenderer glowSr = glowGo.AddComponent<SpriteRenderer>();
             glowSr.sprite = glowSprite;
-            glowSr.color = new Color(1f, 0.9f, 0.3f, 0.6f);
-            glowSr.sortingOrder = 4;
-            glowGo.transform.localScale = Vector3.one * 1.3f;
+            glowSr.color = new Color(1f, 0.9f, 0.2f, 0.75f);
+            glowSr.sortingOrder = 9;
+            glowGo.transform.localScale = Vector3.one * 1.35f;
             glowGo.SetActive(false);
 
             PieceView view = go.AddComponent<PieceView>();
@@ -236,24 +516,48 @@ namespace DogCrush.EditorTool
         }
 
         private static void SetupGameplayScene(BoardConfig config, PieceView piecePrefab,
-            Sprite dog, Sprite bone, Sprite ball, Sprite food, Sprite collar)
+            Sprite dog, Sprite bone, Sprite ball, Sprite food, Sprite collar,
+            Sprite pawParticle, Sprite dogParkBg, Sprite boardFrame, Sprite boardPanel, Sprite timerFill)
         {
             string scenePath = "Assets/_DogCrush/Scenes/Gameplay.unity";
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
             // 1. Camera Setup
             GameObject camGo = new GameObject("Main Camera");
-            camGo.transform.position = new Vector3(0f, 0f, -10f);
+            camGo.transform.position = new Vector3(0f, -0.4f, -10f);
             Camera cam = camGo.AddComponent<Camera>();
             cam.orthographic = true;
-            cam.orthographicSize = 6.8f;
+            cam.orthographicSize = 7.2f;
             cam.nearClipPlane = 0.1f;
             cam.farClipPlane = 1000f;
-            cam.backgroundColor = new Color(0.08f, 0.12f, 0.18f); // Dark cozy background
+            cam.backgroundColor = new Color(0.12f, 0.16f, 0.22f);
             cam.tag = "MainCamera";
             camGo.AddComponent<AudioListener>();
 
-            // 2. Game Managers
+            // 2. Dog Park Background Backdrop
+            GameObject bgGo = new GameObject("DogParkBackground");
+            bgGo.transform.position = new Vector3(0f, 0f, 10f);
+            SpriteRenderer bgSr = bgGo.AddComponent<SpriteRenderer>();
+            bgSr.sprite = dogParkBg;
+            bgSr.sortingOrder = -100;
+            bgGo.transform.localScale = new Vector3(2.5f, 2.5f, 1f);
+
+            // 3. Board Frame & Panel Backdrop
+            GameObject frameGo = new GameObject("BoardFrame");
+            frameGo.transform.position = new Vector3(0f, -0.3f, 1f);
+            SpriteRenderer frameSr = frameGo.AddComponent<SpriteRenderer>();
+            frameSr.sprite = boardFrame;
+            frameSr.sortingOrder = 1;
+            frameGo.transform.localScale = new Vector3(1.68f, 1.72f, 1f);
+
+            GameObject panelGo = new GameObject("BoardPanel");
+            panelGo.transform.position = new Vector3(0f, -0.3f, 2f);
+            SpriteRenderer panelSr = panelGo.AddComponent<SpriteRenderer>();
+            panelSr.sprite = boardPanel;
+            panelSr.sortingOrder = 0;
+            panelGo.transform.localScale = new Vector3(1.62f, 1.66f, 1f);
+
+            // 4. Game Managers
             GameObject managerGo = new GameObject("[GameManager]");
             GameStateController stateController = managerGo.AddComponent<GameStateController>();
             BoardController boardController = managerGo.AddComponent<BoardController>();
@@ -264,9 +568,11 @@ namespace DogCrush.EditorTool
             GameTimer gameTimer = managerGo.AddComponent<GameTimer>();
             FeedbackController feedbackController = managerGo.AddComponent<FeedbackController>();
             AudioPlaceholderController audioController = managerGo.AddComponent<AudioPlaceholderController>();
+            ParticleEffectController particleController = managerGo.AddComponent<ParticleEffectController>();
+            particleController.particleSprite = pawParticle;
             GameBootstrap bootstrap = managerGo.AddComponent<GameBootstrap>();
 
-            // 3. Piece Spawner
+            // 5. Piece Spawner
             GameObject spawnerGo = new GameObject("[PieceSpawner]");
             PieceSpawner spawner = spawnerGo.AddComponent<PieceSpawner>();
             spawner.piecePrefab = piecePrefab;
@@ -278,13 +584,21 @@ namespace DogCrush.EditorTool
             spawner.foodSprite = food;
             spawner.collarSprite = collar;
 
-            // 4. Line View
+            spawner.dogColor = new Color(1.0f, 0.62f, 0.15f);  // Warm Orange
+            spawner.boneColor = new Color(0.96f, 0.96f, 0.98f); // Soft Bone White
+            spawner.ballColor = new Color(0.2f, 0.78f, 0.95f); // Bright Cyan
+            spawner.foodColor = new Color(0.95f, 0.32f, 0.38f); // Coral Red
+            spawner.collarColor = new Color(0.28f, 0.85f, 0.48f); // Mint Green
+
+            // 6. Line View
             GameObject lineGo = new GameObject("[ChainLineView]");
             LineRenderer lr = lineGo.AddComponent<LineRenderer>();
             ChainLineView lineView = lineGo.AddComponent<ChainLineView>();
             lineView.lineRenderer = lr;
-            lr.startColor = new Color(1f, 0.85f, 0.2f, 0.85f);
-            lr.endColor = new Color(1f, 0.5f, 0.1f, 0.85f);
+            lr.startColor = new Color(1f, 0.85f, 0.2f, 0.95f);
+            lr.endColor = new Color(1f, 0.5f, 0.1f, 0.95f);
+            lr.startWidth = 0.24f;
+            lr.endWidth = 0.24f;
 
             // Wire Controller Dependencies
             boardController.config = config;
@@ -304,17 +618,18 @@ namespace DogCrush.EditorTool
             bootstrap.scoreController = scoreController;
             bootstrap.gameTimer = gameTimer;
             bootstrap.feedbackController = feedbackController;
+            bootstrap.particleController = particleController;
             bootstrap.audioController = audioController;
 
-            // 5. Canvas UI Setup
-            Canvas canvas = CreateGameplayCanvas(bootstrap, feedbackController);
+            // 7. Canvas UI Setup
+            Canvas canvas = CreateGameplayCanvas(bootstrap, feedbackController, timerFill);
             feedbackController.uiCanvas = canvas;
             feedbackController.mainCamera = cam;
 
             EditorSceneManager.SaveScene(scene, scenePath);
         }
 
-        private static Canvas CreateGameplayCanvas(GameBootstrap bootstrap, FeedbackController feedbackController)
+        private static Canvas CreateGameplayCanvas(GameBootstrap bootstrap, FeedbackController feedbackController, Sprite timerFill)
         {
             GameObject canvasGo = new GameObject("[Canvas]");
             Canvas canvas = canvasGo.AddComponent<Canvas>();
@@ -339,23 +654,74 @@ namespace DogCrush.EditorTool
             GameplayUIController uiController = safeGo.AddComponent<GameplayUIController>();
             bootstrap.uiController = uiController;
 
-            // Top Header Panel
-            GameObject headerGo = new GameObject("HeaderHUD", typeof(RectTransform));
+            // Top Header Panel (12% of screen height)
+            GameObject headerGo = new GameObject("HeaderHUD", typeof(RectTransform), typeof(Image));
             headerGo.transform.SetParent(safeGo.transform, false);
             RectTransform headerRect = headerGo.GetComponent<RectTransform>();
-            headerRect.anchorMin = new Vector2(0.05f, 0.88f);
-            headerRect.anchorMax = new Vector2(0.95f, 0.98f);
+            headerRect.anchorMin = new Vector2(0.04f, 0.88f);
+            headerRect.anchorMax = new Vector2(0.96f, 0.98f);
             headerRect.sizeDelta = Vector2.zero;
 
-            uiController.scoreText = CreateTMPText("ScoreText", headerGo.transform, "Puntos: 0", 38, TextAlignmentOptions.Left, new Vector2(0, 0.5f), new Vector2(0.5f, 1f));
-            uiController.highScoreText = CreateTMPText("HighScoreText", headerGo.transform, "Récord: 0", 28, TextAlignmentOptions.Left, new Vector2(0, 0f), new Vector2(0.5f, 0.5f));
-            uiController.timerText = CreateTMPText("TimerText", headerGo.transform, "60s", 52, TextAlignmentOptions.Right, new Vector2(0.6f, 0.2f), new Vector2(1f, 1f));
+            Image headerBg = headerGo.GetComponent<Image>();
+            headerBg.color = new Color(0.08f, 0.12f, 0.18f, 0.75f);
 
-            // Chain Info Banner
-            uiController.chainInfoText = CreateTMPText("ChainInfoText", safeGo.transform, "Cadena: 0", 32, TextAlignmentOptions.Center, new Vector2(0.2f, 0.82f), new Vector2(0.8f, 0.87f));
+            // DOGCRUSH Logo Badge
+            CreateTMPText("LogoBadge", headerGo.transform, "🐶 DOGCRUSH", 40, TextAlignmentOptions.Center, new Vector2(0.02f, 0.52f), new Vector2(0.38f, 0.95f));
 
-            // Restart Button in HUD
-            GameObject btnGo = CreateSimpleButton("HUD_RestartButton", safeGo.transform, "Reiniciar", new Vector2(0.8f, 0.03f), new Vector2(0.95f, 0.08f));
+            // Score & High Score
+            uiController.scoreText = CreateTMPText("ScoreText", headerGo.transform, "0", 44, TextAlignmentOptions.Left, new Vector2(0.42f, 0.5f), new Vector2(0.72f, 0.95f));
+            uiController.scoreText.color = new Color(1f, 0.92f, 0.35f);
+
+            uiController.highScoreText = CreateTMPText("HighScoreText", headerGo.transform, "RÉCORD: 0", 24, TextAlignmentOptions.Left, new Vector2(0.42f, 0.05f), new Vector2(0.72f, 0.48f));
+            uiController.highScoreText.color = new Color(0.85f, 0.85f, 0.9f);
+
+            // Timer Text
+            uiController.timerText = CreateTMPText("TimerText", headerGo.transform, "60s", 48, TextAlignmentOptions.Right, new Vector2(0.75f, 0.52f), new Vector2(0.96f, 0.95f));
+
+            // Visual Timer Bar
+            GameObject barBgGo = new GameObject("TimerBarBg", typeof(RectTransform), typeof(Image));
+            barBgGo.transform.SetParent(headerGo.transform, false);
+            RectTransform barBgRect = barBgGo.GetComponent<RectTransform>();
+            barBgRect.anchorMin = new Vector2(0.02f, 0.15f);
+            barBgRect.anchorMax = new Vector2(0.98f, 0.38f);
+            barBgRect.sizeDelta = Vector2.zero;
+
+            Image barBgImg = barBgGo.GetComponent<Image>();
+            barBgImg.color = new Color(0f, 0f, 0f, 0.5f);
+
+            GameObject barFillGo = new GameObject("TimerBarFill", typeof(RectTransform), typeof(Image));
+            barFillGo.transform.SetParent(barBgGo.transform, false);
+            RectTransform barFillRect = barFillGo.GetComponent<RectTransform>();
+            barFillRect.anchorMin = Vector2.zero;
+            barFillRect.anchorMax = Vector2.one;
+            barFillRect.sizeDelta = Vector2.zero;
+
+            Image fillImg = barFillGo.GetComponent<Image>();
+            fillImg.sprite = timerFill;
+            fillImg.type = Image.Type.Filled;
+            fillImg.fillMethod = Image.FillMethod.Horizontal;
+            fillImg.fillOrigin = (int)Image.OriginHorizontal.Left;
+            fillImg.color = new Color(0.3f, 0.85f, 0.45f);
+
+            uiController.timerBarFill = fillImg;
+
+            // Chain Info Text
+            uiController.chainInfoText = CreateTMPText("ChainInfoText", safeGo.transform, "Cadena: 0", 34, TextAlignmentOptions.Center, new Vector2(0.15f, 0.82f), new Vector2(0.85f, 0.87f));
+
+            // Combo Floating Banner Text
+            uiController.comboBannerText = CreateTMPText("ComboBannerText", safeGo.transform, "COMBO x2!", 56, TextAlignmentOptions.Center, new Vector2(0.1f, 0.45f), new Vector2(0.9f, 0.58f));
+            uiController.comboBannerText.color = new Color(1f, 0.85f, 0.2f);
+            uiController.comboBannerText.gameObject.SetActive(false);
+
+            // Bottom Control Bar (10% of screen height)
+            GameObject bottomGo = new GameObject("BottomControlsPanel", typeof(RectTransform));
+            bottomGo.transform.SetParent(safeGo.transform, false);
+            RectTransform bottomRect = bottomGo.GetComponent<RectTransform>();
+            bottomRect.anchorMin = new Vector2(0.05f, 0.02f);
+            bottomRect.anchorMax = new Vector2(0.95f, 0.08f);
+            bottomRect.sizeDelta = Vector2.zero;
+
+            GameObject btnGo = CreateSimpleButton("HUD_RestartButton", bottomGo.transform, "🔄 Reiniciar", new Vector2(0.28f, 0f), new Vector2(0.72f, 1f), new Color(0.2f, 0.65f, 0.38f));
             uiController.hudRestartButton = btnGo.GetComponent<Button>();
 
             // Game Over Panel Overlay
@@ -367,15 +733,18 @@ namespace DogCrush.EditorTool
             goRect.sizeDelta = Vector2.zero;
 
             Image bgImg = gameOverGo.GetComponent<Image>();
-            bgImg.color = new Color(0f, 0f, 0f, 0.85f);
+            bgImg.color = new Color(0.06f, 0.08f, 0.12f, 0.92f);
 
-            CreateTMPText("GameOverTitle", gameOverGo.transform, "¡TIEMPO AGOTADO!", 64, TextAlignmentOptions.Center, new Vector2(0.1f, 0.7f), new Vector2(0.9f, 0.85f));
-            uiController.finalScoreText = CreateTMPText("FinalScoreText", gameOverGo.transform, "Puntuación Final:\n0", 42, TextAlignmentOptions.Center, new Vector2(0.1f, 0.5f), new Vector2(0.9f, 0.68f));
-            uiController.newRecordBanner = CreateTMPText("NewRecordBanner", gameOverGo.transform, "★ ¡NUEVO RÉCORD! ★", 36, TextAlignmentOptions.Center, new Vector2(0.1f, 0.42f), new Vector2(0.9f, 0.49f));
+            CreateTMPText("GameOverTitle", gameOverGo.transform, "¡TIEMPO AGOTADO!", 64, TextAlignmentOptions.Center, new Vector2(0.05f, 0.72f), new Vector2(0.95f, 0.85f));
+            uiController.finalScoreText = CreateTMPText("FinalScoreText", gameOverGo.transform, "Puntuación Final\n0", 46, TextAlignmentOptions.Center, new Vector2(0.05f, 0.52f), new Vector2(0.95f, 0.68f));
+            uiController.newRecordBanner = CreateTMPText("NewRecordBanner", gameOverGo.transform, "★ ¡NUEVO RÉCORD! ★", 40, TextAlignmentOptions.Center, new Vector2(0.05f, 0.44f), new Vector2(0.95f, 0.51f));
             uiController.newRecordBanner.color = new Color(1f, 0.85f, 0.2f);
 
-            GameObject playAgainBtn = CreateSimpleButton("PlayAgainButton", gameOverGo.transform, "¡JUGAR OTRA VEZ!", new Vector2(0.25f, 0.22f), new Vector2(0.75f, 0.35f));
+            GameObject playAgainBtn = CreateSimpleButton("PlayAgainButton", gameOverGo.transform, "¡JUGAR OTRA VEZ!", new Vector2(0.18f, 0.24f), new Vector2(0.82f, 0.36f), new Color(0.2f, 0.75f, 0.38f));
             uiController.playAgainButton = playAgainBtn.GetComponent<Button>();
+
+            GameObject secondaryRestartBtn = CreateSimpleButton("SecondaryRestartButton", gameOverGo.transform, "Reiniciar", new Vector2(0.32f, 0.12f), new Vector2(0.68f, 0.20f), new Color(0.35f, 0.38f, 0.45f));
+            uiController.secondaryRestartButton = secondaryRestartBtn.GetComponent<Button>();
 
             uiController.gameOverPanel = gameOverGo;
 
@@ -414,7 +783,7 @@ namespace DogCrush.EditorTool
             return tmp;
         }
 
-        private static GameObject CreateSimpleButton(string name, Transform parent, string label, Vector2 minAnchor, Vector2 maxAnchor)
+        private static GameObject CreateSimpleButton(string name, Transform parent, string label, Vector2 minAnchor, Vector2 maxAnchor, Color btnColor)
         {
             GameObject btnGo = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
             btnGo.transform.SetParent(parent, false);
@@ -425,9 +794,9 @@ namespace DogCrush.EditorTool
             rect.sizeDelta = Vector2.zero;
 
             Image img = btnGo.GetComponent<Image>();
-            img.color = new Color(0.2f, 0.65f, 0.35f);
+            img.color = btnColor;
 
-            CreateTMPText("Label", btnGo.transform, label, 28, TextAlignmentOptions.Center, Vector2.zero, Vector2.one);
+            CreateTMPText("Label", btnGo.transform, label, 30, TextAlignmentOptions.Center, Vector2.zero, Vector2.one);
 
             return btnGo;
         }
