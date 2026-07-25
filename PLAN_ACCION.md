@@ -50,7 +50,7 @@ Este documento es la hoja de ruta de referencia del proyecto. Se actualizará al
 
 La prueba PlayMode también verifica ahora que cada sprite tiene geometría superior a 0,5 unidades, además de collider e interacción.
 
-Actualización 25/07/2026: la compilación WebGL limpia posterior a la corrección de importación de sprites terminó correctamente (`Build Finished, Result: Success`; auditoría: `errors: 0`). La comprobación local solo conserva la advertencia conocida del shader FSR. Se reparó el canal alfa roto de las cinco fichas, se ajustó su escala y se verificó visualmente el tablero completo en navegador.
+Actualización 26/07/2026: se reparó el reinicio para reciclar las fichas anteriores y se añadió una prueba PlayMode específica. URP WebGL quedó fijado a escalado lineal para evitar el shader FSR no compatible. La compilación WebGL resultante terminó correctamente (`Build Finished, Result: Success`; auditoría: `errors: 0`) y se verificó visualmente el tablero completo en navegador.
 
 ## Fase 2 — Escena y arquitectura limpias
 
