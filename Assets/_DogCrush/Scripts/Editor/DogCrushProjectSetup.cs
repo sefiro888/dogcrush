@@ -54,8 +54,8 @@ namespace DogCrush.EditorTool
         {
             Debug.Log("[DOGCRUSH] Starting WebGL Build for GitHub Pages...");
 
-            // First ensure prototype is built & updated
-            BuildPrototype();
+            // DO NOT call BuildPrototype() - it overwrites real HD PNG sprites with old procedural flat icons!
+            // BuildPrototype();
 
             string outputFolder = Path.Combine(Directory.GetCurrentDirectory(), "docs");
             if (!Directory.Exists(outputFolder))
