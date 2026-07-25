@@ -37,11 +37,11 @@ namespace DogCrush.UI
 
         private void Awake()
         {
-            // Build UI from code if not assigned in editor
-            if (scoreText == null || timerBarFill == null)
-            {
-                BuildRuntimeUI();
-            }
+            // Disable old scene UI elements if they exist
+            CleanOldSceneUI();
+
+            // Always build clean runtime UI to ensure correct scaling and design
+            BuildRuntimeUI();
 
             if (playAgainButton != null)
                 playAgainButton.onClick.AddListener(() => OnRestartRequested?.Invoke());
@@ -54,6 +54,21 @@ namespace DogCrush.UI
 
             HideGameOver();
             if (comboBannerText != null) comboBannerText.gameObject.SetActive(false);
+        }
+
+        private void CleanOldSceneUI()
+        {
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas == null) canvas = FindAnyObjectByType<Canvas>();
+            if (canvas == null) return;
+
+            foreach (Transform child in canvas.transform)
+            {
+                if (child.name != "SafeAreaPanel" && !child.name.EndsWith("_RT"))
+                {
+                    child.gameObject.SetActive(false);
+                }
+            }
         }
 
         private void BuildRuntimeUI()
