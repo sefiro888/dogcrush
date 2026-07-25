@@ -1,61 +1,133 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
+<html lang="en-us">
+  <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Dog Crush - Mobile Match-3</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background: #1a0c2e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; display: flex; justify-content: center; align-items: center; }
-        #game-container { width: 100vw; height: 100vh; max-width: 540px; max-height: 960px; position: relative; background: #000; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
-        #unity-canvas { width: 100%; height: 100%; background: #26173a; display: block; }
-        #loading-cover { position: absolute; inset: 0; background: linear-gradient(135deg, #1b0a2a 0%, #3a1552 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10; color: #fff; text-align: center; padding: 20px; }
-        .logo { font-size: 36px; font-weight: 900; color: #FFD700; text-shadow: 0 4px 14px rgba(255, 215, 0, 0.5), 0 2px 4px rgba(0,0,0,0.8); margin-bottom: 6px; letter-spacing: 1px; }
-        .subtitle { font-size: 15px; color: #E0C3FC; margin-bottom: 35px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; }
-        .progress-bar { width: 75%; height: 18px; background: rgba(255,255,255,0.12); border-radius: 12px; overflow: hidden; border: 2px solid rgba(255,215,0,0.6); padding: 2px; }
-        .progress-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #FF7E5F, #FEB47B, #FFD700); border-radius: 8px; transition: width 0.2s ease-out; }
-        .status-text { margin-top: 18px; font-size: 14px; color: #E0C3FC; font-weight: 600; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-    </style>
-</head>
-<body>
-    <div id="game-container">
-        <canvas id="unity-canvas" width="1080" height="1920" tabindex="-1"></canvas>
-        <div id="loading-cover">
-            <div class="logo">🐶 DOG CRUSH 🦴</div>
-            <div class="subtitle">v0.4 Mobile Edition</div>
-            <div class="progress-bar">
-                <div class="progress-fill" id="progress-fill"></div>
-            </div>
-            <div class="status-text" id="status-text">Cargando diversión... 0%</div>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity Web Player | DOGCRUSH</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+  </head>
+  <body>
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
         </div>
+      </div>
+      <div id="unity-warning"> </div>
+      <div id="unity-footer">
+        <div id="unity-logo-title-footer"></div>
+        <div id="unity-fullscreen-button"></div>
+        <div id="unity-build-title">DOGCRUSH</div>
+      </div>
     </div>
-
-    <script src="Build/docs.loader.js"></script>
     <script>
-        const canvas = document.querySelector("#unity-canvas");
-        const loadingCover = document.querySelector("#loading-cover");
-        const progressFill = document.querySelector("#progress-fill");
-        const statusText = document.querySelector("#status-text");
+      var canvas = document.querySelector("#unity-canvas");
 
-        const config = {
-            dataUrl: "Build/docs.data.gz",
-            frameworkUrl: "Build/docs.framework.js.gz",
-            codeUrl: "Build/docs.wasm.gz",
-            streamingAssetsUrl: "StreamingAssets",
-            companyName: "DefaultCompany",
-            productName: "DOGCRUSH",
-            productVersion: "0.4",
-        };
+      // Shows a temporary message banner/ribbon for a few seconds, or
+      // a permanent error message on top of the canvas if type=='error'.
+      // If type=='warning', a yellow highlight color is used.
+      // Modify or remove this function to customize the visually presented
+      // way that non-critical warnings and error messages are presented to the
+      // user.
+      function unityShowBanner(msg, type) {
+        var warningBanner = document.querySelector("#unity-warning");
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        }
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        else {
+          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          setTimeout(function() {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
 
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/docs.loader.js";
+      var config = {
+        arguments: [],
+        dataUrl: buildUrl + "/docs.data",
+        frameworkUrl: buildUrl + "/docs.framework.js",
+        codeUrl: buildUrl + "/docs.wasm",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: "DOGCRUSH",
+        productVersion: "1.0",
+        showBanner: unityShowBanner,
+        // errorHandler: function(err, url, line) {
+        //    alert("error " + err + " occurred at line " + line);
+        //    // Return 'true' if you handled this error and don't want Unity
+        //    // to process it further, 'false' otherwise.
+        //    return true;
+        // },
+      };
+
+      // By default, Unity keeps WebGL canvas render target size matched with
+      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+      // Set this to false if you want to decouple this synchronization from
+      // happening inside the engine, and you would instead like to size up
+      // the canvas DOM size and WebGL render target sizes yourself.
+      // config.matchWebGLToCanvasSize = false;
+
+      // If you would like all file writes inside Unity Application.persistentDataPath
+      // directory to automatically persist so that the contents are remembered when
+      // the user revisits the site the next time, uncomment the following line:
+      // config.autoSyncPersistentDataPath = true;
+      // This autosyncing is currently not the default behavior to avoid regressing
+      // existing user projects that might rely on the earlier manual
+      // JS_FileSystem_Sync() behavior, but in future Unity version, this will be
+      // expected to change.
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Mobile device style: fill the whole browser client area with the game canvas:
+
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+        document.querySelector("#unity-container").className = "unity-mobile";
+        canvas.className = "unity-mobile";
+
+        // To lower canvas resolution on mobile devices to gain some
+        // performance, uncomment the following line:
+        // config.devicePixelRatio = 1;
+
+
+      } else {
+        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
+        canvas.style.width = "960px";
+        canvas.style.height = "600px";
+      }
+
+      document.querySelector("#unity-loading-bar").style.display = "block";
+
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
         createUnityInstance(canvas, config, (progress) => {
-            const pct = Math.round(progress * 100);
-            progressFill.style.width = pct + "%";
-            statusText.textContent = "Cargando juego... " + pct + "%";
-        }).then((unityInstance) => {
-            loadingCover.style.display = "none";
-        }).catch((message) => {
-            alert("Error al cargar el juego: " + message);
-        });
+          document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
+              }).then((unityInstance) => {
+                document.querySelector("#unity-loading-bar").style.display = "none";
+                document.querySelector("#unity-fullscreen-button").onclick = () => {
+                  unityInstance.SetFullscreen(1);
+                };
+
+              }).catch((message) => {
+                alert(message);
+              });
+            };
+
+      document.body.appendChild(script);
+
     </script>
-</body>
+  </body>
 </html>

@@ -66,7 +66,9 @@ namespace DogCrush.EditorTool
             // Ensure active build target is set to WebGL
             EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.WebGL, BuildTarget.WebGL);
 
-            // Disable compression for seamless GitHub Pages compatibility without server header tweaks
+            // Optimize for size & GitHub Pages limits (< 50MB file size limit)
+            PlayerSettings.stripEngineCode = true;
+            PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.None;
             PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Disabled;
             PlayerSettings.WebGL.template = "APPLICATION:Default";
 
@@ -75,7 +77,7 @@ namespace DogCrush.EditorTool
             buildOptions.locationPathName = outputFolder;
             buildOptions.target = BuildTarget.WebGL;
             buildOptions.targetGroup = BuildTargetGroup.WebGL;
-            buildOptions.options = BuildOptions.None;
+            buildOptions.options = BuildOptions.CleanBuildCache;
 
             var report = BuildPipeline.BuildPlayer(buildOptions);
 
