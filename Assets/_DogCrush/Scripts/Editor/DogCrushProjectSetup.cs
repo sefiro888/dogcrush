@@ -54,8 +54,7 @@ namespace DogCrush.EditorTool
         {
             Debug.Log("[DOGCRUSH] Starting WebGL Build for GitHub Pages...");
 
-            // DO NOT call BuildPrototype() - it overwrites real HD PNG sprites with old procedural flat icons!
-            // BuildPrototype();
+            BuildPrototype();
 
             string outputFolder = Path.Combine(Directory.GetCurrentDirectory(), "docs");
             if (!Directory.Exists(outputFolder))
@@ -213,6 +212,12 @@ namespace DogCrush.EditorTool
         private static Sprite CreateIconTexture(string name, int size, IconShape shape)
         {
             string path = $"Assets/_DogCrush/Art/Pieces/{name}.png";
+            if (File.Exists(path))
+            {
+                Sprite existing = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+                if (existing != null) return existing;
+            }
+
             Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
             Color[] pixels = new Color[size * size];
 
