@@ -111,7 +111,10 @@ namespace DogCrush.Core
 
             if (gameTimer != null)
             {
-                gameTimer.StartTimer(60f);
+                float duration = boardController != null && boardController.config != null
+                    ? boardController.config.gameDurationSeconds
+                    : gameTimer.durationSeconds;
+                gameTimer.StartTimer(duration);
             }
 
             stateController.ChangeState(GameState.Playing);

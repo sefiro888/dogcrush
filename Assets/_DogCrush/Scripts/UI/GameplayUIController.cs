@@ -185,7 +185,7 @@ namespace DogCrush.UI
 
             // High Score text floating top right
             highScoreText = CreateText(canvasRect, "HighScoreText_RT",
-                "RÉCORD: 0", 24f, new Color(1f, 1f, 1f, 0.85f),
+                "RECORD: 0", 24f, new Color(1f, 1f, 1f, 0.85f),
                 TextAlignmentOptions.Right,
                 new Vector2(0.5f, 0.89f), new Vector2(0.96f, 0.925f),
                 Vector2.zero, Vector2.zero);
@@ -241,14 +241,14 @@ namespace DogCrush.UI
 
             // Title
             CreateText(centerRect, "GOTitle",
-                "¡FIN DEL TIEMPO!", 48f, new Color(1f, 0.4f, 0.35f),
+                "TIME UP!", 48f, new Color(1f, 0.4f, 0.35f),
                 TextAlignmentOptions.Center,
                 new Vector2(0.05f, 0.75f), new Vector2(0.95f, 0.95f),
                 Vector2.zero, Vector2.zero).fontStyle = FontStyles.Bold;
 
             // Final score label
             CreateText(centerRect, "FinalLabel",
-                "PUNTUACIÓN OBTENIDA", 22f, new Color(0.8f, 0.85f, 0.95f),
+                "SCORE OBTAINED", 22f, new Color(0.8f, 0.85f, 0.95f),
                 TextAlignmentOptions.Center,
                 new Vector2(0.05f, 0.58f), new Vector2(0.95f, 0.72f),
                 Vector2.zero, Vector2.zero);
@@ -263,7 +263,7 @@ namespace DogCrush.UI
 
             // New Record banner
             newRecordBanner = CreateText(centerRect, "NewRecordBanner_RT",
-                "🏆 ¡NUEVO RÉCORD! 🏆", 32f, new Color(0.3f, 0.95f, 0.4f),
+                "NEW RECORD!", 32f, new Color(0.3f, 0.95f, 0.4f),
                 TextAlignmentOptions.Center,
                 new Vector2(0.05f, 0.25f), new Vector2(0.95f, 0.36f),
                 Vector2.zero, Vector2.zero);
@@ -306,6 +306,13 @@ namespace DogCrush.UI
             rect.offsetMax = offsetMax;
 
             TextMeshProUGUI tmp = go.GetComponent<TextMeshProUGUI>();
+            // Do not depend on a project-global TMP default. WebGL builds must
+            // carry an explicit font asset or TMP can fail during first layout.
+            tmp.font = TMP_Settings.defaultFontAsset;
+            if (tmp.font == null)
+            {
+                tmp.font = Resources.Load<TMP_FontAsset>("Fonts & Materials/LiberationSans SDF");
+            }
             tmp.text = text;
             tmp.fontSize = fontSize;
             tmp.color = color;
@@ -373,14 +380,14 @@ namespace DogCrush.UI
             if (count > 0)
             {
                 chainInfoText.gameObject.SetActive(true);
-                string icon = "🐾";
+                string icon = "PET";
                 switch (typeName)
                 {
-                    case "Dog": icon = "🐶"; break;
-                    case "Bone": icon = "🦴"; break;
-                    case "Ball": icon = "🔵"; break;
-                    case "Food": icon = "🍖"; break;
-                    case "Collar": icon = "🟢"; break;
+                    case "Dog": icon = "DOG"; break;
+                    case "Bone": icon = "BONE"; break;
+                    case "Ball": icon = "BALL"; break;
+                    case "Food": icon = "FOOD"; break;
+                    case "Collar": icon = "COLLAR"; break;
                 }
                 chainInfoText.text = $"{icon} x{count}";
             }

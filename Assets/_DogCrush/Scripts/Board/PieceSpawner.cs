@@ -31,11 +31,20 @@ namespace DogCrush.Board
 
         public void LoadSpritesIfNull()
         {
-            if (dogSprite == null) dogSprite = Resources.Load<Sprite>("Pieces/dog_icon");
-            if (boneSprite == null) boneSprite = Resources.Load<Sprite>("Pieces/bone_icon");
-            if (ballSprite == null) ballSprite = Resources.Load<Sprite>("Pieces/ball_icon");
-            if (foodSprite == null) foodSprite = Resources.Load<Sprite>("Pieces/food_icon");
-            if (collarSprite == null) collarSprite = Resources.Load<Sprite>("Pieces/collar_icon");
+            if (dogSprite == null) dogSprite = LoadResourceSprite("Pieces/dog_icon");
+            if (boneSprite == null) boneSprite = LoadResourceSprite("Pieces/bone_icon");
+            if (ballSprite == null) ballSprite = LoadResourceSprite("Pieces/ball_icon");
+            if (foodSprite == null) foodSprite = LoadResourceSprite("Pieces/food_icon");
+            if (collarSprite == null) collarSprite = LoadResourceSprite("Pieces/collar_icon");
+        }
+
+        private static Sprite LoadResourceSprite(string path)
+        {
+            Sprite sprite = Resources.Load<Sprite>(path);
+            if (sprite != null) return sprite;
+
+            Sprite[] sprites = Resources.LoadAll<Sprite>(path);
+            return sprites != null && sprites.Length > 0 ? sprites[0] : null;
         }
 
         public PieceView SpawnPiece(PieceType type, int gridX, int gridY, Vector3 spawnWorldPos)

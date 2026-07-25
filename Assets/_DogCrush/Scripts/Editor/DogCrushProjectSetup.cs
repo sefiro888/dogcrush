@@ -184,6 +184,15 @@ namespace DogCrush.EditorTool
             }
         }
 
+        [MenuItem("DOGCRUSH/Import TMP Essential Resources")]
+        public static void ImportTMPEssentialResources()
+        {
+            TMP_PackageResourceImporter.ImportResources(true, false, false);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log("[DOGCRUSH] TMP Essential Resources imported.");
+        }
+
         private static void EnsureDirectoriesExist()
         {
             string[] dirs = new string[]
