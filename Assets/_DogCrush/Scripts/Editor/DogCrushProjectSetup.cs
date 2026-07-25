@@ -205,7 +205,7 @@ namespace DogCrush.EditorTool
                 locationPathName = outputFolder,
                 target = BuildTarget.WebGL,
                 targetGroup = BuildTargetGroup.WebGL,
-                options = BuildOptions.CleanBuildCache
+                options = BuildOptions.None
             };
 
             var report = BuildPipeline.BuildPlayer(options);
