@@ -1,5 +1,9 @@
 using UnityEngine;
 
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
+
 namespace DogCrush.InputSystem
 {
     public class ChainInputHandler : MonoBehaviour
@@ -21,45 +25,79 @@ namespace DogCrush.InputSystem
             if (mainCamera == null)
                 mainCamera = Camera.main;
 
-            // Touch Input check
-            if (Input.touchCount > 0)
+#if ENABLE_INPUT_SYSTEM
+            Pointer pointer = Pointer.current;
+            if (pointer != null)
             {
-                Touch touch = Input.GetTouch(0);
-                Vector2 worldPos = GetWorldPosition(touch.position);
+                Vector2 screenPos = pointer.position.ReadValue();
+                bool isPressed = pointer.press.isPressed;
 
-                if (touch.phase == TouchPhase.Began)
+                if (pointer.press.wasPressedThisFrame)
                 {
                     IsPointerPressed = true;
-                    OnPointerDownEvent?.Invoke(worldPos);
+                    OnPointerDownEvent?.Invoke(GetWorldPosition(screenPos));
                 }
-                else if ((touch.phase == TouchPhase.Moved || touch.phase == TouchPhase.Stationary) && IsPointerPressed)
+                else if (isPressed && IsPointerPressed)
                 {
-                    OnPointerDragEvent?.Invoke(worldPos);
+                    OnPointerDragEvent?.Invoke(GetWorldPosition(screenPos));
                 }
-                else if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
+                else if (pointer.press.wasReleasedThisFrame && IsPointerPressed)
                 {
                     IsPointerPressed = false;
                     OnPointerUpEvent?.Invoke();
                 }
                 return;
             }
+#endif
 
-            // Mouse Input check
-            if (Input.GetMouseButtonDown(0))
+            // Fallback for Legacy Input
+            TryLegacyInput();
+        }
+
+        private void TryLegacyInput()
+        {
+            try
             {
-                IsPointerPressed = true;
-                Vector2 worldPos = GetWorldPosition(Input.mousePosition);
-                OnPointerDownEvent?.Invoke(worldPos);
+                if (Input.touchCount > 0)
+                {
+                    Touch touch = Input.GetTouch(0);
+                    Vector2 worldPos = GetWorldPosition(touch.position);
+
+                    if (touch.phase == TouchPhase.Began)
+                    {
+                        IsPointerPressed = true;
+                        OnPointerDownEvent?.Invoke(worldPos);
+                    }
+                    else if ((touch.phase == TouchPhase.Moved || touch.phase == TouchPhase.Stationary) && IsPointerPressed)
+                    {
+                        OnPointerDragEvent?.Invoke(worldPos);
+                    }
+                    else if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
+                    {
+                        IsPointerPressed = false;
+                        OnPointerUpEvent?.Invoke();
+                    }
+                    return;
+                }
+
+                if (Input.GetMouseButtonDown(0))
+                {
+                    IsPointerPressed = true;
+                    OnPointerDownEvent?.Invoke(GetWorldPosition(Input.mousePosition));
+                }
+                else if (Input.GetMouseButton(0) && IsPointerPressed)
+                {
+                    OnPointerDragEvent?.Invoke(GetWorldPosition(Input.mousePosition));
+                }
+                else if (Input.GetMouseButtonUp(0) && IsPointerPressed)
+                {
+                    IsPointerPressed = false;
+                    OnPointerUpEvent?.Invoke();
+                }
             }
-            else if (Input.GetMouseButton(0) && IsPointerPressed)
+            catch (System.InvalidOperationException)
             {
-                Vector2 worldPos = GetWorldPosition(Input.mousePosition);
-                OnPointerDragEvent?.Invoke(worldPos);
-            }
-            else if (Input.GetMouseButtonUp(0) && IsPointerPressed)
-            {
-                IsPointerPressed = false;
-                OnPointerUpEvent?.Invoke();
+                // Silently handle if activeInputHandler is strictly set to New Input System without legacy support
             }
         }
 
