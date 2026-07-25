@@ -1,0 +1,42 @@
+name: Repository Security & Structure Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  check-structure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify Required Unity Directories
+        run: |
+          if [ ! -d "Assets" ] || [ ! -d "Packages" ] || [ ! -d "ProjectSettings" ]; then
+            echo "Error: Required Unity folders (Assets, Packages, ProjectSettings) are missing!"
+            exit 1
+          fi
+          echo "Unity core folders present."
+
+      - name: Verify Documentation Files
+        run: |
+          for doc in README.md GAME_DESIGN.md ROADMAP.md DEVELOPMENT.md CHANGELOG.md SECURITY.md; do
+            if [ ! -f "$doc" ]; then
+              echo "Error: Documentation file $doc missing!"
+              exit 1
+            fi
+          done
+          echo "Documentation files present."
+
+      - name: Check for Forbidden Heavy Folders & Secret Files
+        run: |
+          for forbidden in Library Temp Logs UserSettings *.keystore *.jks .env; do
+            if [ -e "$forbidden" ]; then
+              echo "Error: Forbidden directory or file found in commit: $forbidden"
+              exit 1
+            fi
+          done
+          echo "No forbidden directories or secrets found."
