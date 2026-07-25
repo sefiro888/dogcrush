@@ -74,8 +74,24 @@ namespace DogCrush.EditorTool
             PlayerSettings.SetIl2CppCompilerConfiguration(UnityEditor.Build.NamedBuildTarget.WebGL, UnityEditor.Il2CppCompilerConfiguration.Master);
             PlayerSettings.SetIl2CppCodeGeneration(UnityEditor.Build.NamedBuildTarget.WebGL, UnityEditor.Build.Il2CppCodeGeneration.OptimizeSize);
 
+            // Ensure scene spawner has all 5 piece sprites assigned and saved
+            string scenePath = "Assets/_DogCrush/Scenes/Gameplay.unity";
+            var scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+            PieceSpawner spawner = Object.FindAnyObjectByType<PieceSpawner>();
+            if (spawner != null)
+            {
+                spawner.dogSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_DogCrush/Art/Pieces/dog_icon.png");
+                spawner.boneSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_DogCrush/Art/Pieces/bone_icon.png");
+                spawner.ballSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_DogCrush/Art/Pieces/ball_icon.png");
+                spawner.foodSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_DogCrush/Art/Pieces/food_icon.png");
+                spawner.collarSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_DogCrush/Art/Pieces/collar_icon.png");
+                spawner.LoadSpritesIfNull();
+                EditorUtility.SetDirty(spawner);
+            }
+            EditorSceneManager.SaveScene(scene);
+
             BuildPlayerOptions buildOptions = new BuildPlayerOptions();
-            buildOptions.scenes = new string[] { "Assets/_DogCrush/Scenes/Gameplay.unity" };
+            buildOptions.scenes = new string[] { scenePath };
             buildOptions.locationPathName = outputFolder;
             buildOptions.target = BuildTarget.WebGL;
             buildOptions.targetGroup = BuildTargetGroup.WebGL;
