@@ -63,16 +63,16 @@ namespace DogCrush.InputSystem
                     Touch touch = Input.GetTouch(0);
                     Vector2 worldPos = GetWorldPosition(touch.position);
 
-                    if (touch.phase == TouchPhase.Began)
+                    if (touch.phase == UnityEngine.TouchPhase.Began)
                     {
                         IsPointerPressed = true;
                         OnPointerDownEvent?.Invoke(worldPos);
                     }
-                    else if ((touch.phase == TouchPhase.Moved || touch.phase == TouchPhase.Stationary) && IsPointerPressed)
+                    else if ((touch.phase == UnityEngine.TouchPhase.Moved || touch.phase == UnityEngine.TouchPhase.Stationary) && IsPointerPressed)
                     {
                         OnPointerDragEvent?.Invoke(worldPos);
                     }
-                    else if (touch.phase == TouchPhase.Ended || touch.phase == TouchPhase.Canceled)
+                    else if (touch.phase == UnityEngine.TouchPhase.Ended || touch.phase == UnityEngine.TouchPhase.Canceled)
                     {
                         IsPointerPressed = false;
                         OnPointerUpEvent?.Invoke();
@@ -97,7 +97,7 @@ namespace DogCrush.InputSystem
             }
             catch (System.InvalidOperationException)
             {
-                // Silently handle if activeInputHandler is strictly set to New Input System without legacy support
+                // Handle if activeInputHandler is strictly set to New Input System without legacy support
             }
         }
 
