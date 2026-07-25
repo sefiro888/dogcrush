@@ -18,15 +18,15 @@ namespace DogCrush.EditorTool
         [MenuItem("DOGCRUSH/Build Playable Prototype")]
         public static void BuildPrototype()
         {
-            Debug.Log("[DOGCRUSH] Building v0.3 Ultra-Fluid Pro Mobile Edition...");
+            Debug.Log("[DOGCRUSH] Building v0.4 Ultra-Perfect Mobile Edition...");
 
             EnsureDirectoriesExist();
 
-            Sprite dogSprite = CreateIconTexture("dog_icon", 512, IconShape.Dog);
-            Sprite boneSprite = CreateIconTexture("bone_icon", 512, IconShape.Bone);
-            Sprite ballSprite = CreateIconTexture("ball_icon", 512, IconShape.Ball);
-            Sprite foodSprite = CreateIconTexture("food_icon", 512, IconShape.Food);
-            Sprite collarSprite = CreateIconTexture("collar_icon", 512, IconShape.Collar);
+            Sprite dogSprite = CreateIconTexture("dog_icon", 1024, IconShape.Dog);
+            Sprite boneSprite = CreateIconTexture("bone_icon", 1024, IconShape.Bone);
+            Sprite ballSprite = CreateIconTexture("ball_icon", 1024, IconShape.Ball);
+            Sprite foodSprite = CreateIconTexture("food_icon", 1024, IconShape.Food);
+            Sprite collarSprite = CreateIconTexture("collar_icon", 1024, IconShape.Collar);
 
             Sprite glowSprite = CreateGlowTexture("piece_glow", 256);
             Sprite pawParticleSprite = CreatePawParticleTexture("paw_particle", 128);
@@ -46,7 +46,7 @@ namespace DogCrush.EditorTool
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
-            Debug.Log("[DOGCRUSH] v0.3 Ultra-Fluid Pro Mobile Edition built successfully! Open Assets/_DogCrush/Scenes/Gameplay.unity and press Play.");
+            Debug.Log("[DOGCRUSH] v0.4 Ultra-Perfect Mobile Edition built successfully! Open Assets/_DogCrush/Scenes/Gameplay.unity and press Play.");
         }
 
         private static void EnsureDirectoriesExist()
@@ -98,14 +98,14 @@ namespace DogCrush.EditorTool
                     bool hasFeature = false;
 
                     // Drop Shadow offset (downwards right)
-                    float sdx = dx + 10f;
-                    float sdy = dy + 14f;
+                    float sdx = dx + 18f;
+                    float sdy = dy + 24f;
                     float sdist = Mathf.Sqrt(sdx * sdx + sdy * sdy);
 
                     switch (shape)
                     {
                         case IconShape.Dog:
-                            // Puppy face: Rounded Head + Floppy ears + Snout + Eyes + Nose + Tongue
+                            // Puppy face: Rounded Head + Floppy ears + Snout + Eyes + Nose + Tongue + Blush
                             bool head = dist <= radius;
                             bool earL = Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.72f, radius * 0.42f)) <= radius * 0.46f;
                             bool earR = Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.72f, radius * 0.42f)) <= radius * 0.46f;
@@ -117,11 +117,11 @@ namespace DogCrush.EditorTool
                             shadow = (sdist <= radius || shearL || shearR) && !outerBody;
 
                             // White Sticker Border
-                            whiteBorder = (dist <= radius + 10f && dist >= radius - 4f) ||
-                                          (Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.72f, radius * 0.42f)) <= radius * 0.46f + 8f &&
-                                           Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.72f, radius * 0.42f)) >= radius * 0.46f - 4f) ||
-                                          (Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.72f, radius * 0.42f)) <= radius * 0.46f + 8f &&
-                                           Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.72f, radius * 0.42f)) >= radius * 0.46f - 4f);
+                            whiteBorder = (dist <= radius + 18f && dist >= radius - 6f) ||
+                                          (Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.72f, radius * 0.42f)) <= radius * 0.46f + 14f &&
+                                           Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.72f, radius * 0.42f)) >= radius * 0.46f - 6f) ||
+                                          (Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.72f, radius * 0.42f)) <= radius * 0.46f + 14f &&
+                                           Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.72f, radius * 0.42f)) >= radius * 0.46f - 6f);
 
                             // Inner Features
                             bool snout = Vector2.Distance(new Vector2(dx, dy), new Vector2(0f, -radius * 0.24f)) <= radius * 0.38f;
@@ -131,10 +131,13 @@ namespace DogCrush.EditorTool
                             bool specL = Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.31f, radius * 0.22f)) <= radius * 0.04f;
                             bool specR = Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.31f, radius * 0.22f)) <= radius * 0.04f;
                             bool tongue = dy < -radius * 0.35f && dy > -radius * 0.58f && Mathf.Abs(dx) <= radius * 0.14f;
+                            bool blushL = Vector2.Distance(new Vector2(dx, dy), new Vector2(-radius * 0.50f, -radius * 0.05f)) <= radius * 0.12f;
+                            bool blushR = Vector2.Distance(new Vector2(dx, dy), new Vector2(radius * 0.50f, -radius * 0.05f)) <= radius * 0.12f;
 
                             if (specL || specR) { hasFeature = true; featureColor = Color.white; }
                             else if (eyeL || eyeR || nose) { hasFeature = true; featureColor = new Color(0.12f, 0.10f, 0.14f); }
                             else if (tongue) { hasFeature = true; featureColor = new Color(0.98f, 0.42f, 0.55f); }
+                            else if (blushL || blushR) { hasFeature = true; featureColor = new Color(1.0f, 0.65f, 0.70f, 0.6f); }
                             else if (snout) { hasFeature = true; featureColor = new Color(0.98f, 0.94f, 0.88f); }
                             break;
 
@@ -154,7 +157,6 @@ namespace DogCrush.EditorTool
                             bool sc4 = Vector2.Distance(new Vector2(sdx, sdy), new Vector2(radius * 0.74f, -radius * 0.44f)) <= radius * 0.38f;
                             shadow = (sbar || sc1 || sc2 || sc3 || sc4) && !outerBody;
 
-                            // Glossy Center Shading
                             float boneHighlight = Mathf.Clamp01(1f - (Mathf.Abs(dy) / (radius * 0.35f)));
                             if (outerBody && dy > 0) { hasFeature = true; featureColor = Color.Lerp(new Color(0.96f, 0.96f, 0.98f), Color.white, boneHighlight * 0.4f); }
                             break;
@@ -164,7 +166,7 @@ namespace DogCrush.EditorTool
                             outerBody = dist <= radius;
                             shadow = (sdist <= radius) && !outerBody;
 
-                            float curveY = Mathf.Sin(dx * 0.03f) * radius * 0.35f;
+                            float curveY = Mathf.Sin(dx * 0.015f) * radius * 0.35f;
                             bool seam1 = Mathf.Abs(dy - curveY) <= radius * 0.12f;
                             if (seam1 && outerBody) { hasFeature = true; featureColor = Color.white; }
                             break;
@@ -179,7 +181,7 @@ namespace DogCrush.EditorTool
                             bool sheap = sdy > radius * 0.05f && sdist <= radius * 0.85f;
                             shadow = (sbowl || sheap) && !outerBody;
 
-                            bool heapKibble = heap && (Mathf.Sin(dx * 0.15f) * Mathf.Cos(dy * 0.15f) > 0.1f);
+                            bool heapKibble = heap && (Mathf.Sin(dx * 0.08f) * Mathf.Cos(dy * 0.08f) > 0.1f);
                             bool boneBadge = Vector2.Distance(new Vector2(dx, dy), new Vector2(0f, -radius * 0.32f)) <= radius * 0.22f;
 
                             if (boneBadge) { hasFeature = true; featureColor = Color.white; }
@@ -197,7 +199,7 @@ namespace DogCrush.EditorTool
                             shadow = (sring || stag) && !outerBody;
 
                             bool tagCenter = Vector2.Distance(new Vector2(dx, dy), new Vector2(0f, -radius * 0.62f)) <= radius * 0.26f;
-                            bool starInTag = tagCenter && Mathf.Abs(dx) * Mathf.Abs(dy + radius * 0.62f) < 40f;
+                            bool starInTag = tagCenter && Mathf.Abs(dx) * Mathf.Abs(dy + radius * 0.62f) < 120f;
 
                             if (starInTag) { hasFeature = true; featureColor = new Color(0.98f, 0.82f, 0.2f); }
                             else if (tagCenter) { hasFeature = true; featureColor = new Color(1.0f, 0.92f, 0.4f); }
@@ -344,10 +346,10 @@ namespace DogCrush.EditorTool
             Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
             Color[] pixels = new Color[width * height];
 
-            Color skyTop = new Color(0.22f, 0.52f, 0.85f); // Deep Sky Blue
-            Color skyBottom = new Color(0.65f, 0.85f, 0.98f);
-            Color grassTop = new Color(0.32f, 0.78f, 0.42f); // Vibrant Mint Grass
-            Color grassBottom = new Color(0.18f, 0.52f, 0.28f);
+            Color skyTop = new Color(0.20f, 0.50f, 0.88f); // Deep Sky Blue
+            Color skyBottom = new Color(0.62f, 0.85f, 0.98f);
+            Color grassTop = new Color(0.30f, 0.78f, 0.40f); // Vibrant Mint Grass
+            Color grassBottom = new Color(0.16f, 0.50f, 0.26f);
 
             for (int y = 0; y < height; y++)
             {
@@ -619,8 +621,8 @@ namespace DogCrush.EditorTool
             lineView.lineRenderer = lr;
             lr.startColor = new Color(1f, 0.85f, 0.15f, 0.95f);
             lr.endColor = new Color(1f, 0.48f, 0.1f, 0.95f);
-            lr.startWidth = 0.26f;
-            lr.endWidth = 0.26f;
+            lr.startWidth = 0.28f;
+            lr.endWidth = 0.28f;
 
             // Wire Controller Dependencies
             boardController.config = config;
@@ -685,7 +687,7 @@ namespace DogCrush.EditorTool
             headerRect.sizeDelta = Vector2.zero;
 
             Image headerBg = headerGo.GetComponent<Image>();
-            headerBg.color = new Color(0.08f, 0.12f, 0.18f, 0.82f);
+            headerBg.color = new Color(0.08f, 0.12f, 0.18f, 0.85f);
 
             // DOGCRUSH Logo Badge
             CreateTMPText("LogoBadge", headerGo.transform, "🐶 DOGCRUSH", 42, TextAlignmentOptions.Center, new Vector2(0.02f, 0.52f), new Vector2(0.38f, 0.95f));
@@ -731,7 +733,7 @@ namespace DogCrush.EditorTool
             uiController.chainInfoText = CreateTMPText("ChainInfoText", safeGo.transform, "Cadena: 0", 34, TextAlignmentOptions.Center, new Vector2(0.15f, 0.82f), new Vector2(0.85f, 0.87f));
 
             // Combo Floating Banner Text
-            uiController.comboBannerText = CreateTMPText("ComboBannerText", safeGo.transform, "COMBO x2!", 60, TextAlignmentOptions.Center, new Vector2(0.1f, 0.45f), new Vector2(0.9f, 0.58f));
+            uiController.comboBannerText = CreateTMPText("ComboBannerText", safeGo.transform, "COMBO x2!", 64, TextAlignmentOptions.Center, new Vector2(0.1f, 0.45f), new Vector2(0.9f, 0.58f));
             uiController.comboBannerText.color = new Color(1f, 0.85f, 0.2f);
             uiController.comboBannerText.gameObject.SetActive(false);
 
