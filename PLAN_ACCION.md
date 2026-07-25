@@ -35,6 +35,7 @@ Este documento es la hoja de ruta de referencia del proyecto. Se actualizará al
 - [x] Reparar y fijar TextMeshPro con una fuente incluida.
 - [x] Corregir textos mal codificados.
 - [ ] Obtener stack traces de desarrollo y localizar el origen exacto de `ArgumentNullException`.
+- [x] Corregir los rectángulos y el PPU de las cinco fichas usadas por la escena.
 - [ ] Unificar la fuente de las cinco fichas y eliminar referencias ambiguas.
 - [ ] Conseguir 63 fichas visibles, con sprite válido y collider activo.
 - [ ] Validar selección por arrastre y cancelación.
@@ -44,6 +45,8 @@ Este documento es la hoja de ruta de referencia del proyecto. Se actualizará al
 - [ ] Conseguir WebGL sin excepciones de consola.
 
 **Criterio de salida:** una partida completa puede iniciarse, jugarse y reiniciarse, mostrando 63 fichas interactivas y HUD legible.
+
+**Nota de progreso:** Unity EditMode (5/5) y PlayMode (1/1) pasan. La primera compilación WebGL se completó sin errores; la recompilación limpia después de corregir las texturas quedó detenida durante el postprocesado prolongado de shaders y aún debe repetirse de forma controlada.
 
 ## Fase 2 — Escena y arquitectura limpias
 

@@ -193,6 +193,29 @@ namespace DogCrush.EditorTool
             Debug.Log("[DOGCRUSH] TMP Essential Resources imported.");
         }
 
+        public static void BuildWebGLAudit()
+        {
+            string scenePath = "Assets/_DogCrush/Scenes/Gameplay.unity";
+            string outputFolder = "Temp/CodexAudit/WebGL";
+            Directory.CreateDirectory(outputFolder);
+
+            BuildPlayerOptions options = new BuildPlayerOptions
+            {
+                scenes = new[] { scenePath },
+                locationPathName = outputFolder,
+                target = BuildTarget.WebGL,
+                targetGroup = BuildTargetGroup.WebGL,
+                options = BuildOptions.CleanBuildCache
+            };
+
+            var report = BuildPipeline.BuildPlayer(options);
+            Debug.Log($"[DOGCRUSH] WebGL audit build result: {report.summary.result}, errors: {report.summary.totalErrors}");
+            if (report.summary.result != UnityEditor.Build.Reporting.BuildResult.Succeeded)
+            {
+                throw new System.InvalidOperationException("WebGL audit build failed.");
+            }
+        }
+
         private static void EnsureDirectoriesExist()
         {
             string[] dirs = new string[]
