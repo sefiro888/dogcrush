@@ -484,6 +484,12 @@ namespace DogCrush.EditorTool
         private static Sprite CreateDogParkBackgroundTexture(string name, int width, int height)
         {
             string path = $"Assets/_DogCrush/Art/Backgrounds/{name}.png";
+            if (File.Exists(path))
+            {
+                Sprite existing = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+                if (existing != null) return existing;
+            }
+
             Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
             Color[] pixels = new Color[width * height];
 
@@ -534,6 +540,12 @@ namespace DogCrush.EditorTool
         private static Sprite CreateBoardFrameTexture(string name, int width, int height)
         {
             string path = $"Assets/_DogCrush/Art/UI/{name}.png";
+            if (File.Exists(path))
+            {
+                Sprite existing = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+                if (existing != null) return existing;
+            }
+
             Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
             Color[] pixels = new Color[width * height];
 
@@ -576,6 +588,12 @@ namespace DogCrush.EditorTool
         private static Sprite CreateBoardPanelTexture(string name, int width, int height)
         {
             string path = $"Assets/_DogCrush/Art/UI/{name}.png";
+            if (File.Exists(path))
+            {
+                Sprite existing = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+                if (existing != null) return existing;
+            }
+
             Texture2D tex = new Texture2D(width, height, TextureFormat.RGBA32, false);
             Color[] pixels = new Color[width * height];
 
