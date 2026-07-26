@@ -196,7 +196,9 @@ namespace DogCrush.EditorTool
         public static void BuildWebGLAudit()
         {
             string scenePath = "Assets/_DogCrush/Scenes/Gameplay.unity";
-            string outputFolder = "Temp/CodexAudit/WebGL";
+            // Keep this audit player outside Unity's Temp directory so it can
+            // also be inspected and promoted to the GitHub Pages build.
+            string outputFolder = "Builds/CodexWebGL";
             Directory.CreateDirectory(outputFolder);
 
             BuildPlayerOptions options = new BuildPlayerOptions
