@@ -67,6 +67,7 @@ Actualización 26/07/2026: se reparó el reinicio para reciclar las fichas anter
 - [ ] Usar `resultadodeseado.png` como guía de composición.
 - [x] Guardar fondo vertical aprobado: `Assets/_DogCrush/Art/Backgrounds/dogcrush-park-background-v1.png`.
 - [x] Guardar marco de tablero limpio con transparencia: `Assets/_DogCrush/Art/UI/dogcrush-board-frame-v1.png`.
+- [x] Preparar en lote logo, fichas, paneles, botones e iconos con transparencia real.
 - [ ] Separar fondo, tablero, marco transparente, logo y HUD.
 - [ ] Resolver los formatos cuadrado, horizontal y vertical.
 - [ ] Definir un sistema de escalado y zonas seguras.
