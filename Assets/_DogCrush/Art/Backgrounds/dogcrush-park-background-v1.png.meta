@@ -3,8 +3,8 @@ guid: 4b1e8d2f6a7c4e90b3d5f8129a6c7e31
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5861598785193029920
-    second: dogcrush-park-background-v1
+      213: 6368264894373760672
+    second: dogcrush-park-background-v1_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 190
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: dog_park_bg_0
+      name: dogcrush-park-background-v1_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 512
-        height: 1024
+        width: 1536
+        height: 2752
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0ee45b006fa67aea0800000000000000
-      internalID: -5861598785193029920
+      spriteID: 0ae0db05e2f906850800000000000000
+      internalID: 6368264894373760672
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      dog_park_bg_0: -5861598785193029920
+      dogcrush-park-background-v1_0: 6368264894373760672
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

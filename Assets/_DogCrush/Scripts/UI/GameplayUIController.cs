@@ -33,6 +33,8 @@ namespace DogCrush.UI
         private Image timerBarGlow;
         private Image bottomPillBg;
         private TextMeshProUGUI bottomPillText;
+        private TextMeshProUGUI levelText;
+        private Image livesIcon;
 
         private void Awake()
         {
@@ -110,23 +112,26 @@ namespace DogCrush.UI
             GameObject topBarOuter = new GameObject("TopBarOuter_RT", typeof(RectTransform), typeof(Image));
             topBarOuter.transform.SetParent(canvasRect, false);
             RectTransform topOuterRect = topBarOuter.GetComponent<RectTransform>();
-            topOuterRect.anchorMin = new Vector2(0.04f, 0.93f);
-            topOuterRect.anchorMax = new Vector2(0.96f, 0.975f);
+            topOuterRect.anchorMin = new Vector2(0.04f, 0.91f);
+            topOuterRect.anchorMax = new Vector2(0.96f, 0.995f);
             topOuterRect.offsetMin = Vector2.zero;
             topOuterRect.offsetMax = Vector2.zero;
             
             // Outer dark metallic capsule frame
             Image topOuterImg = topBarOuter.GetComponent<Image>();
-            topOuterImg.color = new Color(0.1f, 0.18f, 0.25f, 0.95f);
+            topOuterImg.sprite = LoadUISprite("hud-top-panel");
+            topOuterImg.type = Image.Type.Simple;
+            topOuterImg.preserveAspect = false;
+            topOuterImg.color = Color.white;
 
             // Inner dark track
             GameObject topBarTrack = new GameObject("TopBarTrack_RT", typeof(RectTransform), typeof(Image));
             topBarTrack.transform.SetParent(topOuterRect, false);
             RectTransform trackRect = topBarTrack.GetComponent<RectTransform>();
-            trackRect.anchorMin = Vector2.zero;
-            trackRect.anchorMax = Vector2.one;
-            trackRect.offsetMin = new Vector2(4, 4);
-            trackRect.offsetMax = new Vector2(-4, -4);
+            trackRect.anchorMin = new Vector2(0.57f, 0.18f);
+            trackRect.anchorMax = new Vector2(0.75f, 0.68f);
+            trackRect.offsetMin = Vector2.zero;
+            trackRect.offsetMax = Vector2.zero;
             Image trackImg = topBarTrack.GetComponent<Image>();
             trackImg.color = new Color(0.05f, 0.08f, 0.12f, 1f);
 
@@ -148,21 +153,34 @@ namespace DogCrush.UI
             timerText = CreateText(topOuterRect, "TimerText_RT",
                 "60s", 28f, Color.white,
                 TextAlignmentOptions.Center,
-                Vector2.zero, Vector2.one,
+                new Vector2(0.57f, 0.18f), new Vector2(0.75f, 0.68f),
                 Vector2.zero, Vector2.zero);
             timerText.fontStyle = FontStyles.Bold;
+
+            levelText = CreateText(topOuterRect, "LevelText_RT",
+                "NIVEL 1", 24f, Color.white,
+                TextAlignmentOptions.Center,
+                new Vector2(0.04f, 0.18f), new Vector2(0.24f, 0.68f),
+                Vector2.zero, Vector2.zero);
+            levelText.fontStyle = FontStyles.Bold;
+
+            livesIcon = CreateImage(topOuterRect, "LivesIcon_RT", LoadUISprite("icon-life-heart"),
+                new Vector2(0.79f, 0.16f), new Vector2(0.93f, 0.70f));
 
             // === BOTTOM INFO CAPSULE (Matches reference image) ===
             GameObject bottomPillObj = new GameObject("BottomPill_RT", typeof(RectTransform), typeof(Image));
             bottomPillObj.transform.SetParent(canvasRect, false);
             RectTransform bottomPillRect = bottomPillObj.GetComponent<RectTransform>();
-            bottomPillRect.anchorMin = new Vector2(0.12f, 0.02f);
-            bottomPillRect.anchorMax = new Vector2(0.88f, 0.07f);
+            bottomPillRect.anchorMin = new Vector2(0.08f, 0.02f);
+            bottomPillRect.anchorMax = new Vector2(0.92f, 0.15f);
             bottomPillRect.offsetMin = Vector2.zero;
             bottomPillRect.offsetMax = Vector2.zero;
             
             bottomPillBg = bottomPillObj.GetComponent<Image>();
-            bottomPillBg.color = new Color(0.08f, 0.48f, 0.45f, 0.95f);
+            bottomPillBg.sprite = LoadUISprite("hud-bottom-panel");
+            bottomPillBg.type = Image.Type.Simple;
+            bottomPillBg.preserveAspect = false;
+            bottomPillBg.color = Color.white;
 
             // Inner gloss line
             GameObject glossObj = new GameObject("Gloss_RT", typeof(RectTransform), typeof(Image));
@@ -177,11 +195,19 @@ namespace DogCrush.UI
 
             // Bottom capsule text (Score & Info)
             scoreText = CreateText(bottomPillRect, "ScoreText_RT",
-                "PUNTOS: 0", 32f, new Color(1f, 0.96f, 0.4f),
+                "PUNTOS: 0", 24f, new Color(1f, 0.96f, 0.4f),
                 TextAlignmentOptions.Center,
-                Vector2.zero, Vector2.one,
+                new Vector2(0.02f, 0.15f), new Vector2(0.23f, 0.85f),
                 Vector2.zero, Vector2.zero);
             scoreText.fontStyle = FontStyles.Bold;
+
+            CreateIconButton(bottomPillRect, "MovesButton_RT", "button-moves", new Vector2(0.25f, 0.12f), new Vector2(0.40f, 0.88f));
+            CreateIconButton(bottomPillRect, "BoneButton_RT", "button-bone", new Vector2(0.43f, 0.12f), new Vector2(0.58f, 0.88f));
+            CreateIconButton(bottomPillRect, "FoodButton_RT", "button-food", new Vector2(0.61f, 0.12f), new Vector2(0.76f, 0.88f));
+            CreateIconButton(bottomPillRect, "SettingsButton_RT", "button-settings", new Vector2(0.79f, 0.12f), new Vector2(0.94f, 0.88f));
+
+            CreateImage(canvasRect, "DogCrushLogo_RT", LoadUISprite("dogcrush-logo"),
+                new Vector2(0.20f, 0.80f), new Vector2(0.80f, 0.91f));
 
             // High Score text floating top right
             highScoreText = CreateText(canvasRect, "HighScoreText_RT",
@@ -320,6 +346,42 @@ namespace DogCrush.UI
             tmp.enableWordWrapping = false;
             tmp.overflowMode = TextOverflowModes.Overflow;
             return tmp;
+        }
+
+        private Sprite LoadUISprite(string name)
+        {
+            return Resources.Load<Sprite>($"UI/{name}");
+        }
+
+        private Image CreateImage(RectTransform parent, string name, Sprite sprite, Vector2 anchorMin, Vector2 anchorMax)
+        {
+            GameObject go = new GameObject(name, typeof(RectTransform), typeof(Image));
+            go.transform.SetParent(parent, false);
+            RectTransform rect = go.GetComponent<RectTransform>();
+            rect.anchorMin = anchorMin;
+            rect.anchorMax = anchorMax;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+            Image image = go.GetComponent<Image>();
+            image.sprite = sprite;
+            image.preserveAspect = true;
+            image.raycastTarget = false;
+            return image;
+        }
+
+        private void CreateIconButton(RectTransform parent, string name, string spriteName, Vector2 anchorMin, Vector2 anchorMax)
+        {
+            GameObject go = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
+            go.transform.SetParent(parent, false);
+            RectTransform rect = go.GetComponent<RectTransform>();
+            rect.anchorMin = anchorMin;
+            rect.anchorMax = anchorMax;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+            Image image = go.GetComponent<Image>();
+            image.sprite = LoadUISprite(spriteName);
+            image.preserveAspect = true;
+            image.raycastTarget = true;
         }
 
         private void Update()
