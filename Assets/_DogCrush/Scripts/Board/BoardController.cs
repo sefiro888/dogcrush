@@ -45,7 +45,9 @@ namespace DogCrush.Board
             // Reserve a header zone for the logo and HUD in portrait.
             // The board stays centered within the wooden frame instead of
             // competing with the top interface.
-            boardOrigin = new Vector3(-totalWidth / 2f, -totalHeight / 2f - 1.3f, -1f);
+            // The 8x8 board is centered inside the wooden frame. The previous
+            // 7x9 offset left several rows visibly stranded at the bottom.
+            boardOrigin = new Vector3(-totalWidth / 2f, -totalHeight / 2f - 0.3f, -1f);
         }
 
         public Vector3 GridToWorldPosition(int x, int y)
