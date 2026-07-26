@@ -42,7 +42,10 @@ namespace DogCrush.Board
             // Keep pieces in front of the board frame in URP/WebGL. At z=0
             // both SpriteRenderers can share the same depth buffer value and
             // the opaque frame may hide the pieces despite their sort order.
-            boardOrigin = new Vector3(-totalWidth / 2f, -totalHeight / 2f + 0.2f, -1f);
+            // Reserve a header zone for the logo and HUD in portrait.
+            // The board stays centered within the wooden frame instead of
+            // competing with the top interface.
+            boardOrigin = new Vector3(-totalWidth / 2f, -totalHeight / 2f - 1.3f, -1f);
         }
 
         public Vector3 GridToWorldPosition(int x, int y)

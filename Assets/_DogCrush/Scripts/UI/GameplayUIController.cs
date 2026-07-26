@@ -32,6 +32,7 @@ namespace DogCrush.UI
         private Canvas runtimeCanvas;
         private Image timerBarGlow;
         private Image bottomPillBg;
+        private Image chainInfoPanel;
         private TextMeshProUGUI bottomPillText;
         private TextMeshProUGUI levelText;
         private Image livesIcon;
@@ -112,8 +113,8 @@ namespace DogCrush.UI
             GameObject topBarOuter = new GameObject("TopBarOuter_RT", typeof(RectTransform), typeof(Image));
             topBarOuter.transform.SetParent(canvasRect, false);
             RectTransform topOuterRect = topBarOuter.GetComponent<RectTransform>();
-            topOuterRect.anchorMin = new Vector2(0.04f, 0.91f);
-            topOuterRect.anchorMax = new Vector2(0.96f, 0.995f);
+            topOuterRect.anchorMin = new Vector2(0.05f, 0.925f);
+            topOuterRect.anchorMax = new Vector2(0.95f, 0.99f);
             topOuterRect.offsetMin = Vector2.zero;
             topOuterRect.offsetMax = Vector2.zero;
             
@@ -171,8 +172,8 @@ namespace DogCrush.UI
             GameObject bottomPillObj = new GameObject("BottomPill_RT", typeof(RectTransform), typeof(Image));
             bottomPillObj.transform.SetParent(canvasRect, false);
             RectTransform bottomPillRect = bottomPillObj.GetComponent<RectTransform>();
-            bottomPillRect.anchorMin = new Vector2(0.08f, 0.02f);
-            bottomPillRect.anchorMax = new Vector2(0.92f, 0.15f);
+            bottomPillRect.anchorMin = new Vector2(0.10f, 0.025f);
+            bottomPillRect.anchorMax = new Vector2(0.90f, 0.115f);
             bottomPillRect.offsetMin = Vector2.zero;
             bottomPillRect.offsetMax = Vector2.zero;
             
@@ -207,21 +208,28 @@ namespace DogCrush.UI
             CreateIconButton(bottomPillRect, "SettingsButton_RT", "button-settings", new Vector2(0.79f, 0.12f), new Vector2(0.94f, 0.88f));
 
             CreateImage(canvasRect, "DogCrushLogo_RT", LoadUISprite("dogcrush-logo"),
-                new Vector2(0.20f, 0.80f), new Vector2(0.80f, 0.91f));
+                new Vector2(0.29f, 0.825f), new Vector2(0.71f, 0.905f));
 
-            // High Score text floating top right
-            highScoreText = CreateText(canvasRect, "HighScoreText_RT",
-                "RECORD: 0", 24f, new Color(1f, 1f, 1f, 0.85f),
-                TextAlignmentOptions.Right,
-                new Vector2(0.5f, 0.89f), new Vector2(0.96f, 0.925f),
+            // Keep the record in the second wood compartment, rather than
+            // floating over the park when the device is portrait.
+            highScoreText = CreateText(topOuterRect, "HighScoreText_RT",
+                "0", 22f, new Color(1f, 1f, 1f, 0.9f),
+                TextAlignmentOptions.Center,
+                new Vector2(0.28f, 0.18f), new Vector2(0.53f, 0.68f),
                 Vector2.zero, Vector2.zero);
             highScoreText.fontStyle = FontStyles.Bold;
+
+            // The live chain count gets its own compact badge, clear of the logo.
+            chainInfoPanel = CreateImage(canvasRect, "ChainInfoPanel_RT", LoadUISprite("objective-panel"),
+                new Vector2(0.08f, 0.845f), new Vector2(0.28f, 0.885f));
+            chainInfoPanel.preserveAspect = false;
+            chainInfoPanel.gameObject.SetActive(false);
 
             // === CHAIN SELECTION FLOATING TEXT ===
             chainInfoText = CreateText(canvasRect, "ChainInfoText_RT",
                 "", 32f, new Color(1f, 0.92f, 0.25f),
                 TextAlignmentOptions.Center,
-                new Vector2(0.1f, 0.88f), new Vector2(0.5f, 0.925f),
+                new Vector2(0.09f, 0.852f), new Vector2(0.27f, 0.878f),
                 Vector2.zero, Vector2.zero);
             chainInfoText.fontStyle = FontStyles.Bold;
             chainInfoText.gameObject.SetActive(false);
@@ -402,7 +410,7 @@ namespace DogCrush.UI
         public void UpdateHighScore(int highScore)
         {
             if (highScoreText != null)
-                highScoreText.text = $"RÉCORD: {highScore:N0}";
+                highScoreText.text = $"{highScore:N0}";
         }
 
         public void UpdateTimer(float remainingSeconds, float progress01)
@@ -441,6 +449,7 @@ namespace DogCrush.UI
 
             if (count > 0)
             {
+                if (chainInfoPanel != null) chainInfoPanel.gameObject.SetActive(true);
                 chainInfoText.gameObject.SetActive(true);
                 string icon = "PET";
                 switch (typeName)
@@ -455,6 +464,7 @@ namespace DogCrush.UI
             }
             else
             {
+                if (chainInfoPanel != null) chainInfoPanel.gameObject.SetActive(false);
                 chainInfoText.gameObject.SetActive(false);
             }
         }

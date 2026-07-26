@@ -15,7 +15,7 @@ MonoBehaviour:
   columns: 7
   rows: 9
   typeCount: 5
-  pieceSpacing: 1.15
+  pieceSpacing: 0.87
   fallSpeed: 14
   bounceHeight: 0.2
   selectionScale: 1.18
