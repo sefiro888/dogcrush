@@ -224,7 +224,7 @@ namespace DogCrush.UI
             CreateIconButton(bottomPillRect, "SettingsButton_RT", "button-settings", new Vector2(0.79f, 0.12f), new Vector2(0.94f, 0.88f));
 
             CreateImage(canvasRect, "DogCrushLogo_RT", LoadUISprite("dogcrush-logo"),
-                new Vector2(0.15f, 0.615f), new Vector2(0.85f, 0.86f));
+                new Vector2(0.21f, 0.665f), new Vector2(0.79f, 0.84f));
 
             // Keep the record in the second wood compartment, rather than
             // floating over the park when the device is portrait.

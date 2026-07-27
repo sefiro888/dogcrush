@@ -22,7 +22,9 @@ namespace DogCrush.Tests.PlayMode
             BoardController board = Object.FindAnyObjectByType<BoardController>();
             Assert.That(board, Is.Not.Null, "Gameplay scene must contain a BoardController.");
             Assert.That(board.Grid, Is.Not.Null, "BoardController must initialize its grid.");
-            Assert.That(board.Columns * board.Rows, Is.EqualTo(64));
+            Assert.That(board.Columns, Is.EqualTo(8));
+            Assert.That(board.Rows, Is.EqualTo(10));
+            Assert.That(board.Columns * board.Rows, Is.EqualTo(80));
             Assert.That(board.HasAnyValidMove(), Is.True,
                 "The generated board must contain an orthogonal three-piece move.");
 
@@ -51,7 +53,7 @@ namespace DogCrush.Tests.PlayMode
                 }
             }
 
-            Assert.That(activePieces, Is.EqualTo(64), "The initial board must contain 64 active pieces.");
+            Assert.That(activePieces, Is.EqualTo(80), "The initial 8x10 board must contain 80 active pieces.");
         }
 
         [UnityTest]
@@ -78,8 +80,8 @@ namespace DogCrush.Tests.PlayMode
                 }
             }
 
-            Assert.That(activePieces, Is.EqualTo(64),
-                "Restarting a match must leave exactly one active set of 64 pieces.");
+            Assert.That(activePieces, Is.EqualTo(80),
+                "Restarting a match must leave exactly one active set of 80 pieces.");
         }
 
         [UnityTest]
@@ -264,8 +266,8 @@ namespace DogCrush.Tests.PlayMode
                 }
             }
 
-            Assert.That(activePieces, Is.EqualTo(64),
-                "A completed chain must refill the board back to 64 active pieces.");
+            Assert.That(activePieces, Is.EqualTo(80),
+                "A completed chain must refill the 8x10 board back to 80 active pieces.");
         }
     }
 }

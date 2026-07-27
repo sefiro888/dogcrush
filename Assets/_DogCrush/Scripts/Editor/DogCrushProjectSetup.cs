@@ -721,7 +721,7 @@ namespace DogCrush.EditorTool
             {
                 config = ScriptableObject.CreateInstance<BoardConfig>();
                 config.columns = 8;
-                config.rows = 8;
+                config.rows = 10;
                 config.typeCount = 5;
                 config.pieceSpacing = 1.15f;
                 config.fallSpeed = 16.0f;
