@@ -107,6 +107,9 @@ namespace DogCrush.Core
                 uiController.OnShuffleBoosterRequested += UseShuffleBooster;
                 uiController.OnBoneBoosterRequested += UseBoneBooster;
                 uiController.OnFoodBoosterRequested += UseFoodBooster;
+                uiController.OnLevelSelected += SelectLevel;
+                uiController.OnLevelSelectVisibilityChanged += HandleLevelSelectVisibilityChanged;
+                uiController.SetUnlockedLevel(PlayerPrefs.GetInt(UnlockedLevelKey, 1));
                 uiController.OnSoundToggleRequested += HandleSoundToggleRequested;
                 uiController.OnHapticsToggleRequested += HandleHapticsToggleRequested;
                 uiController.OnSettingsVisibilityChanged += HandleSettingsVisibilityChanged;
@@ -344,6 +347,19 @@ namespace DogCrush.Core
         {
             currentLevel++;
             StartNewMatch();
+        }
+
+        private void SelectLevel(int level)
+        {
+            int unlockedLevel = PlayerPrefs.GetInt(UnlockedLevelKey, 1);
+            if (level < 1 || level > unlockedLevel) return;
+            currentLevel = level;
+            StartNewMatch();
+        }
+
+        private void HandleLevelSelectVisibilityChanged(bool visible)
+        {
+            gameTimer?.SetPaused(visible);
         }
 
         private void UseShuffleBooster()

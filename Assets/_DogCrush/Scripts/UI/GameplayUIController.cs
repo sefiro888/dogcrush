@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -26,6 +27,8 @@ namespace DogCrush.UI
         public System.Action OnShuffleBoosterRequested;
         public System.Action OnBoneBoosterRequested;
         public System.Action OnFoodBoosterRequested;
+        public System.Action<int> OnLevelSelected;
+        public System.Action<bool> OnLevelSelectVisibilityChanged;
 
         [Header("Settings Overlay")]
         public GameObject settingsPanel;
@@ -61,6 +64,10 @@ namespace DogCrush.UI
         private Button movesBoosterButton;
         private Button boneBoosterButton;
         private Button foodBoosterButton;
+        private GameObject levelSelectPanel;
+        private readonly List<Button> levelButtons = new List<Button>();
+        private readonly List<TextMeshProUGUI> levelButtonLabels = new List<TextMeshProUGUI>();
+        private int unlockedLevel = 1;
         private Sprite roundedRectSprite;
         private RectTransform portraitContentRect;
         private RectTransform logoRect;
@@ -161,6 +168,9 @@ namespace DogCrush.UI
                 topHudRect, "LevelSlot_RT", new Vector2(0.025f, 0.12f), new Vector2(0.245f, 0.88f));
             CreateHudLabel(levelSlot, "LevelLabel_RT", "NIVEL");
             levelText = CreateHudValue(levelSlot, "LevelText_RT", "1", 27f);
+            Button levelSelectButton = levelSlot.gameObject.AddComponent<Button>();
+            levelSelectButton.transition = Selectable.Transition.None;
+            levelSelectButton.onClick.AddListener(ShowLevelSelect);
 
             RectTransform recordSlot = CreateHudSlot(
                 topHudRect, "RecordSlot_RT", new Vector2(0.26f, 0.12f), new Vector2(0.50f, 0.88f));
@@ -283,6 +293,7 @@ namespace DogCrush.UI
             comboBannerText.gameObject.SetActive(false);
 
             BuildSettingsPanel(canvasRect);
+            BuildLevelSelectPanel(canvasRect);
 
             // === GAME OVER OVERLAY ===
             BuildGameOverPanel(canvasRect);
@@ -628,6 +639,107 @@ namespace DogCrush.UI
             label.fontSizeMin = 16f;
             label.fontSizeMax = 28f;
             return buttonObject.GetComponent<Button>();
+        }
+
+        private void BuildLevelSelectPanel(RectTransform canvasRect)
+        {
+            levelSelectPanel = new GameObject("LevelSelectPanel_RT", typeof(RectTransform), typeof(Image));
+            levelSelectPanel.transform.SetParent(canvasRect, false);
+            RectTransform overlayRect = levelSelectPanel.GetComponent<RectTransform>();
+            overlayRect.anchorMin = Vector2.zero;
+            overlayRect.anchorMax = Vector2.one;
+            overlayRect.offsetMin = Vector2.zero;
+            overlayRect.offsetMax = Vector2.zero;
+            levelSelectPanel.GetComponent<Image>().color = new Color(0.035f, 0.025f, 0.02f, 0.78f);
+
+            GameObject card = new GameObject("LevelSelectCard_RT", typeof(RectTransform), typeof(Image));
+            card.transform.SetParent(overlayRect, false);
+            RectTransform cardRect = card.GetComponent<RectTransform>();
+            cardRect.anchorMin = new Vector2(0.10f, 0.16f);
+            cardRect.anchorMax = new Vector2(0.90f, 0.84f);
+            cardRect.offsetMin = Vector2.zero;
+            cardRect.offsetMax = Vector2.zero;
+            Image cardImage = card.GetComponent<Image>();
+            cardImage.sprite = CreateRoundedRectSprite();
+            cardImage.type = Image.Type.Sliced;
+            cardImage.color = new Color(0.20f, 0.09f, 0.025f, 0.98f);
+
+            TextMeshProUGUI title = CreateText(cardRect, "LevelSelectTitle_RT", "SELECCIONA NIVEL", 34f,
+                new Color(1f, 0.88f, 0.25f), TextAlignmentOptions.Center,
+                new Vector2(0.05f, 0.86f), new Vector2(0.95f, 0.97f), Vector2.zero, Vector2.zero);
+            title.fontStyle = FontStyles.Bold;
+
+            for (int i = 0; i < 10; i++)
+            {
+                int level = i + 1;
+                GameObject buttonObject = new GameObject($"LevelButton_{level}_RT", typeof(RectTransform), typeof(Image), typeof(Button));
+                buttonObject.transform.SetParent(cardRect, false);
+                RectTransform buttonRect = buttonObject.GetComponent<RectTransform>();
+                float top = 0.78f - i * 0.065f;
+                buttonRect.anchorMin = new Vector2(0.14f, top - 0.052f);
+                buttonRect.anchorMax = new Vector2(0.86f, top);
+                buttonRect.offsetMin = Vector2.zero;
+                buttonRect.offsetMax = Vector2.zero;
+                Image buttonImage = buttonObject.GetComponent<Image>();
+                buttonImage.sprite = CreateRoundedRectSprite();
+                buttonImage.type = Image.Type.Sliced;
+                buttonImage.color = new Color(0.08f, 0.42f, 0.70f, 1f);
+                TextMeshProUGUI label = CreateText(buttonRect, $"LevelButtonLabel_{level}_RT", "", 24f,
+                    Color.white, TextAlignmentOptions.Center, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+                label.fontStyle = FontStyles.Bold;
+                Button button = buttonObject.GetComponent<Button>();
+                button.transition = Selectable.Transition.ColorTint;
+                button.onClick.AddListener(() => SelectLevel(level));
+                levelButtons.Add(button);
+                levelButtonLabels.Add(label);
+            }
+
+            Button closeButton = CreateSettingsButton(cardRect, "LevelSelectClose_RT",
+                new Vector2(0.25f, 0.045f), new Vector2(0.75f, 0.14f), out TextMeshProUGUI closeLabel);
+            closeLabel.text = "CERRAR";
+            closeButton.onClick.AddListener(() => SetLevelSelectVisible(false));
+            levelSelectPanel.SetActive(false);
+        }
+
+        private void ShowLevelSelect()
+        {
+            SetLevelSelectVisible(true);
+        }
+
+        public void SetUnlockedLevel(int level)
+        {
+            unlockedLevel = Mathf.Clamp(level, 1, levelButtons.Count > 0 ? levelButtons.Count : 10);
+            UpdateLevelButtons();
+        }
+
+        private void UpdateLevelButtons()
+        {
+            for (int i = 0; i < levelButtons.Count; i++)
+            {
+                int level = i + 1;
+                bool available = level <= unlockedLevel;
+                levelButtons[i].interactable = available;
+                int stars = PlayerPrefs.GetInt("DogCrush_LevelStars_" + level, 0);
+                levelButtonLabels[i].text = available
+                    ? $"NIVEL {level}   {(stars > 0 ? new string('★', stars) : "—")}"
+                    : $"NIVEL {level}   🔒";
+            }
+        }
+
+        public void SetLevelSelectVisible(bool visible)
+        {
+            if (levelSelectPanel == null) return;
+            if (visible) UpdateLevelButtons();
+            levelSelectPanel.SetActive(visible);
+            levelSelectPanel.transform.SetAsLastSibling();
+            OnLevelSelectVisibilityChanged?.Invoke(visible);
+        }
+
+        private void SelectLevel(int level)
+        {
+            if (level > unlockedLevel) return;
+            SetLevelSelectVisible(false);
+            OnLevelSelected?.Invoke(level);
         }
 
         private void BuildGameOverPanel(RectTransform canvasRect)
