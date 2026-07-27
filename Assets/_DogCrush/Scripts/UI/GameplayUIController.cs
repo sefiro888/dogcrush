@@ -39,9 +39,12 @@ namespace DogCrush.UI
         private Image livesIcon;
         private Sprite roundedRectSprite;
         private RectTransform portraitContentRect;
+        private RectTransform logoRect;
         private RectTransform chainInfoPanelRect;
         private RectTransform chainInfoTextRect;
         private Coroutine chainPulseRoutine;
+        private int lastHudScreenWidth;
+        private int lastHudScreenHeight;
 
         private void Awake()
         {
@@ -133,23 +136,23 @@ namespace DogCrush.UI
             RectTransform levelSlot = CreateHudSlot(
                 topHudRect, "LevelSlot_RT", new Vector2(0.025f, 0.12f), new Vector2(0.245f, 0.88f));
             CreateHudLabel(levelSlot, "LevelLabel_RT", "NIVEL");
-            levelText = CreateHudValue(levelSlot, "LevelText_RT", "1", 31f);
+            levelText = CreateHudValue(levelSlot, "LevelText_RT", "1", 27f);
 
             RectTransform recordSlot = CreateHudSlot(
                 topHudRect, "RecordSlot_RT", new Vector2(0.26f, 0.12f), new Vector2(0.50f, 0.88f));
             CreateHudLabel(recordSlot, "RecordLabel_RT", "RÉCORD");
-            highScoreText = CreateHudValue(recordSlot, "HighScoreText_RT", "0", 27f);
+            highScoreText = CreateHudValue(recordSlot, "HighScoreText_RT", "0", 24f);
 
             RectTransform timerSlot = CreateHudSlot(
                 topHudRect, "TimerSlot_RT", new Vector2(0.515f, 0.12f), new Vector2(0.755f, 0.88f));
             CreateHudLabel(timerSlot, "TimerLabel_RT", "TIEMPO");
-            timerText = CreateHudValue(timerSlot, "TimerText_RT", "60s", 32f);
+            timerText = CreateHudValue(timerSlot, "TimerText_RT", "60s", 27f);
 
             Image timerTrack = CreatePanelImage(
                 timerSlot,
                 "TimerTrack_RT",
-                new Vector2(0.08f, 0.08f),
-                new Vector2(0.92f, 0.19f),
+                new Vector2(0.08f, 0.05f),
+                new Vector2(0.92f, 0.13f),
                 new Color(0.10f, 0.025f, 0.012f, 0.96f));
             timerBarFill = CreatePanelImage(
                 timerTrack.rectTransform,
@@ -174,7 +177,7 @@ namespace DogCrush.UI
                 livesSlot,
                 "LivesText_RT",
                 "5/5",
-                26f,
+                22f,
                 Color.white,
                 TextAlignmentOptions.Center,
                 new Vector2(0.44f, 0.14f),
@@ -182,6 +185,11 @@ namespace DogCrush.UI
                 Vector2.zero,
                 Vector2.zero);
             livesText.fontStyle = FontStyles.Bold;
+            livesText.enableAutoSizing = true;
+            livesText.fontSizeMin = 11f;
+            livesText.fontSizeMax = 22f;
+            livesText.overflowMode = TextOverflowModes.Truncate;
+            livesText.margin = new Vector4(3f, 0f, 3f, 0f);
 
             RectTransform bottomPillRect = CreateHudShell(
                 canvasRect,
@@ -193,7 +201,7 @@ namespace DogCrush.UI
             RectTransform scoreSlot = CreateHudSlot(
                 bottomPillRect, "ScoreSlot_RT", new Vector2(0.025f, 0.12f), new Vector2(0.275f, 0.88f));
             CreateHudLabel(scoreSlot, "ScoreLabel_RT", "PUNTOS");
-            scoreText = CreateHudValue(scoreSlot, "ScoreText_RT", "0", 31f);
+            scoreText = CreateHudValue(scoreSlot, "ScoreText_RT", "0", 28f);
             scoreText.color = new Color(1f, 0.91f, 0.28f);
 
             CreateBoosterButton(bottomPillRect, "MovesButton_RT", "button-moves", 0.30f, 0.455f);
@@ -201,8 +209,10 @@ namespace DogCrush.UI
             CreateBoosterButton(bottomPillRect, "FoodButton_RT", "button-food", 0.64f, 0.795f);
             CreateBoosterButton(bottomPillRect, "SettingsButton_RT", "button-settings", 0.81f, 0.965f);
 
-            CreateImage(canvasRect, "DogCrushLogo_RT", LoadUISprite("dogcrush-logo"),
-                new Vector2(0.21f, 0.665f), new Vector2(0.79f, 0.84f));
+            Image logo = CreateImage(canvasRect, "DogCrushLogo_RT", LoadUISprite("dogcrush-logo"),
+                new Vector2(0.23f, 0.675f), new Vector2(0.77f, 0.845f));
+            logoRect = logo.rectTransform;
+            ApplyResponsiveHudLayout();
 
             // The live chain count gets its own compact badge, clear of the logo.
             chainInfoPanel = CreateImage(canvasRect, "ChainInfoPanel_RT", LoadUISprite("objective-panel"),
@@ -371,15 +381,20 @@ namespace DogCrush.UI
                 parent,
                 name,
                 text,
-                17f,
+                14f,
                 new Color(1f, 0.72f, 0.32f, 0.96f),
                 TextAlignmentOptions.Center,
-                new Vector2(0.05f, 0.61f),
+                new Vector2(0.05f, 0.64f),
                 new Vector2(0.95f, 0.93f),
                 Vector2.zero,
                 Vector2.zero);
             label.fontStyle = FontStyles.Bold;
             label.characterSpacing = 1.5f;
+            label.enableAutoSizing = true;
+            label.fontSizeMin = 8f;
+            label.fontSizeMax = 14f;
+            label.overflowMode = TextOverflowModes.Truncate;
+            label.margin = new Vector4(4f, 0f, 4f, 0f);
         }
 
         private TextMeshProUGUI CreateHudValue(
@@ -395,11 +410,16 @@ namespace DogCrush.UI
                 fontSize,
                 Color.white,
                 TextAlignmentOptions.Center,
-                new Vector2(0.04f, 0.11f),
-                new Vector2(0.96f, 0.67f),
+                new Vector2(0.04f, 0.12f),
+                new Vector2(0.96f, 0.61f),
                 Vector2.zero,
                 Vector2.zero);
             value.fontStyle = FontStyles.Bold;
+            value.enableAutoSizing = true;
+            value.fontSizeMin = 11f;
+            value.fontSizeMax = fontSize;
+            value.overflowMode = TextOverflowModes.Truncate;
+            value.margin = new Vector4(5f, 0f, 5f, 0f);
             return value;
         }
 
@@ -606,8 +626,36 @@ namespace DogCrush.UI
             image.raycastTarget = true;
         }
 
+        private void ApplyResponsiveHudLayout()
+        {
+            if (logoRect == null) return;
+
+            float aspect = (float)Screen.width / Mathf.Max(1, Screen.height);
+            bool widerViewport = aspect >= 0.52f;
+            if (widerViewport)
+            {
+                logoRect.anchorMin = new Vector2(0.30f, 0.77f);
+                logoRect.anchorMax = new Vector2(0.70f, 0.89f);
+            }
+            else
+            {
+                logoRect.anchorMin = new Vector2(0.23f, 0.675f);
+                logoRect.anchorMax = new Vector2(0.77f, 0.845f);
+            }
+
+            logoRect.offsetMin = Vector2.zero;
+            logoRect.offsetMax = Vector2.zero;
+            lastHudScreenWidth = Screen.width;
+            lastHudScreenHeight = Screen.height;
+        }
+
         private void Update()
         {
+            if (lastHudScreenWidth != Screen.width || lastHudScreenHeight != Screen.height)
+            {
+                ApplyResponsiveHudLayout();
+            }
+
             if (displayedScore != targetScore)
             {
                 displayedScore = (int)Mathf.MoveTowards(displayedScore, targetScore,
