@@ -31,6 +31,16 @@ namespace DogCrush.Core
 
         private int CurrentTargetScore =>
             baseTargetScore + Mathf.Max(0, currentLevel - 1) * targetIncreasePerLevel;
+        private int CurrentBoardRows => currentLevel switch
+        {
+            1 => 8,
+            2 => 9,
+            3 => 10,
+            4 => 10,
+            _ => 11
+        };
+        private int CurrentBoardColumns => currentLevel >= 4 ? 9 : 8;
+        private float CurrentLevelDuration => Mathf.Max(35f, 60f - Mathf.Max(0, currentLevel - 1) * 3f);
         private bool shuffleBoosterAvailable;
         private bool boneBoosterAvailable;
         private bool foodBoosterAvailable;
@@ -125,6 +135,8 @@ namespace DogCrush.Core
         {
             stateController.ChangeState(GameState.Initializing);
 
+            ConfigureCurrentLevel();
+
             if (uiController != null)
             {
                 uiController.HideGameOver();
@@ -156,6 +168,15 @@ namespace DogCrush.Core
             }
 
             stateController.ChangeState(GameState.Playing);
+        }
+
+        private void ConfigureCurrentLevel()
+        {
+            if (boardController == null || boardController.config == null) return;
+            boardController.config.columns = CurrentBoardColumns;
+            boardController.config.rows = CurrentBoardRows;
+            boardController.config.gameDurationSeconds = CurrentLevelDuration;
+            boardController.config.typeCount = currentLevel >= 5 ? 6 : 5;
         }
 
         private void HandleChainUpdated(int count, PieceType type)
