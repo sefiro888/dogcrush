@@ -93,6 +93,10 @@ namespace DogCrush.Board
                 yield return null;
             }
 
+            // A second touch or a cancelled animation must never leave a
+            // playable cell empty. Fill any defensive gaps before unlocking input.
+            boardController.FillMissingCells();
+
             // Ensure grid has valid moves after refill
             boardController.EnsureHasValidMoves();
 

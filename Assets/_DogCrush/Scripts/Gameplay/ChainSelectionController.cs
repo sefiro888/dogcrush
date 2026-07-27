@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using DogCrush.Board;
+using DogCrush.Core;
 using DogCrush.InputSystem;
 using UnityEngine;
 
@@ -10,6 +11,7 @@ namespace DogCrush.Gameplay
         public BoardController boardController;
         public ChainInputHandler inputHandler;
         public Presentation.ChainLineView lineView;
+        public GameStateController stateController;
 
         public System.Action<List<PieceView>> OnChainCompleted;
         public System.Action OnChainCancelled;
@@ -31,6 +33,12 @@ namespace DogCrush.Gameplay
             }
         }
 
+        private void Awake()
+        {
+            if (stateController == null)
+                stateController = FindAnyObjectByType<GameStateController>();
+        }
+
         private void OnDisable()
         {
             if (inputHandler != null)
@@ -43,6 +51,7 @@ namespace DogCrush.Gameplay
 
         private void HandlePointerDown(Vector2 worldPos)
         {
+            if (stateController != null && !stateController.CanSelectPieces()) return;
             PieceView piece = GetPieceAtPosition(worldPos);
             if (piece == null) return;
 
@@ -60,6 +69,11 @@ namespace DogCrush.Gameplay
         private void HandlePointerDrag(Vector2 worldPos)
         {
             if (!IsSelecting) return;
+            if (stateController != null && !stateController.CanSelectPieces())
+            {
+                CancelCurrentSelection();
+                return;
+            }
 
             PieceView piece = GetPieceAtPosition(worldPos);
             if (piece == null)
@@ -99,6 +113,12 @@ namespace DogCrush.Gameplay
         {
             if (!IsSelecting) return;
             IsSelecting = false;
+
+            if (stateController != null && !stateController.CanSelectPieces())
+            {
+                CancelCurrentSelection();
+                return;
+            }
 
             int minLength = boardController != null && boardController.config != null ? boardController.config.minChainLength : 3;
 
@@ -150,6 +170,15 @@ namespace DogCrush.Gameplay
             {
                 lineView.ClearLine();
             }
+        }
+
+        private void CancelCurrentSelection()
+        {
+            IsSelecting = false;
+            ClearSelectionVisuals();
+            selectedChain.Clear();
+            ActiveChainType = PieceType.None;
+            OnChainCancelled?.Invoke();
         }
 
         private void UpdateLineView()

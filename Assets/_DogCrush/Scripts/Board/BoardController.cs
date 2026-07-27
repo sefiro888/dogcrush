@@ -242,6 +242,20 @@ namespace DogCrush.Board
             return dx + dy == 1;
         }
 
+        public void FillMissingCells()
+        {
+            if (config == null || grid == null || spawner == null) return;
+            for (int x = 0; x < Columns; x++)
+            {
+                for (int y = 0; y < Rows; y++)
+                {
+                    if (grid[x, y] != null) continue;
+                    PieceType type = (PieceType)Random.Range(0, config.typeCount);
+                    grid[x, y] = spawner.SpawnPiece(type, x, y, GridToWorldPosition(x, y));
+                }
+            }
+        }
+
         public List<PieceView> GetRowPieces(int row)
         {
             var result = new List<PieceView>();
