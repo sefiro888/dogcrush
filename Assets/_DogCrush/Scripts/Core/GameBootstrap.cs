@@ -34,6 +34,8 @@ namespace DogCrush.Core
         private bool shuffleBoosterAvailable;
         private bool boneBoosterAvailable;
         private bool foodBoosterAvailable;
+        private const string UnlockedLevelKey = "DogCrush_UnlockedLevel";
+        private const string LevelStarsKeyPrefix = "DogCrush_LevelStars_";
 
         private void Start()
         {
@@ -42,6 +44,7 @@ namespace DogCrush.Core
 
         public void InitializeGame()
         {
+            currentLevel = Mathf.Max(currentLevel, PlayerPrefs.GetInt(UnlockedLevelKey, 1));
             if (stateController == null) stateController = GetComponent<GameStateController>();
             if (audioController == null) audioController = GetComponent<AudioPlaceholderController>();
             if (hapticController == null)
@@ -306,6 +309,15 @@ namespace DogCrush.Core
             if (uiController != null)
             {
                 int stars = CalculateStars();
+                if (victory)
+                {
+                    string starsKey = LevelStarsKeyPrefix + currentLevel;
+                    int previousStars = PlayerPrefs.GetInt(starsKey, 0);
+                    PlayerPrefs.SetInt(starsKey, Mathf.Max(previousStars, stars));
+                    PlayerPrefs.SetInt(UnlockedLevelKey, Mathf.Max(
+                        PlayerPrefs.GetInt(UnlockedLevelKey, 1), currentLevel + 1));
+                    PlayerPrefs.Save();
+                }
                 uiController.ShowLevelResult(victory, finalScore, isNewRecord, stars);
             }
         }
