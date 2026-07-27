@@ -38,6 +38,13 @@ namespace DogCrush.Core
             IsPaused = paused && IsRunning;
         }
 
+        public void AddTime(float seconds)
+        {
+            if (!IsRunning || seconds <= 0f) return;
+            RemainingTime = Mathf.Min(durationSeconds, RemainingTime + seconds);
+            OnTimerTick?.Invoke(RemainingTime);
+        }
+
         private void Update()
         {
             if (!IsRunning || IsPaused) return;

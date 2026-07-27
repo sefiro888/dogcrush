@@ -23,6 +23,9 @@ namespace DogCrush.UI
         public Button secondaryRestartButton;
         public Button hudRestartButton;
         public System.Action OnNextLevelRequested;
+        public System.Action OnShuffleBoosterRequested;
+        public System.Action OnBoneBoosterRequested;
+        public System.Action OnFoodBoosterRequested;
 
         [Header("Settings Overlay")]
         public GameObject settingsPanel;
@@ -55,6 +58,9 @@ namespace DogCrush.UI
         private TextMeshProUGUI resultTitleText;
         private TextMeshProUGUI resultLabelText;
         private TextMeshProUGUI resultButtonText;
+        private Button movesBoosterButton;
+        private Button boneBoosterButton;
+        private Button foodBoosterButton;
         private Sprite roundedRectSprite;
         private RectTransform portraitContentRect;
         private RectTransform logoRect;
@@ -222,9 +228,12 @@ namespace DogCrush.UI
             scoreText = CreateHudValue(scoreSlot, "ScoreText_RT", "0 / 5.000", 24f);
             scoreText.color = new Color(1f, 0.91f, 0.28f);
 
-            CreateBoosterButton(bottomPillRect, "MovesButton_RT", "button-moves", 0.30f, 0.455f);
-            CreateBoosterButton(bottomPillRect, "BoneButton_RT", "button-bone", 0.47f, 0.625f);
-            CreateBoosterButton(bottomPillRect, "FoodButton_RT", "button-food", 0.64f, 0.795f);
+            movesBoosterButton = CreateBoosterButton(bottomPillRect, "MovesButton_RT", "button-moves", 0.30f, 0.455f);
+            movesBoosterButton.onClick.AddListener(() => OnShuffleBoosterRequested?.Invoke());
+            boneBoosterButton = CreateBoosterButton(bottomPillRect, "BoneButton_RT", "button-bone", 0.47f, 0.625f);
+            boneBoosterButton.onClick.AddListener(() => OnBoneBoosterRequested?.Invoke());
+            foodBoosterButton = CreateBoosterButton(bottomPillRect, "FoodButton_RT", "button-food", 0.64f, 0.795f);
+            foodBoosterButton.onClick.AddListener(() => OnFoodBoosterRequested?.Invoke());
             settingsButton = CreateBoosterButton(
                 bottomPillRect, "SettingsButton_RT", "button-settings", 0.81f, 0.965f);
             settingsButton.onClick.AddListener(() => SetSettingsVisible(true));
@@ -876,6 +885,13 @@ namespace DogCrush.UI
                 levelText.text = Mathf.Max(1, level).ToString();
             }
             RefreshObjectiveText();
+        }
+
+        public void SetBoosterAvailability(bool shuffle, bool bone, bool food)
+        {
+            if (movesBoosterButton != null) movesBoosterButton.interactable = shuffle;
+            if (boneBoosterButton != null) boneBoosterButton.interactable = bone;
+            if (foodBoosterButton != null) foodBoosterButton.interactable = food;
         }
 
         private void RefreshObjectiveText()

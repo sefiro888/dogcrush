@@ -241,5 +241,16 @@ namespace DogCrush.Board
             int dy = Mathf.Abs(y1 - y2);
             return dx + dy == 1;
         }
+
+        public List<PieceView> GetRowPieces(int row)
+        {
+            var result = new List<PieceView>();
+            if (config == null || row < 0 || row >= Rows) return result;
+            for (int x = 0; x < Columns; x++)
+            {
+                if (grid[x, row] != null) result.Add(grid[x, row]);
+            }
+            return result;
+        }
     }
 }
