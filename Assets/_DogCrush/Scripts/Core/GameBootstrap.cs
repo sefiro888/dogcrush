@@ -24,6 +24,14 @@ namespace DogCrush.Core
         public AudioPlaceholderController audioController;
         public HapticFeedbackController hapticController;
 
+        [Header("Level Progress")]
+        [Min(1)] public int currentLevel = 1;
+        [Min(100)] public int baseTargetScore = 5000;
+        [Min(0)] public int targetIncreasePerLevel = 2500;
+
+        private int CurrentTargetScore =>
+            baseTargetScore + Mathf.Max(0, currentLevel - 1) * targetIncreasePerLevel;
+
         private void Start()
         {
             InitializeGame();
@@ -89,6 +97,7 @@ namespace DogCrush.Core
             if (uiController != null)
             {
                 uiController.OnRestartRequested += RestartGame;
+                uiController.OnNextLevelRequested += StartNextLevel;
                 uiController.OnSoundToggleRequested += HandleSoundToggleRequested;
                 uiController.OnHapticsToggleRequested += HandleHapticsToggleRequested;
                 uiController.OnSettingsVisibilityChanged += HandleSettingsVisibilityChanged;
@@ -108,6 +117,7 @@ namespace DogCrush.Core
             {
                 uiController.HideGameOver();
                 uiController.UpdateChainInfo(0, "");
+                uiController.SetLevelObjective(currentLevel, CurrentTargetScore);
                 uiController.SetSettingsVisible(false);
             }
 
@@ -217,9 +227,13 @@ namespace DogCrush.Core
             {
                 StartCoroutine(gravityController.ProcessRemovalAndRefill(chain, () =>
                 {
-                    if (gameTimer != null && gameTimer.RemainingTime <= 0)
+                    if (scoreController != null && scoreController.CurrentScore >= CurrentTargetScore)
                     {
-                        EndMatch();
+                        EndMatch(true);
+                    }
+                    else if (gameTimer != null && gameTimer.RemainingTime <= 0)
+                    {
+                        EndMatch(false);
                     }
                     else
                     {
@@ -248,10 +262,10 @@ namespace DogCrush.Core
             {
                 return;
             }
-            EndMatch();
+            EndMatch(false);
         }
 
-        private void EndMatch()
+        private void EndMatch(bool victory)
         {
             stateController.ChangeState(GameState.GameOver);
 
@@ -262,11 +276,17 @@ namespace DogCrush.Core
 
             if (audioController != null)
             {
-                audioController.PlayGameOverSound();
+                if (victory)
+                    audioController.PlayComboSound();
+                else
+                    audioController.PlayGameOverSound();
             }
             if (hapticController != null)
             {
-                hapticController.PulseGameOver();
+                if (victory)
+                    hapticController.PulseMatch(8);
+                else
+                    hapticController.PulseGameOver();
             }
 
             int finalScore = scoreController != null ? scoreController.CurrentScore : 0;
@@ -275,12 +295,32 @@ namespace DogCrush.Core
 
             if (uiController != null)
             {
-                uiController.ShowGameOver(finalScore, isNewRecord);
+                int stars = CalculateStars();
+                uiController.ShowLevelResult(victory, finalScore, isNewRecord, stars);
             }
+        }
+
+        private int CalculateStars()
+        {
+            if (gameTimer == null || gameTimer.durationSeconds <= 0f)
+            {
+                return 1;
+            }
+
+            float timeRatio = gameTimer.RemainingTime / gameTimer.durationSeconds;
+            if (timeRatio >= 0.60f) return 3;
+            if (timeRatio >= 0.30f) return 2;
+            return 1;
         }
 
         public void RestartGame()
         {
+            StartNewMatch();
+        }
+
+        public void StartNextLevel()
+        {
+            currentLevel++;
             StartNewMatch();
         }
 

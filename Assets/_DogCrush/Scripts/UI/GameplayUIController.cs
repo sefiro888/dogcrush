@@ -22,6 +22,7 @@ namespace DogCrush.UI
         public Button playAgainButton;
         public Button secondaryRestartButton;
         public Button hudRestartButton;
+        public System.Action OnNextLevelRequested;
 
         [Header("Settings Overlay")]
         public GameObject settingsPanel;
@@ -39,6 +40,8 @@ namespace DogCrush.UI
 
         private int targetScore = 0;
         private int displayedScore = 0;
+        private int levelTargetScore = 5000;
+        private bool lastResultWasVictory;
         private Coroutine comboRoutine;
 
         private Canvas runtimeCanvas;
@@ -49,6 +52,9 @@ namespace DogCrush.UI
         private TextMeshProUGUI levelText;
         private TextMeshProUGUI livesText;
         private Image livesIcon;
+        private TextMeshProUGUI resultTitleText;
+        private TextMeshProUGUI resultLabelText;
+        private TextMeshProUGUI resultButtonText;
         private Sprite roundedRectSprite;
         private RectTransform portraitContentRect;
         private RectTransform logoRect;
@@ -212,8 +218,8 @@ namespace DogCrush.UI
 
             RectTransform scoreSlot = CreateHudSlot(
                 bottomPillRect, "ScoreSlot_RT", new Vector2(0.025f, 0.12f), new Vector2(0.275f, 0.88f));
-            CreateHudLabel(scoreSlot, "ScoreLabel_RT", "PUNTOS");
-            scoreText = CreateHudValue(scoreSlot, "ScoreText_RT", "0", 28f);
+            CreateHudLabel(scoreSlot, "ScoreLabel_RT", "OBJETIVO");
+            scoreText = CreateHudValue(scoreSlot, "ScoreText_RT", "0 / 5.000", 24f);
             scoreText.color = new Color(1f, 0.91f, 0.28f);
 
             CreateBoosterButton(bottomPillRect, "MovesButton_RT", "button-moves", 0.30f, 0.455f);
@@ -642,15 +648,19 @@ namespace DogCrush.UI
             boxImg.color = new Color(0.12f, 0.16f, 0.26f, 0.98f);
 
             // Title
-            CreateText(centerRect, "GOTitle",
-                "TIME UP!", 48f, new Color(1f, 0.4f, 0.35f),
+            resultTitleText = CreateText(centerRect, "GOTitle",
+                "TIEMPO AGOTADO", 48f, new Color(1f, 0.4f, 0.35f),
                 TextAlignmentOptions.Center,
                 new Vector2(0.05f, 0.75f), new Vector2(0.95f, 0.95f),
-                Vector2.zero, Vector2.zero).fontStyle = FontStyles.Bold;
+                Vector2.zero, Vector2.zero);
+            resultTitleText.fontStyle = FontStyles.Bold;
+            resultTitleText.enableAutoSizing = true;
+            resultTitleText.fontSizeMin = 28f;
+            resultTitleText.fontSizeMax = 48f;
 
             // Final score label
-            CreateText(centerRect, "FinalLabel",
-                "SCORE OBTAINED", 22f, new Color(0.8f, 0.85f, 0.95f),
+            resultLabelText = CreateText(centerRect, "FinalLabel",
+                "PUNTUACIÓN", 22f, new Color(0.8f, 0.85f, 0.95f),
                 TextAlignmentOptions.Center,
                 new Vector2(0.05f, 0.58f), new Vector2(0.95f, 0.72f),
                 Vector2.zero, Vector2.zero);
@@ -665,7 +675,7 @@ namespace DogCrush.UI
 
             // New Record banner
             newRecordBanner = CreateText(centerRect, "NewRecordBanner_RT",
-                "NEW RECORD!", 32f, new Color(0.3f, 0.95f, 0.4f),
+                "¡NUEVO RÉCORD!", 32f, new Color(0.3f, 0.95f, 0.4f),
                 TextAlignmentOptions.Center,
                 new Vector2(0.05f, 0.25f), new Vector2(0.95f, 0.36f),
                 Vector2.zero, Vector2.zero);
@@ -684,15 +694,21 @@ namespace DogCrush.UI
             Image btnImg = btnObj.GetComponent<Image>();
             btnImg.color = new Color(0.2f, 0.78f, 0.38f);
 
-            TextMeshProUGUI btnText = CreateText(btnRect, "BtnLabel",
+            resultButtonText = CreateText(btnRect, "BtnLabel",
                 "JUGAR DE NUEVO", 30f, Color.white,
                 TextAlignmentOptions.Center,
                 Vector2.zero, Vector2.one,
                 Vector2.zero, Vector2.zero);
-            btnText.fontStyle = FontStyles.Bold;
+            resultButtonText.fontStyle = FontStyles.Bold;
 
             playAgainButton = btnObj.GetComponent<Button>();
-            playAgainButton.onClick.AddListener(() => OnRestartRequested?.Invoke());
+            playAgainButton.onClick.AddListener(() =>
+            {
+                if (lastResultWasVictory)
+                    OnNextLevelRequested?.Invoke();
+                else
+                    OnRestartRequested?.Invoke();
+            });
         }
 
         private TextMeshProUGUI CreateText(RectTransform parent, string name,
@@ -839,13 +855,35 @@ namespace DogCrush.UI
             {
                 displayedScore = (int)Mathf.MoveTowards(displayedScore, targetScore,
                     Mathf.Max(100f, Mathf.Abs(targetScore - displayedScore) * 10f * Time.deltaTime));
-                if (scoreText != null) scoreText.text = $"{displayedScore:N0}";
+                RefreshObjectiveText();
             }
         }
 
         public void UpdateScore(int currentScore)
         {
             targetScore = currentScore;
+            if (displayedScore == targetScore)
+            {
+                RefreshObjectiveText();
+            }
+        }
+
+        public void SetLevelObjective(int level, int objectiveScore)
+        {
+            levelTargetScore = Mathf.Max(1, objectiveScore);
+            if (levelText != null)
+            {
+                levelText.text = Mathf.Max(1, level).ToString();
+            }
+            RefreshObjectiveText();
+        }
+
+        private void RefreshObjectiveText()
+        {
+            if (scoreText != null)
+            {
+                scoreText.text = $"{displayedScore:N0} / {levelTargetScore:N0}";
+            }
         }
 
         public void UpdateHighScore(int highScore)
@@ -1031,10 +1069,33 @@ namespace DogCrush.UI
 
         public void ShowGameOver(int finalScore, bool isNewRecord)
         {
+            ShowLevelResult(false, finalScore, isNewRecord, 0);
+        }
+
+        public void ShowLevelResult(bool victory, int finalScore, bool isNewRecord, int stars)
+        {
+            lastResultWasVictory = victory;
             if (gameOverPanel != null)
             {
                 gameOverPanel.SetActive(true);
                 gameOverPanel.transform.SetAsLastSibling();
+            }
+            if (resultTitleText != null)
+            {
+                resultTitleText.text = victory ? "¡NIVEL SUPERADO!" : "TIEMPO AGOTADO";
+                resultTitleText.color = victory
+                    ? new Color(1f, 0.88f, 0.20f)
+                    : new Color(1f, 0.4f, 0.35f);
+            }
+            if (resultLabelText != null)
+            {
+                resultLabelText.text = victory
+                    ? $"{new string('★', Mathf.Clamp(stars, 1, 3))}\nPUNTUACIÓN"
+                    : "PUNTUACIÓN";
+            }
+            if (resultButtonText != null)
+            {
+                resultButtonText.text = victory ? "SIGUIENTE NIVEL" : "JUGAR DE NUEVO";
             }
             if (finalScoreText != null)
             {
