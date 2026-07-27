@@ -61,24 +61,24 @@ Antes de comenzar cada bloque importante se creará una rama `codex/...`. Solo s
 ## Fase 2 — Composición móvil definitiva
 
 - [ ] Definir una composición maestra vertical basada en `resultadodeseado.png`.
-- [ ] Separar claramente fondo, cabecera, logo, tablero, fichas y barra inferior.
+- [x] Separar claramente fondo, cabecera, logo, tablero, fichas y barra inferior.
 - [ ] Ajustar jerarquía y separación entre HUD, logo y tablero.
-- [ ] Mantener el tablero cuadrado sin deformación en todas las resoluciones.
+- [x] Mantener el tablero cuadrado sin deformación en todas las resoluciones.
 - [ ] Aplicar zonas seguras superiores e inferiores.
-- [ ] Evitar fondos blancos, huecos accidentales y recortes del marco.
-- [ ] Validar `360x800`, `390x844` y `430x932`.
+- [x] Evitar fondos blancos, huecos accidentales y recortes del marco.
+- [x] Validar `360x800`, `390x844` y `430x932`.
 - [ ] Mantener una composición de escritorio razonable sin perjudicar el móvil.
 
 **Criterio de salida:** la pantalla completa se ve equilibrada y sin deformaciones en los tres tamaños móviles.
 
 ## Fase 3 — Tablero definitivo
 
-- [ ] Convertir el tablero en un componente independiente y predecible.
-- [ ] Separar marco de madera, fondo interior y cuadrícula.
+- [x] Convertir el tablero en un componente independiente y predecible.
+- [x] Separar marco de madera, fondo interior y cuadrícula.
 - [ ] Ajustar el marco al aspecto cálido, compacto y redondeado de la referencia.
-- [ ] Hacer visibles las 64 casillas sin competir con las fichas.
-- [ ] Normalizar márgenes interiores y separación entre fichas.
-- [ ] Impedir que una sustitución del marco altere posiciones o tamaño de las fichas.
+- [x] Hacer visibles las 64 casillas sin competir con las fichas.
+- [x] Normalizar márgenes interiores y separación entre fichas.
+- [x] Impedir que una sustitución del marco altere posiciones o tamaño de las fichas.
 
 **Criterio de salida:** el tablero puede cambiar de arte sin romper la cuadrícula ni la interacción.
 
@@ -145,6 +145,8 @@ Antes de comenzar cada bloque importante se creará una rama `codex/...`. Solo s
 ## Próximo objetivo inmediato
 
 Trabajar únicamente en **Fase 2 — Composición móvil definitiva**, conservando la jugabilidad y las fichas actuales. Cuando las tres resoluciones objetivo estén aprobadas, se cerrará esa fase antes de modificar el tablero o volver a generar ilustraciones.
+
+**En revisión local:** la rama `codex/tablero-adaptable` sustituye la imagen rígida por un marco, panel y cuadrícula generados según las dimensiones del nivel. Se ha verificado en 8×8 y 7×9, pero no se publicará hasta recibir aprobación visual.
 
 ## Método de trabajo
 

@@ -126,8 +126,8 @@ namespace DogCrush.UI
             GameObject topBarOuter = new GameObject("TopBarOuter_RT", typeof(RectTransform), typeof(Image));
             topBarOuter.transform.SetParent(canvasRect, false);
             RectTransform topOuterRect = topBarOuter.GetComponent<RectTransform>();
-            topOuterRect.anchorMin = new Vector2(0.05f, 0.925f);
-            topOuterRect.anchorMax = new Vector2(0.95f, 0.99f);
+            topOuterRect.anchorMin = new Vector2(0.05f, 0.90f);
+            topOuterRect.anchorMax = new Vector2(0.95f, 0.975f);
             topOuterRect.offsetMin = Vector2.zero;
             topOuterRect.offsetMax = Vector2.zero;
             
@@ -188,8 +188,8 @@ namespace DogCrush.UI
             GameObject bottomPillObj = new GameObject("BottomPill_RT", typeof(RectTransform), typeof(Image));
             bottomPillObj.transform.SetParent(canvasRect, false);
             RectTransform bottomPillRect = bottomPillObj.GetComponent<RectTransform>();
-            bottomPillRect.anchorMin = new Vector2(0.10f, 0.035f);
-            bottomPillRect.anchorMax = new Vector2(0.90f, 0.135f);
+            bottomPillRect.anchorMin = new Vector2(0.07f, 0.025f);
+            bottomPillRect.anchorMax = new Vector2(0.93f, 0.15f);
             bottomPillRect.offsetMin = Vector2.zero;
             bottomPillRect.offsetMax = Vector2.zero;
             
@@ -224,7 +224,7 @@ namespace DogCrush.UI
             CreateIconButton(bottomPillRect, "SettingsButton_RT", "button-settings", new Vector2(0.79f, 0.12f), new Vector2(0.94f, 0.88f));
 
             CreateImage(canvasRect, "DogCrushLogo_RT", LoadUISprite("dogcrush-logo"),
-                new Vector2(0.27f, 0.78f), new Vector2(0.73f, 0.86f));
+                new Vector2(0.29f, 0.65f), new Vector2(0.71f, 0.735f));
 
             // Keep the record in the second wood compartment, rather than
             // floating over the park when the device is portrait.

@@ -24,6 +24,14 @@ namespace DogCrush.Tests.PlayMode
             Assert.That(board.Grid, Is.Not.Null, "BoardController must initialize its grid.");
             Assert.That(board.Columns * board.Rows, Is.EqualTo(64));
 
+            AdaptiveBoardView adaptiveView = board.GetComponent<AdaptiveBoardView>();
+            Assert.That(adaptiveView, Is.Not.Null,
+                "The board must use the adaptive visual presenter.");
+            Assert.That(adaptiveView.VisualSize.x, Is.GreaterThan(0f));
+            Assert.That(adaptiveView.VisualSize.y, Is.GreaterThan(0f));
+            Assert.That(GameObject.Find("BoardFrame"), Is.Null,
+                "The rigid legacy board image must not remain active.");
+
             int activePieces = 0;
             PieceView[] pieces = Object.FindObjectsByType<PieceView>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
             foreach (PieceView piece in pieces)
@@ -70,6 +78,49 @@ namespace DogCrush.Tests.PlayMode
 
             Assert.That(activePieces, Is.EqualTo(64),
                 "Restarting a match must leave exactly one active set of 64 pieces.");
+        }
+
+        [UnityTest]
+        public IEnumerator ChangingLevelDimensions_RebuildsAdaptiveBoard()
+        {
+            SceneManager.LoadScene("Gameplay", LoadSceneMode.Single);
+            yield return null;
+            yield return null;
+
+            BoardController board = Object.FindAnyObjectByType<BoardController>();
+            Assert.That(board, Is.Not.Null);
+
+            BoardConfig originalConfig = board.config;
+            BoardConfig levelConfig = Object.Instantiate(originalConfig);
+            levelConfig.columns = 7;
+            levelConfig.rows = 9;
+
+            board.config = levelConfig;
+            board.InitializeBoard();
+            yield return null;
+
+            Assert.That(board.Columns, Is.EqualTo(7));
+            Assert.That(board.Rows, Is.EqualTo(9));
+            Assert.That(board.Grid.GetLength(0), Is.EqualTo(7));
+            Assert.That(board.Grid.GetLength(1), Is.EqualTo(9));
+
+            AdaptiveBoardView adaptiveView = board.GetComponent<AdaptiveBoardView>();
+            Assert.That(adaptiveView, Is.Not.Null);
+            Assert.That(adaptiveView.VisualSize.y, Is.GreaterThan(adaptiveView.VisualSize.x),
+                "A 7x9 level must produce a naturally taller board without stretching its cells.");
+
+            int activePieces = 0;
+            PieceView[] pieces = Object.FindObjectsByType<PieceView>(
+                FindObjectsInactive.Exclude,
+                FindObjectsSortMode.None);
+            foreach (PieceView piece in pieces)
+            {
+                if (piece.gameObject.activeInHierarchy) activePieces++;
+            }
+            Assert.That(activePieces, Is.EqualTo(63));
+
+            board.config = originalConfig;
+            Object.Destroy(levelConfig);
         }
 
         [UnityTest]

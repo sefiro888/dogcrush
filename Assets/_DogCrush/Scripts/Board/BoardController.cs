@@ -10,10 +10,15 @@ namespace DogCrush.Board
 
         private PieceView[,] grid;
         private Vector3 boardOrigin;
+        private float activePieceSpacing;
+        private float activeBoardCenterY;
+        private AdaptiveBoardView adaptiveView;
 
         public PieceView[,] Grid => grid;
         public int Columns => config != null ? config.columns : 8;
         public int Rows => config != null ? config.rows : 8;
+        public float ActivePieceSpacing => activePieceSpacing;
+        public float ActiveBoardCenterY => activeBoardCenterY;
 
         public void InitializeBoard()
         {
@@ -31,27 +36,60 @@ namespace DogCrush.Board
             }
 
             grid = new PieceView[config.columns, config.rows];
+            adaptiveView = GetComponent<AdaptiveBoardView>();
+            if (adaptiveView == null)
+            {
+                adaptiveView = gameObject.AddComponent<AdaptiveBoardView>();
+            }
             CalculateBoardOrigin();
+            adaptiveView.Rebuild(this);
             FillInitialBoard();
         }
 
         public void CalculateBoardOrigin()
         {
-            float totalWidth = (config.columns - 1) * config.pieceSpacing;
-            float totalHeight = (config.rows - 1) * config.pieceSpacing;
+            AdaptiveBoardView.CalculateLayout(
+                config.columns,
+                config.rows,
+                Camera.main,
+                config.pieceSpacing,
+                out activePieceSpacing,
+                out activeBoardCenterY);
+
+            float totalWidth = (config.columns - 1) * activePieceSpacing;
+            float totalHeight = (config.rows - 1) * activePieceSpacing;
             // Keep pieces in front of the board frame in URP/WebGL. At z=0
             // both SpriteRenderers can share the same depth buffer value and
             // the opaque frame may hide the pieces despite their sort order.
-            // The canonical board is square. Keep the logical 8x8 grid
-            // centered on its chocolate play area; UI spacing is handled by
-            // the camera/HUD rather than by distorting the board geometry.
-            const float boardCenterY = 0.55f;
-            boardOrigin = new Vector3(-totalWidth / 2f, boardCenterY - totalHeight / 2f, -1f);
+            boardOrigin = new Vector3(
+                -totalWidth / 2f,
+                activeBoardCenterY - totalHeight / 2f,
+                -1f);
         }
 
         public Vector3 GridToWorldPosition(int x, int y)
         {
-            return boardOrigin + new Vector3(x * config.pieceSpacing, y * config.pieceSpacing, 0f);
+            return boardOrigin + new Vector3(x * activePieceSpacing, y * activePieceSpacing, 0f);
+        }
+
+        public void RefreshAdaptiveLayout()
+        {
+            if (config == null || grid == null) return;
+
+            CalculateBoardOrigin();
+            adaptiveView?.Rebuild(this);
+
+            for (int x = 0; x < config.columns; x++)
+            {
+                for (int y = 0; y < config.rows; y++)
+                {
+                    PieceView piece = grid[x, y];
+                    if (piece != null)
+                    {
+                        piece.transform.position = GridToWorldPosition(x, y);
+                    }
+                }
+            }
         }
 
         public bool IsValidGridPos(int x, int y)
@@ -98,9 +136,11 @@ namespace DogCrush.Board
         public void ClearBoard()
         {
             if (grid == null) return;
-            for (int x = 0; x < config.columns; x++)
+            int existingColumns = grid.GetLength(0);
+            int existingRows = grid.GetLength(1);
+            for (int x = 0; x < existingColumns; x++)
             {
-                for (int y = 0; y < config.rows; y++)
+                for (int y = 0; y < existingRows; y++)
                 {
                     if (grid[x, y] != null)
                     {
