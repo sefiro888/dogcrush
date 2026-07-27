@@ -6,8 +6,8 @@ namespace DogCrush.Board
     public class BoardConfig : ScriptableObject
     {
         [Header("Grid Dimensions")]
-        [Range(3, 12)] public int columns = 8;
-        [Range(3, 12)] public int rows = 8;
+        [Range(3, 12)] public int columns = 7;
+        [Range(3, 12)] public int rows = 9;
         [Range(3, 6)] public int typeCount = 5;
 
         [Header("Piece Settings")]

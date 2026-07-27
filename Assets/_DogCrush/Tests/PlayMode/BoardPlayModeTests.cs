@@ -20,7 +20,7 @@ namespace DogCrush.Tests.PlayMode
             BoardController board = Object.FindAnyObjectByType<BoardController>();
             Assert.That(board, Is.Not.Null, "Gameplay scene must contain a BoardController.");
             Assert.That(board.Grid, Is.Not.Null, "BoardController must initialize its grid.");
-            Assert.That(board.Columns * board.Rows, Is.EqualTo(64));
+            Assert.That(board.Columns * board.Rows, Is.EqualTo(63));
 
             int activePieces = 0;
             PieceView[] pieces = Object.FindObjectsByType<PieceView>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
@@ -39,7 +39,7 @@ namespace DogCrush.Tests.PlayMode
                 }
             }
 
-            Assert.That(activePieces, Is.EqualTo(64), "The initial board must contain 64 active pieces.");
+            Assert.That(activePieces, Is.EqualTo(63), "The initial board must contain 63 active pieces.");
         }
 
         [UnityTest]
@@ -66,8 +66,8 @@ namespace DogCrush.Tests.PlayMode
                 }
             }
 
-            Assert.That(activePieces, Is.EqualTo(64),
-                "Restarting a match must leave exactly one active set of 64 pieces.");
+            Assert.That(activePieces, Is.EqualTo(63),
+                "Restarting a match must leave exactly one active set of 63 pieces.");
         }
     }
 }
