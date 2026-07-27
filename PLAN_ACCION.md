@@ -39,8 +39,8 @@ Antes de comenzar cada bloque importante se creará una rama `codex/...`. Solo s
 
 - [x] Fijar la versión actual como línea base protegida.
 - [x] Mantener `main` como rama estable y publicada.
-- [ ] Crear y verificar un repositorio privado de seguridad.
-- [ ] Mantener una etiqueta de restauración para cada versión aprobada.
+- [x] Crear y verificar un repositorio privado de seguridad.
+- [x] Mantener una etiqueta de restauración para cada versión aprobada.
 - [ ] Documentar al cerrar cada sesión el último estado validado y el siguiente paso.
 - [ ] No incluir adjuntos temporales, cachés de Unity ni cambios ajenos al bloque activo.
 
