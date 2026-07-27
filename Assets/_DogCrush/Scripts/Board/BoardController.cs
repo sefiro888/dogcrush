@@ -5,6 +5,14 @@ namespace DogCrush.Board
 {
     public class BoardController : MonoBehaviour
     {
+        private static readonly Vector2Int[] OrthogonalDirections =
+        {
+            Vector2Int.up,
+            Vector2Int.right,
+            Vector2Int.down,
+            Vector2Int.left
+        };
+
         public BoardConfig config;
         public PieceSpawner spawner;
 
@@ -161,17 +169,15 @@ namespace DogCrush.Board
                     if (current == null) continue;
 
                     int matchingNeighbors = 0;
-                    for (int dx = -1; dx <= 1; dx++)
+                    foreach (Vector2Int direction in OrthogonalDirections)
                     {
-                        for (int dy = -1; dy <= 1; dy++)
+                        int nx = x + direction.x;
+                        int ny = y + direction.y;
+                        if (IsValidGridPos(nx, ny) &&
+                            grid[nx, ny] != null &&
+                            grid[nx, ny].type == current.type)
                         {
-                            if (dx == 0 && dy == 0) continue;
-                            int nx = x + dx;
-                            int ny = y + dy;
-                            if (IsValidGridPos(nx, ny) && grid[nx, ny] != null && grid[nx, ny].type == current.type)
-                            {
-                                matchingNeighbors++;
-                            }
+                            matchingNeighbors++;
                         }
                     }
 
@@ -233,7 +239,7 @@ namespace DogCrush.Board
         {
             int dx = Mathf.Abs(x1 - x2);
             int dy = Mathf.Abs(y1 - y2);
-            return dx <= 1 && dy <= 1 && !(dx == 0 && dy == 0);
+            return dx + dy == 1;
         }
     }
 }

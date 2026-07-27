@@ -9,11 +9,13 @@ namespace DogCrush.Tests.EditMode
     public class BoardLogicTests
     {
         [Test]
-        public void AdjacencyCheck_ReturnsTrueForOrthogonalAndDiagonal()
+        public void AdjacencyCheck_ReturnsTrueOnlyForOrthogonalNeighbors()
         {
             Assert.IsTrue(BoardController.AreAdjacent(0, 0, 0, 1), "Orthogonal vertical adjacent");
             Assert.IsTrue(BoardController.AreAdjacent(0, 0, 1, 0), "Orthogonal horizontal adjacent");
-            Assert.IsTrue(BoardController.AreAdjacent(0, 0, 1, 1), "Diagonal adjacent");
+            Assert.IsTrue(BoardController.AreAdjacent(1, 1, 1, 0), "Orthogonal downward adjacent");
+            Assert.IsTrue(BoardController.AreAdjacent(1, 1, 0, 1), "Orthogonal left adjacent");
+            Assert.IsFalse(BoardController.AreAdjacent(0, 0, 1, 1), "Diagonal movement is forbidden");
         }
 
         [Test]

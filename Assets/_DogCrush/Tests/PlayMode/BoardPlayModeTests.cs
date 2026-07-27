@@ -23,6 +23,8 @@ namespace DogCrush.Tests.PlayMode
             Assert.That(board, Is.Not.Null, "Gameplay scene must contain a BoardController.");
             Assert.That(board.Grid, Is.Not.Null, "BoardController must initialize its grid.");
             Assert.That(board.Columns * board.Rows, Is.EqualTo(64));
+            Assert.That(board.HasAnyValidMove(), Is.True,
+                "The generated board must contain an orthogonal three-piece move.");
 
             AdaptiveBoardView adaptiveView = board.GetComponent<AdaptiveBoardView>();
             Assert.That(adaptiveView, Is.Not.Null,
@@ -124,6 +126,42 @@ namespace DogCrush.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator DraggingDiagonally_DoesNotExtendSelection()
+        {
+            SceneManager.LoadScene("Gameplay", LoadSceneMode.Single);
+            yield return null;
+            yield return null;
+
+            BoardController board = Object.FindAnyObjectByType<BoardController>();
+            ChainSelectionController selection = Object.FindAnyObjectByType<ChainSelectionController>();
+            ChainInputHandler input = Object.FindAnyObjectByType<ChainInputHandler>();
+            Assert.That(board, Is.Not.Null);
+            Assert.That(selection, Is.Not.Null);
+            Assert.That(input, Is.Not.Null);
+
+            PieceView first = board.GetPieceAt(0, 0);
+            PieceView diagonal = board.GetPieceAt(1, 1);
+            diagonal.Initialize(
+                first.type,
+                1,
+                1,
+                board.spawner.GetSpriteForType(first.type),
+                board.spawner.GetColorForType(first.type));
+
+            Physics2D.SyncTransforms();
+            input.OnPointerDownEvent?.Invoke(first.transform.position);
+            yield return null;
+            input.OnPointerDragEvent?.Invoke(diagonal.transform.position);
+            yield return null;
+
+            Assert.That(selection.SelectedChain.Count, Is.EqualTo(1),
+                "A diagonal drag must not add a piece to the active chain.");
+
+            input.OnPointerUpEvent?.Invoke();
+            yield return null;
+        }
+
+        [UnityTest]
         public IEnumerator DraggingThreeMatchingPieces_ScoresFallsAndRefills()
         {
             SceneManager.LoadScene("Gameplay", LoadSceneMode.Single);
@@ -160,6 +198,7 @@ namespace DogCrush.Tests.PlayMode
                         for (int dy = -1; dy <= 1; dy++)
                         {
                             if (dx == 0 && dy == 0) continue;
+                            if (!BoardController.AreAdjacent(x, y, x + dx, y + dy)) continue;
                             PieceView neighbor = board.GetPieceAt(x + dx, y + dy);
                             if (neighbor != null && neighbor.type == candidate.type)
                             {
