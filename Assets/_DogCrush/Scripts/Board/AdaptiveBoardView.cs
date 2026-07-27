@@ -71,23 +71,41 @@ namespace DogCrush.Board
                 gridHeight + framePadding * 2f);
 
             CreateLayer(
+                "BoardShadow",
+                board.ActiveBoardCenterY - 0.10f,
+                VisualSize + new Vector2(0.10f, 0.16f),
+                new Color(0.045f, 0.018f, 0.01f, 0.52f),
+                -40);
+            CreateLayer(
                 "OuterFrame",
                 board.ActiveBoardCenterY,
                 VisualSize,
-                new Color(0.38f, 0.13f, 0.035f, 1f),
-                -30);
+                new Color(0.28f, 0.075f, 0.018f, 1f),
+                -39);
+            CreateLayer(
+                "WoodBase",
+                board.ActiveBoardCenterY + 0.015f,
+                VisualSize - Vector2.one * 0.07f,
+                new Color(0.67f, 0.25f, 0.055f, 1f),
+                -38);
             CreateLayer(
                 "WoodHighlight",
-                board.ActiveBoardCenterY + 0.015f,
-                VisualSize - Vector2.one * framePadding * 0.45f,
-                new Color(0.72f, 0.31f, 0.075f, 1f),
-                -29);
+                board.ActiveBoardCenterY + 0.035f,
+                VisualSize - Vector2.one * framePadding * 0.58f,
+                new Color(0.82f, 0.39f, 0.09f, 1f),
+                -37);
+            CreateLayer(
+                "InnerBevel",
+                board.ActiveBoardCenterY + 0.025f,
+                new Vector2(gridWidth + spacing * 0.25f, gridHeight + spacing * 0.25f),
+                new Color(0.20f, 0.052f, 0.018f, 1f),
+                -36);
             CreateLayer(
                 "InnerPanel",
                 board.ActiveBoardCenterY + 0.03f,
                 new Vector2(gridWidth + spacing * 0.12f, gridHeight + spacing * 0.12f),
                 new Color(0.105f, 0.035f, 0.018f, 1f),
-                -28);
+                -35);
 
             Vector2 cellSize = Vector2.one * spacing * 0.90f;
             for (int x = 0; x < board.Columns; x++)
@@ -101,7 +119,7 @@ namespace DogCrush.Board
                         ((x + y) & 1) == 0
                             ? new Color(0.31f, 0.12f, 0.055f, 1f)
                             : new Color(0.265f, 0.09f, 0.04f, 1f),
-                        -27);
+                        -34);
                     Vector3 gridPosition = board.GridToWorldPosition(x, y);
                     cell.transform.position = new Vector3(
                         gridPosition.x,
@@ -109,6 +127,13 @@ namespace DogCrush.Board
                         0.2f);
                 }
             }
+
+            CreateLayer(
+                "TopRimSheen",
+                board.ActiveBoardCenterY + VisualSize.y * 0.5f - 0.08f,
+                new Vector2(VisualSize.x - 0.28f, 0.065f),
+                new Color(1f, 0.72f, 0.30f, 0.62f),
+                -33);
 
             lastScreenWidth = Screen.width;
             lastScreenHeight = Screen.height;

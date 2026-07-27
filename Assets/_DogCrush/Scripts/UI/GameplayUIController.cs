@@ -224,7 +224,7 @@ namespace DogCrush.UI
             CreateIconButton(bottomPillRect, "SettingsButton_RT", "button-settings", new Vector2(0.79f, 0.12f), new Vector2(0.94f, 0.88f));
 
             CreateImage(canvasRect, "DogCrushLogo_RT", LoadUISprite("dogcrush-logo"),
-                new Vector2(0.29f, 0.65f), new Vector2(0.71f, 0.735f));
+                new Vector2(0.22f, 0.625f), new Vector2(0.78f, 0.755f));
 
             // Keep the record in the second wood compartment, rather than
             // floating over the park when the device is portrait.
@@ -276,7 +276,8 @@ namespace DogCrush.UI
             GameObject content = new GameObject(
                 "PortraitContent_RT",
                 typeof(RectTransform),
-                typeof(AspectRatioFitter));
+                typeof(AspectRatioFitter),
+                typeof(SafeAreaHandler));
             content.transform.SetParent(canvasRect, false);
 
             portraitContentRect = content.GetComponent<RectTransform>();
