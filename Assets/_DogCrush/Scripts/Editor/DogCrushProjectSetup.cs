@@ -216,6 +216,38 @@ namespace DogCrush.EditorTool
             }
         }
 
+        /// <summary>
+        /// Builds the already-validated scene for GitHub Pages without calling
+        /// BuildPrototype. BuildPrototype regenerates legacy art assets and
+        /// must never run as part of the release pipeline.
+        /// </summary>
+        public static void BuildWebGLRelease()
+        {
+            string scenePath = "Assets/_DogCrush/Scenes/Gameplay.unity";
+            string outputFolder = "docs";
+            Directory.CreateDirectory(outputFolder);
+
+            PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Disabled;
+            PlayerSettings.WebGL.template = "PROJECT:DogCrushTemplate";
+
+            BuildPlayerOptions options = new BuildPlayerOptions
+            {
+                scenes = new[] { scenePath },
+                locationPathName = outputFolder,
+                target = BuildTarget.WebGL,
+                targetGroup = BuildTargetGroup.WebGL,
+                options = BuildOptions.None
+            };
+
+            var report = BuildPipeline.BuildPlayer(options);
+            File.WriteAllText(Path.Combine(outputFolder, ".nojekyll"), string.Empty);
+            Debug.Log($"[DOGCRUSH] WebGL release build result: {report.summary.result}, errors: {report.summary.totalErrors}");
+            if (report.summary.result != UnityEditor.Build.Reporting.BuildResult.Succeeded)
+            {
+                throw new System.InvalidOperationException("WebGL release build failed.");
+            }
+        }
+
         private static void EnsureDirectoriesExist()
         {
             string[] dirs = new string[]
