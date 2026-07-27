@@ -863,8 +863,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: DogCrush.Runtime::DogCrush.Presentation.ChainLineView
   lineRenderer: {fileID: 1993819190}
-  startWidth: 0.28
-  endWidth: 0.28
+  startWidth: 0.13
+  endWidth: 0.13
 --- !u!120 &1993819190
 LineRenderer:
   serializedVersion: 3

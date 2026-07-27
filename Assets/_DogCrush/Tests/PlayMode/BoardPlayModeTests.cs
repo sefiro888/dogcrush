@@ -3,6 +3,8 @@ using DogCrush.Board;
 using DogCrush.Core;
 using DogCrush.Gameplay;
 using DogCrush.InputSystem;
+using DogCrush.Presentation;
+using DogCrush.UI;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -175,6 +177,77 @@ namespace DogCrush.Tests.PlayMode
 
             input.OnPointerUpEvent?.Invoke();
             yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator DraggingChain_ShowsLiveSelectionFeedbackAndSupportsBacktrack()
+        {
+            SceneManager.LoadScene("Gameplay", LoadSceneMode.Single);
+            yield return null;
+            yield return null;
+
+            BoardController board = Object.FindAnyObjectByType<BoardController>();
+            ChainSelectionController selection = Object.FindAnyObjectByType<ChainSelectionController>();
+            ChainInputHandler input = Object.FindAnyObjectByType<ChainInputHandler>();
+            ChainLineView line = Object.FindAnyObjectByType<ChainLineView>();
+            GameplayUIController ui = Object.FindAnyObjectByType<GameplayUIController>();
+
+            Assert.That(board, Is.Not.Null);
+            Assert.That(selection, Is.Not.Null);
+            Assert.That(input, Is.Not.Null);
+            Assert.That(line, Is.Not.Null);
+            Assert.That(ui, Is.Not.Null);
+
+            PieceView first = board.GetPieceAt(0, 0);
+            PieceView middle = board.GetPieceAt(1, 0);
+            PieceView last = board.GetPieceAt(2, 0);
+            PieceType chainType = first.type;
+
+            foreach (PieceView piece in new[] { middle, last })
+            {
+                piece.Initialize(
+                    chainType,
+                    piece.gridX,
+                    piece.gridY,
+                    board.spawner.GetSpriteForType(chainType),
+                    board.spawner.GetColorForType(chainType));
+            }
+
+            Physics2D.SyncTransforms();
+            input.OnPointerDownEvent?.Invoke(first.transform.position);
+            yield return null;
+            input.OnPointerDragEvent?.Invoke(middle.transform.position);
+            yield return null;
+            input.OnPointerDragEvent?.Invoke(last.transform.position);
+            yield return null;
+
+            Assert.That(selection.SelectedChain.Count, Is.EqualTo(3));
+            Assert.That(first.IsSelected, Is.True);
+            Assert.That(middle.IsSelected, Is.True);
+            Assert.That(last.IsSelected, Is.True);
+            Assert.That(first.selectionGlow.gameObject.activeSelf, Is.True);
+            Assert.That(line.lineRenderer.positionCount, Is.EqualTo(3),
+                "The chain line must join the three selected piece centers.");
+            Assert.That(ui.chainInfoText.gameObject.activeSelf, Is.True);
+            StringAssert.Contains("CADENA", ui.chainInfoText.text);
+            StringAssert.Contains("x3", ui.chainInfoText.text);
+
+            input.OnPointerDragEvent?.Invoke(middle.transform.position);
+            yield return null;
+
+            Assert.That(selection.SelectedChain.Count, Is.EqualTo(2));
+            Assert.That(last.IsSelected, Is.False,
+                "Backtracking must immediately restore the removed piece visual.");
+            Assert.That(line.lineRenderer.positionCount, Is.EqualTo(2));
+            StringAssert.Contains("x2", ui.chainInfoText.text);
+
+            input.OnPointerUpEvent?.Invoke();
+            yield return null;
+
+            Assert.That(first.IsSelected, Is.False);
+            Assert.That(middle.IsSelected, Is.False);
+            Assert.That(line.lineRenderer.positionCount, Is.EqualTo(0));
+            Assert.That(ui.chainInfoText.gameObject.activeSelf, Is.False);
         }
 
         [UnityTest]

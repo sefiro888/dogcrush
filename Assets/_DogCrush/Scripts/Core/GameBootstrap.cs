@@ -167,15 +167,22 @@ namespace DogCrush.Core
                 if (feedbackController != null)
                 {
                     feedbackController.SpawnFloatingText(centerPos, $"+{pointsGained:N0}", Color.yellow, 36f);
+                    feedbackController.TriggerCameraShake(
+                        Mathf.Clamp(0.025f + chain.Count * 0.004f, 0.035f, 0.075f),
+                        0.14f);
                 }
 
                 if (particleController != null)
                 {
+                    int burstCount = Mathf.Clamp(6 + chain.Count, 9, 16);
                     foreach (var piece in chain)
                     {
                         if (piece != null)
                         {
-                            particleController.PlayMatchBurst(piece.transform.position, Color.yellow, 10);
+                            particleController.PlayMatchBurst(
+                                piece.transform.position,
+                                GetPieceAccentColor(piece.type),
+                                burstCount);
                         }
                     }
                 }
@@ -200,6 +207,19 @@ namespace DogCrush.Core
                     }
                 }));
             }
+        }
+
+        private static Color GetPieceAccentColor(PieceType type)
+        {
+            return type switch
+            {
+                PieceType.Dog => new Color(1f, 0.66f, 0.18f),
+                PieceType.Bone => new Color(1f, 0.95f, 0.72f),
+                PieceType.Ball => new Color(0.24f, 0.78f, 1f),
+                PieceType.Food => new Color(1f, 0.34f, 0.28f),
+                PieceType.Collar => new Color(0.32f, 0.95f, 0.48f),
+                _ => new Color(1f, 0.85f, 0.2f)
+            };
         }
 
         private void HandleTimerExpired()

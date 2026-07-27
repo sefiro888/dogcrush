@@ -17,12 +17,15 @@ namespace DogCrush.Board
 
             // 1. Despawn removed pieces
             int pendingDespawns = 0;
+            int despawnIndex = 0;
             foreach (var piece in removedPieces)
             {
                 if (piece == null) continue;
                 pendingDespawns++;
                 boardController.SetPieceAt(piece.gridX, piece.gridY, null);
-                piece.AnimateDespawn(() =>
+                float despawnDelay = Mathf.Min(despawnIndex * 0.025f, 0.18f);
+                despawnIndex++;
+                piece.AnimateDespawn(despawnDelay, () =>
                 {
                     spawner.RecyclePiece(piece);
                     pendingDespawns--;
@@ -56,7 +59,8 @@ namespace DogCrush.Board
 
                         Vector3 targetWorldPos = boardController.GridToWorldPosition(x, newY);
                         movingPiecesCount++;
-                        current.MoveToWorldPosition(targetWorldPos, fallSpeed, () =>
+                        float moveDelay = x * 0.012f + newY * 0.004f;
+                        current.MoveToWorldPosition(targetWorldPos, fallSpeed, moveDelay, () =>
                         {
                             movingPiecesCount--;
                         });
@@ -76,7 +80,8 @@ namespace DogCrush.Board
                     boardController.SetPieceAt(x, targetY, newPiece);
 
                     movingPiecesCount++;
-                    newPiece.MoveToWorldPosition(targetWorldPos, fallSpeed, () =>
+                    float refillDelay = x * 0.012f + fillIndex * 0.035f;
+                    newPiece.MoveToWorldPosition(targetWorldPos, fallSpeed, refillDelay, () =>
                     {
                         movingPiecesCount--;
                     });

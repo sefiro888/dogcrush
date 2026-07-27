@@ -49,6 +49,10 @@ namespace DogCrush.Gameplay
             IsSelecting = true;
             selectedChain.Clear();
             ActiveChainType = piece.type;
+            if (lineView != null)
+            {
+                lineView.SetChainType(ActiveChainType);
+            }
 
             AddPieceToChain(piece);
         }
@@ -58,11 +62,16 @@ namespace DogCrush.Gameplay
             if (!IsSelecting) return;
 
             PieceView piece = GetPieceAtPosition(worldPos);
-            if (piece == null) return;
+            if (piece == null)
+            {
+                UpdateLineView(worldPos);
+                return;
+            }
 
             if (selectedChain.Count == 0)
             {
                 AddPieceToChain(piece);
+                UpdateLineView(worldPos);
                 return;
             }
 
@@ -70,6 +79,7 @@ namespace DogCrush.Gameplay
             if (selectedChain.Count >= 2 && piece == selectedChain[selectedChain.Count - 2])
             {
                 RemoveLastPieceFromChain();
+                UpdateLineView(worldPos);
                 return;
             }
 
@@ -81,6 +91,8 @@ namespace DogCrush.Gameplay
             {
                 AddPieceToChain(piece);
             }
+
+            UpdateLineView(worldPos);
         }
 
         private void HandlePointerUp()
@@ -109,7 +121,7 @@ namespace DogCrush.Gameplay
         private void AddPieceToChain(PieceView piece)
         {
             selectedChain.Add(piece);
-            piece.SetSelected(true);
+            piece.SetSelected(true, selectedChain.Count - 1);
 
             UpdateLineView();
             OnChainUpdated?.Invoke(selectedChain.Count, ActiveChainType);
@@ -145,6 +157,14 @@ namespace DogCrush.Gameplay
             if (lineView != null)
             {
                 lineView.UpdateLine(selectedChain);
+            }
+        }
+
+        private void UpdateLineView(Vector2 pointerWorldPos)
+        {
+            if (lineView != null)
+            {
+                lineView.UpdateLine(selectedChain, pointerWorldPos);
             }
         }
 

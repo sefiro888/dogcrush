@@ -23,14 +23,14 @@ Antes de comenzar cada bloque importante se creará una rama `codex/...`. Solo s
 
 ## Estado funcional confirmado
 
-- [x] Tablero cuadrado `8x8` con 64 fichas.
+- [x] Tablero vertical `8x10` con 80 fichas.
 - [x] Cinco tipos de ficha visibles e interactivos.
 - [x] Selección por arrastre y multiplicador vivo.
 - [x] Puntuación, eliminación, gravedad y reposición.
 - [x] Temporizador, nivel, récord y reinicio.
 - [x] Reinicio sin conservar fichas de la partida anterior.
 - [x] Fondo vertical, marco, logo y controles inferiores integrados.
-- [x] Tres pruebas PlayMode aprobadas.
+- [x] Seis pruebas PlayMode y cinco pruebas EditMode aprobadas.
 - [x] Compilación WebGL con cero errores.
 - [x] Validación manual en resolución móvil `390x844`.
 - [x] Publicación mediante GitHub Pages.
@@ -76,7 +76,7 @@ Antes de comenzar cada bloque importante se creará una rama `codex/...`. Solo s
 - [x] Convertir el tablero en un componente independiente y predecible.
 - [x] Separar marco de madera, fondo interior y cuadrícula.
 - [ ] Ajustar el marco al aspecto cálido, compacto y redondeado de la referencia.
-- [x] Hacer visibles las 64 casillas sin competir con las fichas.
+- [x] Hacer visibles las 80 casillas sin competir con las fichas.
 - [x] Normalizar márgenes interiores y separación entre fichas.
 - [x] Impedir que una sustitución del marco altere posiciones o tamaño de las fichas.
 
@@ -110,15 +110,15 @@ Antes de comenzar cada bloque importante se creará una rama `codex/...`. Solo s
 
 ## Fase 6 — Sensación de juego
 
-- [ ] Añadir contorno o brillo controlado durante la selección.
-- [ ] Añadir línea suave entre las fichas seleccionadas.
-- [ ] Aplicar un pequeño aumento de escala a la cadena activa.
-- [ ] Animar el multiplicador vivo.
-- [ ] Añadir desaparición, destello y partículas al completar una cadena.
-- [ ] Añadir caída con rebote ligero.
+- [x] Añadir contorno o brillo controlado durante la selección.
+- [x] Añadir línea suave entre las fichas seleccionadas.
+- [x] Aplicar un pequeño aumento de escala a la cadena activa.
+- [x] Animar el multiplicador vivo.
+- [x] Añadir desaparición, destello y partículas al completar una cadena.
+- [x] Añadir caída y reposición escalonadas con movimiento suave.
 - [ ] Incorporar sonidos coherentes y control de volumen.
 - [ ] Añadir vibración opcional en dispositivos compatibles.
-- [ ] Mantener estabilidad y claridad con cadenas largas.
+- [x] Mantener estabilidad y claridad con cadenas largas.
 
 **Criterio de salida:** seleccionar y eliminar fichas transmite respuesta inmediata sin saturar la pantalla.
 
@@ -144,9 +144,9 @@ Antes de comenzar cada bloque importante se creará una rama `codex/...`. Solo s
 
 ## Próximo objetivo inmediato
 
-Trabajar únicamente en **Fase 2 — Composición móvil definitiva**, conservando la jugabilidad y las fichas actuales. Cuando las tres resoluciones objetivo estén aprobadas, se cerrará esa fase antes de modificar el tablero o volver a generar ilustraciones.
+Cerrar y publicar el bloque actual de **Fase 6 — Sensación de juego**. Después, trabajar en sonido y vibración opcional sin alterar la composición móvil aprobada, o pasar a la familia visual de fichas si se prioriza el acabado artístico.
 
-**En revisión local:** la rama `codex/tablero-adaptable` sustituye la imagen rígida por un marco, panel y cuadrícula generados según las dimensiones del nivel. Se ha verificado en 8×8 y 7×9, pero no se publicará hasta recibir aprobación visual.
+**Estado validado en la rama `codex/tablero-adaptable`:** tablero adaptable 8×10, selección únicamente horizontal y vertical, brillo y escala de cadena, línea de conexión, contador vivo, desaparición con destello, partículas y reposición escalonada. Validado con 5 pruebas EditMode, 6 pruebas PlayMode, WebGL sin errores de compilación y revisión local a 390×844.
 
 ## Método de trabajo
 

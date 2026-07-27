@@ -221,19 +221,26 @@ namespace DogCrush.UI
             chainInfoPanel.type = Image.Type.Sliced;
             chainInfoPanel.color = new Color(0.20f, 0.09f, 0.025f, 0.96f);
             chainInfoPanelRect = chainInfoPanel.rectTransform;
-            chainInfoPanelRect.sizeDelta = new Vector2(150f, 82f);
+            chainInfoPanelRect.sizeDelta = new Vector2(146f, 78f);
             chainInfoPanelRect.pivot = new Vector2(0.5f, 0.5f);
+            Outline chainOutline = chainInfoPanel.gameObject.AddComponent<Outline>();
+            chainOutline.effectColor = new Color(1f, 0.72f, 0.18f, 0.92f);
+            chainOutline.effectDistance = new Vector2(3f, -3f);
             chainInfoPanel.gameObject.SetActive(false);
 
             // === CHAIN SELECTION FLOATING TEXT ===
             chainInfoText = CreateText(canvasRect, "ChainInfoText_RT",
-                "", 44f, new Color(1f, 0.92f, 0.25f),
+                "", 40f, new Color(1f, 0.94f, 0.48f),
                 TextAlignmentOptions.Center,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 Vector2.zero, Vector2.zero);
             chainInfoText.fontStyle = FontStyles.Bold;
+            chainInfoText.enableAutoSizing = true;
+            chainInfoText.fontSizeMin = 22f;
+            chainInfoText.fontSizeMax = 40f;
+            chainInfoText.lineSpacing = -18f;
             chainInfoTextRect = chainInfoText.rectTransform;
-            chainInfoTextRect.sizeDelta = new Vector2(150f, 82f);
+            chainInfoTextRect.sizeDelta = new Vector2(146f, 78f);
             chainInfoTextRect.pivot = new Vector2(0.5f, 0.5f);
             chainInfoText.gameObject.SetActive(false);
 
@@ -718,7 +725,22 @@ namespace DogCrush.UI
             {
                 if (chainInfoPanel != null) chainInfoPanel.gameObject.SetActive(true);
                 chainInfoText.gameObject.SetActive(true);
-                chainInfoText.text = $"x{count}";
+                chainInfoText.text = $"<size=16>CADENA</size>\n<size=40>x{count}</size>";
+
+                Color badgeColor;
+                if (count >= 9)
+                    badgeColor = new Color(0.42f, 0.10f, 0.52f, 0.96f);
+                else if (count >= 5)
+                    badgeColor = new Color(0.58f, 0.20f, 0.025f, 0.96f);
+                else if (count >= 3)
+                    badgeColor = new Color(0.12f, 0.36f, 0.12f, 0.96f);
+                else
+                    badgeColor = new Color(0.20f, 0.09f, 0.025f, 0.96f);
+
+                if (chainInfoPanel != null) chainInfoPanel.color = badgeColor;
+                chainInfoText.color = count >= 3
+                    ? new Color(1f, 0.94f, 0.48f)
+                    : new Color(1f, 0.80f, 0.38f);
 
                 if (portraitContentRect != null && Camera.main != null)
                 {
@@ -732,7 +754,7 @@ namespace DogCrush.UI
                         eventCamera,
                         out Vector2 localPosition))
                     {
-                        localPosition += new Vector2(0f, 92f);
+                        localPosition += new Vector2(72f, 72f);
                         Rect contentRect = portraitContentRect.rect;
                         localPosition.x = Mathf.Clamp(
                             localPosition.x,
@@ -752,20 +774,34 @@ namespace DogCrush.UI
             }
             else
             {
-                if (chainInfoPanel != null) chainInfoPanel.gameObject.SetActive(false);
-                chainInfoText.gameObject.SetActive(false);
+                HideChainInfo();
             }
+        }
+
+        private void HideChainInfo()
+        {
+            if (chainPulseRoutine != null)
+            {
+                StopCoroutine(chainPulseRoutine);
+                chainPulseRoutine = null;
+            }
+
+            if (chainInfoPanelRect != null) chainInfoPanelRect.localScale = Vector3.one;
+            if (chainInfoTextRect != null) chainInfoTextRect.localScale = Vector3.one;
+            if (chainInfoPanel != null) chainInfoPanel.gameObject.SetActive(false);
+            if (chainInfoText != null) chainInfoText.gameObject.SetActive(false);
         }
 
         private IEnumerator PulseChainBadge()
         {
             float elapsed = 0f;
-            const float duration = 0.16f;
+            const float duration = 0.20f;
             while (elapsed < duration)
             {
                 elapsed += Time.deltaTime;
                 float t = Mathf.Clamp01(elapsed / duration);
-                float scale = Mathf.Lerp(1.28f, 1f, t);
+                float eased = 1f - Mathf.Pow(1f - t, 3f);
+                float scale = Mathf.Lerp(1.18f, 1f, eased);
                 if (chainInfoPanelRect != null) chainInfoPanelRect.localScale = Vector3.one * scale;
                 if (chainInfoTextRect != null) chainInfoTextRect.localScale = Vector3.one * scale;
                 yield return null;
