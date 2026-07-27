@@ -101,6 +101,52 @@ namespace DogCrush.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator SettingsPanel_ControlsSoundHapticsAndPausesTimer()
+        {
+            PlayerPrefs.DeleteKey("DogCrush_SfxVolume");
+            PlayerPrefs.DeleteKey("DogCrush_HapticsEnabled");
+            SceneManager.LoadScene("Gameplay", LoadSceneMode.Single);
+            yield return null;
+            yield return null;
+
+            GameplayUIController ui = Object.FindAnyObjectByType<GameplayUIController>();
+            AudioPlaceholderController audio = Object.FindAnyObjectByType<AudioPlaceholderController>();
+            HapticFeedbackController haptics = Object.FindAnyObjectByType<HapticFeedbackController>();
+            GameTimer timer = Object.FindAnyObjectByType<GameTimer>();
+
+            Assert.That(ui, Is.Not.Null);
+            Assert.That(audio, Is.Not.Null);
+            Assert.That(haptics, Is.Not.Null);
+            Assert.That(timer, Is.Not.Null);
+            Assert.That(ui.settingsButton, Is.Not.Null);
+            Assert.That(ui.settingsPanel, Is.Not.Null);
+            Assert.That(ui.settingsPanel.activeSelf, Is.False);
+
+            ui.settingsButton.onClick.Invoke();
+            yield return null;
+            Assert.That(ui.settingsPanel.activeSelf, Is.True);
+            Assert.That(timer.IsPaused, Is.True);
+
+            ui.soundToggleButton.onClick.Invoke();
+            yield return null;
+            Assert.That(audio.SfxVolume, Is.EqualTo(0.6f).Within(0.001f));
+            StringAssert.Contains("60%", ui.soundToggleText.text);
+
+            ui.hapticsToggleButton.onClick.Invoke();
+            yield return null;
+            Assert.That(haptics.HapticsEnabled, Is.False);
+            StringAssert.Contains("NO", ui.hapticsToggleText.text);
+
+            ui.settingsCloseButton.onClick.Invoke();
+            yield return null;
+            Assert.That(ui.settingsPanel.activeSelf, Is.False);
+            Assert.That(timer.IsPaused, Is.False);
+
+            PlayerPrefs.DeleteKey("DogCrush_SfxVolume");
+            PlayerPrefs.DeleteKey("DogCrush_HapticsEnabled");
+        }
+
+        [UnityTest]
         public IEnumerator ChangingLevelDimensions_RebuildsAdaptiveBoard()
         {
             SceneManager.LoadScene("Gameplay", LoadSceneMode.Single);

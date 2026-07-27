@@ -23,7 +23,19 @@ namespace DogCrush.UI
         public Button secondaryRestartButton;
         public Button hudRestartButton;
 
+        [Header("Settings Overlay")]
+        public GameObject settingsPanel;
+        public Button settingsButton;
+        public Button soundToggleButton;
+        public Button hapticsToggleButton;
+        public Button settingsCloseButton;
+        public TextMeshProUGUI soundToggleText;
+        public TextMeshProUGUI hapticsToggleText;
+
         public System.Action OnRestartRequested;
+        public System.Action OnSoundToggleRequested;
+        public System.Action OnHapticsToggleRequested;
+        public System.Action<bool> OnSettingsVisibilityChanged;
 
         private int targetScore = 0;
         private int displayedScore = 0;
@@ -207,7 +219,9 @@ namespace DogCrush.UI
             CreateBoosterButton(bottomPillRect, "MovesButton_RT", "button-moves", 0.30f, 0.455f);
             CreateBoosterButton(bottomPillRect, "BoneButton_RT", "button-bone", 0.47f, 0.625f);
             CreateBoosterButton(bottomPillRect, "FoodButton_RT", "button-food", 0.64f, 0.795f);
-            CreateBoosterButton(bottomPillRect, "SettingsButton_RT", "button-settings", 0.81f, 0.965f);
+            settingsButton = CreateBoosterButton(
+                bottomPillRect, "SettingsButton_RT", "button-settings", 0.81f, 0.965f);
+            settingsButton.onClick.AddListener(() => SetSettingsVisible(true));
 
             Image logo = CreateImage(canvasRect, "DogCrushLogo_RT", LoadUISprite("dogcrush-logo"),
                 new Vector2(0.23f, 0.675f), new Vector2(0.77f, 0.845f));
@@ -252,6 +266,8 @@ namespace DogCrush.UI
                 Vector2.zero, Vector2.zero);
             comboBannerText.fontStyle = FontStyles.Bold;
             comboBannerText.gameObject.SetActive(false);
+
+            BuildSettingsPanel(canvasRect);
 
             // === GAME OVER OVERLAY ===
             BuildGameOverPanel(canvasRect);
@@ -430,7 +446,7 @@ namespace DogCrush.UI
             return value;
         }
 
-        private void CreateBoosterButton(
+        private Button CreateBoosterButton(
             RectTransform parent,
             string name,
             string spriteName,
@@ -442,7 +458,7 @@ namespace DogCrush.UI
                 $"{name}Slot",
                 new Vector2(anchorMinX, 0.10f),
                 new Vector2(anchorMaxX, 0.90f));
-            CreateIconButton(
+            return CreateIconButton(
                 slot,
                 name,
                 spriteName,
@@ -486,6 +502,117 @@ namespace DogCrush.UI
                 SpriteMeshType.FullRect,
                 new Vector4(radius, radius, radius, radius));
             return roundedRectSprite;
+        }
+
+        private void BuildSettingsPanel(RectTransform canvasRect)
+        {
+            GameObject overlay = new GameObject(
+                "SettingsPanel_RT",
+                typeof(RectTransform),
+                typeof(Image),
+                typeof(CanvasGroup));
+            overlay.transform.SetParent(canvasRect, false);
+            RectTransform overlayRect = overlay.GetComponent<RectTransform>();
+            overlayRect.anchorMin = Vector2.zero;
+            overlayRect.anchorMax = Vector2.one;
+            overlayRect.offsetMin = Vector2.zero;
+            overlayRect.offsetMax = Vector2.zero;
+            overlay.GetComponent<Image>().color = new Color(0.035f, 0.025f, 0.02f, 0.72f);
+            settingsPanel = overlay;
+
+            GameObject card = new GameObject("SettingsCard_RT", typeof(RectTransform), typeof(Image), typeof(Outline));
+            card.transform.SetParent(overlayRect, false);
+            RectTransform cardRect = card.GetComponent<RectTransform>();
+            cardRect.anchorMin = new Vector2(0.12f, 0.34f);
+            cardRect.anchorMax = new Vector2(0.88f, 0.66f);
+            cardRect.offsetMin = Vector2.zero;
+            cardRect.offsetMax = Vector2.zero;
+            Image cardImage = card.GetComponent<Image>();
+            cardImage.sprite = CreateRoundedRectSprite();
+            cardImage.type = Image.Type.Sliced;
+            cardImage.color = new Color(0.27f, 0.075f, 0.025f, 0.99f);
+            Outline cardOutline = card.GetComponent<Outline>();
+            cardOutline.effectColor = new Color(1f, 0.58f, 0.12f, 0.92f);
+            cardOutline.effectDistance = new Vector2(4f, -4f);
+
+            TextMeshProUGUI title = CreateText(
+                cardRect,
+                "SettingsTitle_RT",
+                "AJUSTES",
+                42f,
+                new Color(1f, 0.88f, 0.35f),
+                TextAlignmentOptions.Center,
+                new Vector2(0.08f, 0.76f),
+                new Vector2(0.92f, 0.94f),
+                Vector2.zero,
+                Vector2.zero);
+            title.fontStyle = FontStyles.Bold;
+
+            soundToggleButton = CreateSettingsButton(
+                cardRect,
+                "SoundToggleButton_RT",
+                new Vector2(0.10f, 0.50f),
+                new Vector2(0.90f, 0.70f),
+                out soundToggleText);
+            soundToggleButton.onClick.AddListener(() => OnSoundToggleRequested?.Invoke());
+
+            hapticsToggleButton = CreateSettingsButton(
+                cardRect,
+                "HapticsToggleButton_RT",
+                new Vector2(0.10f, 0.27f),
+                new Vector2(0.90f, 0.47f),
+                out hapticsToggleText);
+            hapticsToggleButton.onClick.AddListener(() => OnHapticsToggleRequested?.Invoke());
+
+            settingsCloseButton = CreateSettingsButton(
+                cardRect,
+                "SettingsCloseButton_RT",
+                new Vector2(0.25f, 0.06f),
+                new Vector2(0.75f, 0.21f),
+                out TextMeshProUGUI closeText);
+            closeText.text = "CONTINUAR";
+            settingsCloseButton.onClick.AddListener(() => SetSettingsVisible(false));
+
+            UpdateSettingsState(1f, true);
+            settingsPanel.SetActive(false);
+        }
+
+        private Button CreateSettingsButton(
+            RectTransform parent,
+            string name,
+            Vector2 anchorMin,
+            Vector2 anchorMax,
+            out TextMeshProUGUI label)
+        {
+            GameObject buttonObject = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
+            buttonObject.transform.SetParent(parent, false);
+            RectTransform rect = buttonObject.GetComponent<RectTransform>();
+            rect.anchorMin = anchorMin;
+            rect.anchorMax = anchorMax;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+
+            Image image = buttonObject.GetComponent<Image>();
+            image.sprite = CreateRoundedRectSprite();
+            image.type = Image.Type.Sliced;
+            image.color = new Color(0.12f, 0.48f, 0.78f, 1f);
+
+            label = CreateText(
+                rect,
+                $"{name}Label",
+                "",
+                27f,
+                Color.white,
+                TextAlignmentOptions.Center,
+                new Vector2(0.04f, 0.06f),
+                new Vector2(0.96f, 0.94f),
+                Vector2.zero,
+                Vector2.zero);
+            label.fontStyle = FontStyles.Bold;
+            label.enableAutoSizing = true;
+            label.fontSizeMin = 16f;
+            label.fontSizeMax = 28f;
+            return buttonObject.GetComponent<Button>();
         }
 
         private void BuildGameOverPanel(RectTransform canvasRect)
@@ -618,7 +745,7 @@ namespace DogCrush.UI
             return image;
         }
 
-        private void CreateIconButton(RectTransform parent, string name, string spriteName, Vector2 anchorMin, Vector2 anchorMax)
+        private Button CreateIconButton(RectTransform parent, string name, string spriteName, Vector2 anchorMin, Vector2 anchorMax)
         {
             GameObject go = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
             go.transform.SetParent(parent, false);
@@ -631,6 +758,51 @@ namespace DogCrush.UI
             image.sprite = LoadUISprite(spriteName);
             image.preserveAspect = true;
             image.raycastTarget = true;
+            return go.GetComponent<Button>();
+        }
+
+        public void SetSettingsVisible(bool visible)
+        {
+            if (settingsPanel == null)
+            {
+                return;
+            }
+
+            settingsPanel.SetActive(visible);
+            settingsPanel.transform.SetAsLastSibling();
+            OnSettingsVisibilityChanged?.Invoke(visible);
+        }
+
+        public void UpdateSettingsState(float sfxVolume, bool hapticsEnabled)
+        {
+            if (soundToggleText != null)
+            {
+                int percentage = Mathf.RoundToInt(Mathf.Clamp01(sfxVolume) * 100f);
+                soundToggleText.text = percentage > 0
+                    ? $"SONIDO  {percentage}%"
+                    : "SONIDO  APAGADO";
+            }
+
+            if (hapticsToggleText != null)
+            {
+                hapticsToggleText.text = hapticsEnabled
+                    ? "VIBRACIÓN  SÍ"
+                    : "VIBRACIÓN  NO";
+            }
+
+            if (soundToggleButton != null)
+            {
+                soundToggleButton.image.color = sfxVolume > 0.001f
+                    ? new Color(0.12f, 0.58f, 0.82f, 1f)
+                    : new Color(0.36f, 0.29f, 0.27f, 1f);
+            }
+
+            if (hapticsToggleButton != null)
+            {
+                hapticsToggleButton.image.color = hapticsEnabled
+                    ? new Color(0.16f, 0.68f, 0.39f, 1f)
+                    : new Color(0.36f, 0.29f, 0.27f, 1f);
+            }
         }
 
         private void ApplyResponsiveHudLayout()

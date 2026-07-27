@@ -30,7 +30,7 @@ Antes de comenzar cada bloque importante se creará una rama `codex/...`. Solo s
 - [x] Temporizador, nivel, récord y reinicio.
 - [x] Reinicio sin conservar fichas de la partida anterior.
 - [x] Fondo vertical, marco, logo y controles inferiores integrados.
-- [x] Seis pruebas PlayMode y cinco pruebas EditMode aprobadas.
+- [x] Siete pruebas PlayMode y siete pruebas EditMode aprobadas.
 - [x] Compilación WebGL con cero errores.
 - [x] Validación manual en resolución móvil `390x844`.
 - [x] Publicación mediante GitHub Pages.
@@ -116,8 +116,8 @@ Antes de comenzar cada bloque importante se creará una rama `codex/...`. Solo s
 - [x] Animar el multiplicador vivo.
 - [x] Añadir desaparición, destello y partículas al completar una cadena.
 - [x] Añadir caída y reposición escalonadas con movimiento suave.
-- [ ] Incorporar sonidos coherentes y control de volumen.
-- [ ] Añadir vibración opcional en dispositivos compatibles.
+- [x] Incorporar sonidos coherentes y control de volumen persistente.
+- [x] Añadir vibración opcional en dispositivos compatibles.
 - [x] Mantener estabilidad y claridad con cadenas largas.
 
 **Criterio de salida:** seleccionar y eliminar fichas transmite respuesta inmediata sin saturar la pantalla.
@@ -144,9 +144,9 @@ Antes de comenzar cada bloque importante se creará una rama `codex/...`. Solo s
 
 ## Próximo objetivo inmediato
 
-Cerrar y publicar el bloque actual de **Fase 6 — Sensación de juego**. Después, trabajar en sonido y vibración opcional sin alterar la composición móvil aprobada, o pasar a la familia visual de fichas si se prioriza el acabado artístico.
+Iniciar la **Fase 4 — Familia visual de fichas** como un conjunto completo, conservando la composición móvil, el tablero y la sensación de juego ya aprobados.
 
-**Estado validado en la rama `codex/tablero-adaptable`:** tablero adaptable 8×10, selección únicamente horizontal y vertical, brillo y escala de cadena, línea de conexión, contador vivo, desaparición con destello, partículas y reposición escalonada. Validado con 5 pruebas EditMode, 6 pruebas PlayMode, WebGL sin errores de compilación y revisión local a 390×844.
+**Estado validado en la rama `codex/tablero-adaptable`:** tablero adaptable 8×10, selección únicamente horizontal y vertical, brillo y escala de cadena, línea de conexión, contador vivo, desaparición con destello, partículas, reposición escalonada, efectos de sonido generados en tiempo real, volumen persistente y vibración opcional. Validado con 7 pruebas EditMode, 7 pruebas PlayMode, WebGL sin errores de compilación y revisión local a 390×844.
 
 ## Método de trabajo
 

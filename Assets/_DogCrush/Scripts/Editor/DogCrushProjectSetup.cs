@@ -812,6 +812,7 @@ namespace DogCrush.EditorTool
             GameTimer gameTimer = managerGo.AddComponent<GameTimer>();
             FeedbackController feedbackController = managerGo.AddComponent<FeedbackController>();
             AudioPlaceholderController audioController = managerGo.AddComponent<AudioPlaceholderController>();
+            HapticFeedbackController hapticController = managerGo.AddComponent<HapticFeedbackController>();
             ParticleEffectController particleController = managerGo.AddComponent<ParticleEffectController>();
             particleController.pawSprite = pawParticle;
             GameBootstrap bootstrap = managerGo.AddComponent<GameBootstrap>();
@@ -864,6 +865,7 @@ namespace DogCrush.EditorTool
             bootstrap.feedbackController = feedbackController;
             bootstrap.particleController = particleController;
             bootstrap.audioController = audioController;
+            bootstrap.hapticController = hapticController;
 
             // 7. Canvas UI Setup
             Canvas canvas = CreateGameplayCanvas(bootstrap, feedbackController, timerFill);

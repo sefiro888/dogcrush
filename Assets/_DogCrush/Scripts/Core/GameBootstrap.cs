@@ -22,6 +22,7 @@ namespace DogCrush.Core
         public FeedbackController feedbackController;
         public ParticleEffectController particleController;
         public AudioPlaceholderController audioController;
+        public HapticFeedbackController hapticController;
 
         private void Start()
         {
@@ -31,6 +32,10 @@ namespace DogCrush.Core
         public void InitializeGame()
         {
             if (stateController == null) stateController = GetComponent<GameStateController>();
+            if (audioController == null) audioController = GetComponent<AudioPlaceholderController>();
+            if (hapticController == null)
+                hapticController = GetComponent<HapticFeedbackController>() ??
+                    gameObject.AddComponent<HapticFeedbackController>();
 
             // Subscribe Events
             if (selectionController != null)
@@ -84,6 +89,12 @@ namespace DogCrush.Core
             if (uiController != null)
             {
                 uiController.OnRestartRequested += RestartGame;
+                uiController.OnSoundToggleRequested += HandleSoundToggleRequested;
+                uiController.OnHapticsToggleRequested += HandleHapticsToggleRequested;
+                uiController.OnSettingsVisibilityChanged += HandleSettingsVisibilityChanged;
+                uiController.UpdateSettingsState(
+                    audioController != null ? audioController.SfxVolume : 0f,
+                    hapticController == null || hapticController.HapticsEnabled);
             }
 
             StartNewMatch();
@@ -97,6 +108,7 @@ namespace DogCrush.Core
             {
                 uiController.HideGameOver();
                 uiController.UpdateChainInfo(0, "");
+                uiController.SetSettingsVisible(false);
             }
 
             if (scoreController != null)
@@ -136,7 +148,11 @@ namespace DogCrush.Core
             }
             if (audioController != null && count > 1)
             {
-                audioController.PlaySelectSound();
+                audioController.PlaySelectSound(count);
+            }
+            if (hapticController != null && count > 1)
+            {
+                hapticController.PulseSelection();
             }
         }
 
@@ -190,7 +206,11 @@ namespace DogCrush.Core
 
             if (audioController != null)
             {
-                audioController.PlayMatchSound();
+                audioController.PlayMatchSound(chain != null ? chain.Count : 3);
+            }
+            if (hapticController != null)
+            {
+                hapticController.PulseMatch(chain != null ? chain.Count : 3);
             }
 
             if (gravityController != null)
@@ -244,6 +264,10 @@ namespace DogCrush.Core
             {
                 audioController.PlayGameOverSound();
             }
+            if (hapticController != null)
+            {
+                hapticController.PulseGameOver();
+            }
 
             int finalScore = scoreController != null ? scoreController.CurrentScore : 0;
             int highScore = scoreController != null ? scoreController.HighScore : 0;
@@ -258,6 +282,49 @@ namespace DogCrush.Core
         public void RestartGame()
         {
             StartNewMatch();
+        }
+
+        private void HandleSoundToggleRequested()
+        {
+            if (audioController == null)
+            {
+                return;
+            }
+
+            float volume = audioController.CycleSfxVolume();
+            uiController?.UpdateSettingsState(
+                volume,
+                hapticController == null || hapticController.HapticsEnabled);
+        }
+
+        private void HandleHapticsToggleRequested()
+        {
+            if (hapticController == null)
+            {
+                return;
+            }
+
+            bool enabled = hapticController.ToggleHaptics();
+            if (enabled)
+            {
+                hapticController.PulseSelection();
+            }
+            audioController?.PlayUISound();
+            uiController?.UpdateSettingsState(
+                audioController != null ? audioController.SfxVolume : 0f,
+                enabled);
+        }
+
+        private void HandleSettingsVisibilityChanged(bool visible)
+        {
+            gameTimer?.SetPaused(visible);
+            if (visible)
+            {
+                audioController?.PlayUISound();
+                uiController?.UpdateSettingsState(
+                    audioController != null ? audioController.SfxVolume : 0f,
+                    hapticController == null || hapticController.HapticsEnabled);
+            }
         }
     }
 }
