@@ -35,7 +35,9 @@ namespace DogCrush.UI
         private Image chainInfoPanel;
         private TextMeshProUGUI bottomPillText;
         private TextMeshProUGUI levelText;
+        private TextMeshProUGUI livesText;
         private Image livesIcon;
+        private Sprite roundedRectSprite;
         private RectTransform portraitContentRect;
         private RectTransform chainInfoPanelRect;
         private RectTransform chainInfoTextRect;
@@ -122,118 +124,85 @@ namespace DogCrush.UI
 
             RectTransform canvasRect = CreatePortraitContent(runtimeCanvas.GetComponent<RectTransform>());
 
-            // === TOP TIME BAR CAPSULE (Matches reference image) ===
-            GameObject topBarOuter = new GameObject("TopBarOuter_RT", typeof(RectTransform), typeof(Image));
-            topBarOuter.transform.SetParent(canvasRect, false);
-            RectTransform topOuterRect = topBarOuter.GetComponent<RectTransform>();
-            topOuterRect.anchorMin = new Vector2(0.05f, 0.90f);
-            topOuterRect.anchorMax = new Vector2(0.95f, 0.975f);
-            topOuterRect.offsetMin = Vector2.zero;
-            topOuterRect.offsetMax = Vector2.zero;
-            
-            // Outer dark metallic capsule frame
-            Image topOuterImg = topBarOuter.GetComponent<Image>();
-            topOuterImg.sprite = LoadUISprite("hud-top-panel");
-            topOuterImg.type = Image.Type.Simple;
-            topOuterImg.preserveAspect = false;
-            topOuterImg.color = Color.white;
+            RectTransform topHudRect = CreateHudShell(
+                canvasRect,
+                "TopHud_RT",
+                new Vector2(0.055f, 0.90f),
+                new Vector2(0.945f, 0.975f));
 
-            // Inner dark track
-            GameObject topBarTrack = new GameObject("TopBarTrack_RT", typeof(RectTransform), typeof(Image));
-            topBarTrack.transform.SetParent(topOuterRect, false);
-            RectTransform trackRect = topBarTrack.GetComponent<RectTransform>();
-            trackRect.anchorMin = new Vector2(0.57f, 0.18f);
-            trackRect.anchorMax = new Vector2(0.75f, 0.68f);
-            trackRect.offsetMin = Vector2.zero;
-            trackRect.offsetMax = Vector2.zero;
-            Image trackImg = topBarTrack.GetComponent<Image>();
-            trackImg.sprite = CreateRoundedRectSprite();
-            trackImg.type = Image.Type.Sliced;
-            trackImg.color = new Color(0.12f, 0.06f, 0.025f, 0.96f);
+            RectTransform levelSlot = CreateHudSlot(
+                topHudRect, "LevelSlot_RT", new Vector2(0.025f, 0.12f), new Vector2(0.245f, 0.88f));
+            CreateHudLabel(levelSlot, "LevelLabel_RT", "NIVEL");
+            levelText = CreateHudValue(levelSlot, "LevelText_RT", "1", 31f);
 
-            // Green gradient fill bar
-            GameObject fillObj = new GameObject("TimerBarFill_RT", typeof(RectTransform), typeof(Image));
-            fillObj.transform.SetParent(trackRect, false);
-            RectTransform fillRect = fillObj.GetComponent<RectTransform>();
-            fillRect.anchorMin = Vector2.zero;
-            fillRect.anchorMax = Vector2.one;
-            fillRect.offsetMin = Vector2.zero;
-            fillRect.offsetMax = Vector2.zero;
-            timerBarFill = fillObj.GetComponent<Image>();
-            timerBarFill.sprite = CreateRoundedRectSprite();
-            timerBarFill.color = new Color(0.25f, 0.9f, 0.35f, 1f);
+            RectTransform recordSlot = CreateHudSlot(
+                topHudRect, "RecordSlot_RT", new Vector2(0.26f, 0.12f), new Vector2(0.50f, 0.88f));
+            CreateHudLabel(recordSlot, "RecordLabel_RT", "RÉCORD");
+            highScoreText = CreateHudValue(recordSlot, "HighScoreText_RT", "0", 27f);
+
+            RectTransform timerSlot = CreateHudSlot(
+                topHudRect, "TimerSlot_RT", new Vector2(0.515f, 0.12f), new Vector2(0.755f, 0.88f));
+            CreateHudLabel(timerSlot, "TimerLabel_RT", "TIEMPO");
+            timerText = CreateHudValue(timerSlot, "TimerText_RT", "60s", 32f);
+
+            Image timerTrack = CreatePanelImage(
+                timerSlot,
+                "TimerTrack_RT",
+                new Vector2(0.08f, 0.08f),
+                new Vector2(0.92f, 0.19f),
+                new Color(0.10f, 0.025f, 0.012f, 0.96f));
+            timerBarFill = CreatePanelImage(
+                timerTrack.rectTransform,
+                "TimerBarFill_RT",
+                Vector2.zero,
+                Vector2.one,
+                new Color(0.25f, 0.9f, 0.35f, 1f));
             timerBarFill.type = Image.Type.Filled;
             timerBarFill.fillMethod = Image.FillMethod.Horizontal;
             timerBarFill.fillAmount = 1f;
 
-            // Timer text overlay (Center of top capsule)
-            timerText = CreateText(topOuterRect, "TimerText_RT",
-                "60s", 40f, Color.white,
+            RectTransform livesSlot = CreateHudSlot(
+                topHudRect, "LivesSlot_RT", new Vector2(0.77f, 0.12f), new Vector2(0.975f, 0.88f));
+            CreateHudLabel(livesSlot, "LivesLabel_RT", "VIDAS");
+            livesIcon = CreateImage(
+                livesSlot,
+                "LivesIcon_RT",
+                LoadUISprite("icon-life-heart"),
+                new Vector2(0.08f, 0.16f),
+                new Vector2(0.48f, 0.72f));
+            livesText = CreateText(
+                livesSlot,
+                "LivesText_RT",
+                "5/5",
+                26f,
+                Color.white,
                 TextAlignmentOptions.Center,
-                new Vector2(0.57f, 0.18f), new Vector2(0.75f, 0.68f),
-                Vector2.zero, Vector2.zero);
-            timerText.fontStyle = FontStyles.Bold;
+                new Vector2(0.44f, 0.14f),
+                new Vector2(0.94f, 0.70f),
+                Vector2.zero,
+                Vector2.zero);
+            livesText.fontStyle = FontStyles.Bold;
 
-            levelText = CreateText(topOuterRect, "LevelText_RT",
-                "NIVEL 1", 34f, Color.white,
-                TextAlignmentOptions.Center,
-                new Vector2(0.04f, 0.18f), new Vector2(0.24f, 0.68f),
-                Vector2.zero, Vector2.zero);
-            levelText.fontStyle = FontStyles.Bold;
+            RectTransform bottomPillRect = CreateHudShell(
+                canvasRect,
+                "BottomHud_RT",
+                new Vector2(0.055f, 0.022f),
+                new Vector2(0.945f, 0.145f));
+            bottomPillBg = bottomPillRect.GetComponent<Image>();
 
-            livesIcon = CreateImage(topOuterRect, "LivesIcon_RT", LoadUISprite("icon-life-heart"),
-                new Vector2(0.79f, 0.16f), new Vector2(0.93f, 0.70f));
+            RectTransform scoreSlot = CreateHudSlot(
+                bottomPillRect, "ScoreSlot_RT", new Vector2(0.025f, 0.12f), new Vector2(0.275f, 0.88f));
+            CreateHudLabel(scoreSlot, "ScoreLabel_RT", "PUNTOS");
+            scoreText = CreateHudValue(scoreSlot, "ScoreText_RT", "0", 31f);
+            scoreText.color = new Color(1f, 0.91f, 0.28f);
 
-            // === BOTTOM INFO CAPSULE (Matches reference image) ===
-            GameObject bottomPillObj = new GameObject("BottomPill_RT", typeof(RectTransform), typeof(Image));
-            bottomPillObj.transform.SetParent(canvasRect, false);
-            RectTransform bottomPillRect = bottomPillObj.GetComponent<RectTransform>();
-            bottomPillRect.anchorMin = new Vector2(0.07f, 0.025f);
-            bottomPillRect.anchorMax = new Vector2(0.93f, 0.15f);
-            bottomPillRect.offsetMin = Vector2.zero;
-            bottomPillRect.offsetMax = Vector2.zero;
-            
-            bottomPillBg = bottomPillObj.GetComponent<Image>();
-            bottomPillBg.sprite = LoadUISprite("hud-bottom-panel");
-            bottomPillBg.type = Image.Type.Simple;
-            bottomPillBg.preserveAspect = false;
-            bottomPillBg.color = Color.white;
-
-            // Inner gloss line
-            GameObject glossObj = new GameObject("Gloss_RT", typeof(RectTransform), typeof(Image));
-            glossObj.transform.SetParent(bottomPillRect, false);
-            RectTransform glossRect = glossObj.GetComponent<RectTransform>();
-            glossRect.anchorMin = new Vector2(0.02f, 0.55f);
-            glossRect.anchorMax = new Vector2(0.98f, 0.92f);
-            glossRect.offsetMin = Vector2.zero;
-            glossRect.offsetMax = Vector2.zero;
-            Image glossImg = glossObj.GetComponent<Image>();
-            glossImg.color = new Color(1f, 1f, 1f, 0.2f);
-
-            // Bottom capsule text (Score & Info)
-            scoreText = CreateText(bottomPillRect, "ScoreText_RT",
-                "PUNTOS: 0", 38f, new Color(1f, 0.96f, 0.4f),
-                TextAlignmentOptions.Center,
-                new Vector2(0.02f, 0.15f), new Vector2(0.23f, 0.85f),
-                Vector2.zero, Vector2.zero);
-            scoreText.fontStyle = FontStyles.Bold;
-
-            CreateIconButton(bottomPillRect, "MovesButton_RT", "button-moves", new Vector2(0.25f, 0.12f), new Vector2(0.40f, 0.88f));
-            CreateIconButton(bottomPillRect, "BoneButton_RT", "button-bone", new Vector2(0.43f, 0.12f), new Vector2(0.58f, 0.88f));
-            CreateIconButton(bottomPillRect, "FoodButton_RT", "button-food", new Vector2(0.61f, 0.12f), new Vector2(0.76f, 0.88f));
-            CreateIconButton(bottomPillRect, "SettingsButton_RT", "button-settings", new Vector2(0.79f, 0.12f), new Vector2(0.94f, 0.88f));
+            CreateBoosterButton(bottomPillRect, "MovesButton_RT", "button-moves", 0.30f, 0.455f);
+            CreateBoosterButton(bottomPillRect, "BoneButton_RT", "button-bone", 0.47f, 0.625f);
+            CreateBoosterButton(bottomPillRect, "FoodButton_RT", "button-food", 0.64f, 0.795f);
+            CreateBoosterButton(bottomPillRect, "SettingsButton_RT", "button-settings", 0.81f, 0.965f);
 
             CreateImage(canvasRect, "DogCrushLogo_RT", LoadUISprite("dogcrush-logo"),
                 new Vector2(0.21f, 0.665f), new Vector2(0.79f, 0.84f));
-
-            // Keep the record in the second wood compartment, rather than
-            // floating over the park when the device is portrait.
-            highScoreText = CreateText(topOuterRect, "HighScoreText_RT",
-                "RÉCORD\n0", 26f, new Color(1f, 1f, 1f, 0.9f),
-                TextAlignmentOptions.Center,
-                new Vector2(0.28f, 0.18f), new Vector2(0.53f, 0.68f),
-                Vector2.zero, Vector2.zero);
-            highScoreText.fontStyle = FontStyles.Bold;
 
             // The live chain count gets its own compact badge, clear of the logo.
             chainInfoPanel = CreateImage(canvasRect, "ChainInfoPanel_RT", LoadUISprite("objective-panel"),
@@ -292,8 +261,172 @@ namespace DogCrush.UI
             return portraitContentRect;
         }
 
+        private RectTransform CreateHudShell(
+            RectTransform parent,
+            string name,
+            Vector2 anchorMin,
+            Vector2 anchorMax)
+        {
+            GameObject shell = new GameObject(name, typeof(RectTransform));
+            shell.transform.SetParent(parent, false);
+            RectTransform shellRect = shell.GetComponent<RectTransform>();
+            shellRect.anchorMin = anchorMin;
+            shellRect.anchorMax = anchorMax;
+            shellRect.offsetMin = Vector2.zero;
+            shellRect.offsetMax = Vector2.zero;
+
+            Image shadow = CreatePanelImage(
+                shellRect,
+                $"{name}Shadow",
+                new Vector2(0.008f, -0.07f),
+                new Vector2(0.992f, 0.94f),
+                new Color(0.075f, 0.018f, 0.008f, 0.72f));
+            shadow.raycastTarget = false;
+
+            Image outer = CreatePanelImage(
+                shellRect,
+                $"{name}Frame",
+                Vector2.zero,
+                Vector2.one,
+                new Color(0.30f, 0.075f, 0.018f, 1f));
+            outer.raycastTarget = false;
+
+            Image wood = CreatePanelImage(
+                shellRect,
+                $"{name}Wood",
+                new Vector2(0.009f, 0.055f),
+                new Vector2(0.991f, 0.955f),
+                new Color(0.69f, 0.26f, 0.055f, 1f));
+            wood.raycastTarget = false;
+
+            Image surface = CreatePanelImage(
+                shellRect,
+                $"{name}Surface",
+                new Vector2(0.018f, 0.10f),
+                new Vector2(0.982f, 0.90f),
+                new Color(0.47f, 0.14f, 0.035f, 1f));
+            surface.raycastTarget = false;
+
+            Image sheen = CreatePanelImage(
+                shellRect,
+                $"{name}Sheen",
+                new Vector2(0.045f, 0.80f),
+                new Vector2(0.955f, 0.89f),
+                new Color(1f, 0.72f, 0.32f, 0.22f));
+            sheen.raycastTarget = false;
+
+            return surface.rectTransform;
+        }
+
+        private RectTransform CreateHudSlot(
+            RectTransform parent,
+            string name,
+            Vector2 anchorMin,
+            Vector2 anchorMax)
+        {
+            Image slot = CreatePanelImage(
+                parent,
+                name,
+                anchorMin,
+                anchorMax,
+                new Color(0.16f, 0.04f, 0.018f, 0.94f));
+            slot.raycastTarget = false;
+
+            Image glow = CreatePanelImage(
+                slot.rectTransform,
+                $"{name}Glow",
+                new Vector2(0.035f, 0.68f),
+                new Vector2(0.965f, 0.90f),
+                new Color(1f, 0.52f, 0.16f, 0.11f));
+            glow.raycastTarget = false;
+            return slot.rectTransform;
+        }
+
+        private Image CreatePanelImage(
+            RectTransform parent,
+            string name,
+            Vector2 anchorMin,
+            Vector2 anchorMax,
+            Color color)
+        {
+            GameObject go = new GameObject(name, typeof(RectTransform), typeof(Image));
+            go.transform.SetParent(parent, false);
+            RectTransform rect = go.GetComponent<RectTransform>();
+            rect.anchorMin = anchorMin;
+            rect.anchorMax = anchorMax;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+
+            Image image = go.GetComponent<Image>();
+            image.sprite = CreateRoundedRectSprite();
+            image.type = Image.Type.Sliced;
+            image.color = color;
+            image.raycastTarget = false;
+            return image;
+        }
+
+        private void CreateHudLabel(RectTransform parent, string name, string text)
+        {
+            TextMeshProUGUI label = CreateText(
+                parent,
+                name,
+                text,
+                17f,
+                new Color(1f, 0.72f, 0.32f, 0.96f),
+                TextAlignmentOptions.Center,
+                new Vector2(0.05f, 0.61f),
+                new Vector2(0.95f, 0.93f),
+                Vector2.zero,
+                Vector2.zero);
+            label.fontStyle = FontStyles.Bold;
+            label.characterSpacing = 1.5f;
+        }
+
+        private TextMeshProUGUI CreateHudValue(
+            RectTransform parent,
+            string name,
+            string text,
+            float fontSize)
+        {
+            TextMeshProUGUI value = CreateText(
+                parent,
+                name,
+                text,
+                fontSize,
+                Color.white,
+                TextAlignmentOptions.Center,
+                new Vector2(0.04f, 0.11f),
+                new Vector2(0.96f, 0.67f),
+                Vector2.zero,
+                Vector2.zero);
+            value.fontStyle = FontStyles.Bold;
+            return value;
+        }
+
+        private void CreateBoosterButton(
+            RectTransform parent,
+            string name,
+            string spriteName,
+            float anchorMinX,
+            float anchorMaxX)
+        {
+            RectTransform slot = CreateHudSlot(
+                parent,
+                $"{name}Slot",
+                new Vector2(anchorMinX, 0.10f),
+                new Vector2(anchorMaxX, 0.90f));
+            CreateIconButton(
+                slot,
+                name,
+                spriteName,
+                new Vector2(0.04f, 0.02f),
+                new Vector2(0.96f, 0.98f));
+        }
+
         private Sprite CreateRoundedRectSprite()
         {
+            if (roundedRectSprite != null) return roundedRectSprite;
+
             const int size = 64;
             const float radius = 18f;
             Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
@@ -317,7 +450,7 @@ namespace DogCrush.UI
 
             texture.SetPixels32(pixels);
             texture.Apply(false, true);
-            return Sprite.Create(
+            roundedRectSprite = Sprite.Create(
                 texture,
                 new Rect(0f, 0f, size, size),
                 new Vector2(0.5f, 0.5f),
@@ -325,6 +458,7 @@ namespace DogCrush.UI
                 0,
                 SpriteMeshType.FullRect,
                 new Vector4(radius, radius, radius, radius));
+            return roundedRectSprite;
         }
 
         private void BuildGameOverPanel(RectTransform canvasRect)
@@ -478,7 +612,7 @@ namespace DogCrush.UI
             {
                 displayedScore = (int)Mathf.MoveTowards(displayedScore, targetScore,
                     Mathf.Max(100f, Mathf.Abs(targetScore - displayedScore) * 10f * Time.deltaTime));
-                if (scoreText != null) scoreText.text = $"PUNTOS: {displayedScore:N0}";
+                if (scoreText != null) scoreText.text = $"{displayedScore:N0}";
             }
         }
 
@@ -490,7 +624,7 @@ namespace DogCrush.UI
         public void UpdateHighScore(int highScore)
         {
             if (highScoreText != null)
-                highScoreText.text = $"RÉCORD\n{highScore:N0}";
+                highScoreText.text = $"{highScore:N0}";
         }
 
         public void UpdateTimer(float remainingSeconds, float progress01)

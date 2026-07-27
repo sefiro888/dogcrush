@@ -36,6 +36,20 @@ namespace DogCrush.Tests.PlayMode
             Assert.That(GameObject.Find("BoardFrame"), Is.Null,
                 "The rigid legacy board image must not remain active.");
 
+            GameObject topHud = GameObject.Find("TopHud_RT");
+            GameObject bottomHud = GameObject.Find("BottomHud_RT");
+            Assert.That(topHud, Is.Not.Null, "The adaptive top HUD must be generated.");
+            Assert.That(bottomHud, Is.Not.Null, "The adaptive bottom HUD must be generated.");
+            Assert.That(GameObject.Find("TopBarOuter_RT"), Is.Null,
+                "The fixed top-panel implementation must no longer be active.");
+            Assert.That(GameObject.Find("BottomPill_RT"), Is.Null,
+                "The fixed bottom-panel implementation must no longer be active.");
+
+            Assert.That(GameObject.Find("ScoreLabel_RT"), Is.Not.Null);
+            Assert.That(GameObject.Find("ScoreText_RT"), Is.Not.Null);
+            Assert.That(GameObject.Find("LivesText_RT"), Is.Not.Null);
+            Assert.That(GameObject.Find("TimerBarFill_RT"), Is.Not.Null);
+
             int activePieces = 0;
             PieceView[] pieces = Object.FindObjectsByType<PieceView>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
             foreach (PieceView piece in pieces)
