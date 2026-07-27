@@ -266,5 +266,19 @@ namespace DogCrush.Board
             }
             return result;
         }
+
+        public PieceView GetRandomPiece()
+        {
+            if (grid == null || Columns <= 0 || Rows <= 0) return null;
+            var pieces = new List<PieceView>();
+            for (int x = 0; x < Columns; x++)
+            {
+                for (int y = 0; y < Rows; y++)
+                {
+                    if (grid[x, y] != null) pieces.Add(grid[x, y]);
+                }
+            }
+            return pieces.Count == 0 ? null : pieces[Random.Range(0, pieces.Count)];
+        }
     }
 }

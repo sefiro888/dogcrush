@@ -404,20 +404,29 @@ namespace DogCrush.Core
 
         private void UseShuffleBooster()
         {
-            if (!shuffleBoosterAvailable || stateController == null || !stateController.CanSelectPieces()) return;
+            if (!shuffleBoosterAvailable || stateController == null || !stateController.CanSelectPieces() || boardController == null || gravityController == null) return;
+            PieceView piece = boardController.GetRandomPiece();
+            if (piece == null) return;
             shuffleBoosterAvailable = false;
-            boardController?.ShuffleBoardTypes();
-            boardController?.EnsureHasValidMoves();
             uiController?.SetBoosterAvailability(false, boneBoosterAvailable, foodBoosterAvailable);
-            audioController?.PlayUISound();
-            hapticController?.PulseSelection();
+            stateController.ChangeState(GameState.Resolving);
+            StartCoroutine(gravityController.ProcessRemovalAndRefill(
+                new List<PieceView> { piece },
+                () =>
+                {
+                    if (gameTimer != null && gameTimer.RemainingTime <= 0f) EndMatch(false);
+                    else stateController.ChangeState(GameState.Playing);
+                }));
+            audioController?.PlayMatchSound(3);
+            hapticController?.PulseMatch(3);
         }
 
         private void UseFoodBooster()
         {
             if (!foodBoosterAvailable || stateController == null || !stateController.CanSelectPieces()) return;
             foodBoosterAvailable = false;
-            gameTimer?.AddTime(10f);
+            boardController?.ShuffleBoardTypes();
+            boardController?.EnsureHasValidMoves();
             uiController?.SetBoosterAvailability(shuffleBoosterAvailable, boneBoosterAvailable, false);
             audioController?.PlayUISound();
             hapticController?.PulseSelection();
