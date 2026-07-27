@@ -46,6 +46,9 @@ namespace DogCrush.Core
         private bool foodBoosterAvailable;
         private const string UnlockedLevelKey = "DogCrush_UnlockedLevel";
         private const string LevelStarsKeyPrefix = "DogCrush_LevelStars_";
+        private const string LivesKey = "DogCrush_Lives";
+        private const int MaxLives = 5;
+        private int lives;
 
         private void Start()
         {
@@ -55,6 +58,7 @@ namespace DogCrush.Core
         public void InitializeGame()
         {
             currentLevel = Mathf.Max(currentLevel, PlayerPrefs.GetInt(UnlockedLevelKey, 1));
+            lives = Mathf.Clamp(PlayerPrefs.GetInt(LivesKey, MaxLives), 0, MaxLives);
             if (stateController == null) stateController = GetComponent<GameStateController>();
             if (audioController == null) audioController = GetComponent<AudioPlaceholderController>();
             if (hapticController == null)
@@ -142,6 +146,7 @@ namespace DogCrush.Core
                 uiController.HideGameOver();
                 uiController.UpdateChainInfo(0, "");
                 uiController.SetLevelObjective(currentLevel, CurrentTargetScore);
+                uiController.UpdateLives(lives, MaxLives);
                 shuffleBoosterAvailable = true;
                 boneBoosterAvailable = true;
                 foodBoosterAvailable = true;
@@ -304,6 +309,7 @@ namespace DogCrush.Core
 
         private void EndMatch(bool victory)
         {
+            if (stateController.CurrentState == GameState.GameOver) return;
             stateController.ChangeState(GameState.GameOver);
 
             if (gameTimer != null)
@@ -342,6 +348,13 @@ namespace DogCrush.Core
                         PlayerPrefs.GetInt(UnlockedLevelKey, 1), currentLevel + 1));
                     PlayerPrefs.Save();
                 }
+                else
+                {
+                    lives = Mathf.Max(0, lives - 1);
+                    PlayerPrefs.SetInt(LivesKey, lives);
+                    PlayerPrefs.Save();
+                    uiController.UpdateLives(lives, MaxLives);
+                }
                 uiController.ShowLevelResult(victory, finalScore, isNewRecord, stars);
             }
         }
@@ -361,6 +374,12 @@ namespace DogCrush.Core
 
         public void RestartGame()
         {
+            if (lives <= 0)
+            {
+                lives = MaxLives;
+                PlayerPrefs.SetInt(LivesKey, lives);
+                PlayerPrefs.Save();
+            }
             StartNewMatch();
         }
 

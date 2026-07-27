@@ -1006,6 +1006,16 @@ namespace DogCrush.UI
             if (foodBoosterButton != null) foodBoosterButton.interactable = food;
         }
 
+        public void UpdateLives(int currentLives, int maxLives = 5)
+        {
+            if (livesText == null) return;
+            int clampedMax = Mathf.Max(1, maxLives);
+            livesText.text = $"{Mathf.Clamp(currentLives, 0, clampedMax)}/{clampedMax}";
+            livesText.color = currentLives <= 1
+                ? new Color(1f, 0.38f, 0.30f)
+                : Color.white;
+        }
+
         private void RefreshObjectiveText()
         {
             if (scoreText != null)
