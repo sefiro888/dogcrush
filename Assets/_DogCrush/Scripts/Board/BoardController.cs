@@ -12,8 +12,8 @@ namespace DogCrush.Board
         private Vector3 boardOrigin;
 
         public PieceView[,] Grid => grid;
-        public int Columns => config != null ? config.columns : 7;
-        public int Rows => config != null ? config.rows : 9;
+        public int Columns => config != null ? config.columns : 8;
+        public int Rows => config != null ? config.rows : 8;
 
         public void InitializeBoard()
         {
@@ -42,12 +42,11 @@ namespace DogCrush.Board
             // Keep pieces in front of the board frame in URP/WebGL. At z=0
             // both SpriteRenderers can share the same depth buffer value and
             // the opaque frame may hide the pieces despite their sort order.
-            // Reserve a header zone for the logo and HUD in portrait.
-            // The board stays centered within the wooden frame instead of
-            // competing with the top interface.
-            // The 8x8 board is centered inside the wooden frame. The previous
-            // 7x9 offset left several rows visibly stranded at the bottom.
-            boardOrigin = new Vector3(-totalWidth / 2f, -totalHeight / 2f - 0.3f, -1f);
+            // The canonical board is square. Keep the logical 8x8 grid
+            // centered on its chocolate play area; UI spacing is handled by
+            // the camera/HUD rather than by distorting the board geometry.
+            const float boardCenterY = 0.55f;
+            boardOrigin = new Vector3(-totalWidth / 2f, boardCenterY - totalHeight / 2f, -1f);
         }
 
         public Vector3 GridToWorldPosition(int x, int y)

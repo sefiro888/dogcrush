@@ -33,6 +33,7 @@ namespace DogCrush.Presentation
             {
                 ParticleSystem ps = pool.Dequeue();
                 ps.gameObject.SetActive(true);
+                ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
                 return ps;
             }
             return CreateNewParticleSystem();
@@ -44,7 +45,12 @@ namespace DogCrush.Presentation
             go.transform.SetParent(transform);
 
             ParticleSystem ps = go.AddComponent<ParticleSystem>();
+            // A ParticleSystem starts playing as soon as it is added. Stop it
+            // before changing duration or lifetime; Unity rejects those
+            // settings while the system is already running.
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             var main = ps.main;
+            main.playOnAwake = false;
             main.duration = 0.45f;
             main.loop = false;
             main.startLifetime = 0.55f;

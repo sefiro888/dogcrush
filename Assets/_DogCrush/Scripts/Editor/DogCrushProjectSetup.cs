@@ -196,9 +196,7 @@ namespace DogCrush.EditorTool
         public static void BuildWebGLAudit()
         {
             string scenePath = "Assets/_DogCrush/Scenes/Gameplay.unity";
-            // Keep this audit player outside Unity's Temp directory so it can
-            // also be inspected and promoted to the GitHub Pages build.
-            string outputFolder = "Builds/CodexWebGL";
+            string outputFolder = "Builds/CodexPreview";
             Directory.CreateDirectory(outputFolder);
 
             BuildPlayerOptions options = new BuildPlayerOptions
@@ -215,6 +213,38 @@ namespace DogCrush.EditorTool
             if (report.summary.result != UnityEditor.Build.Reporting.BuildResult.Succeeded)
             {
                 throw new System.InvalidOperationException("WebGL audit build failed.");
+            }
+        }
+
+        /// <summary>
+        /// Builds the already-validated scene for GitHub Pages without calling
+        /// BuildPrototype. BuildPrototype regenerates legacy art assets and
+        /// must never run as part of the release pipeline.
+        /// </summary>
+        public static void BuildWebGLRelease()
+        {
+            string scenePath = "Assets/_DogCrush/Scenes/Gameplay.unity";
+            string outputFolder = "docs";
+            Directory.CreateDirectory(outputFolder);
+
+            PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Disabled;
+            PlayerSettings.WebGL.template = "PROJECT:DogCrushTemplate";
+
+            BuildPlayerOptions options = new BuildPlayerOptions
+            {
+                scenes = new[] { scenePath },
+                locationPathName = outputFolder,
+                target = BuildTarget.WebGL,
+                targetGroup = BuildTargetGroup.WebGL,
+                options = BuildOptions.None
+            };
+
+            var report = BuildPipeline.BuildPlayer(options);
+            File.WriteAllText(Path.Combine(outputFolder, ".nojekyll"), string.Empty);
+            Debug.Log($"[DOGCRUSH] WebGL release build result: {report.summary.result}, errors: {report.summary.totalErrors}");
+            if (report.summary.result != UnityEditor.Build.Reporting.BuildResult.Succeeded)
+            {
+                throw new System.InvalidOperationException("WebGL release build failed.");
             }
         }
 
@@ -690,8 +720,8 @@ namespace DogCrush.EditorTool
             if (config == null)
             {
                 config = ScriptableObject.CreateInstance<BoardConfig>();
-                config.columns = 7;
-                config.rows = 9;
+                config.columns = 8;
+                config.rows = 8;
                 config.typeCount = 5;
                 config.pieceSpacing = 1.15f;
                 config.fallSpeed = 16.0f;

@@ -36,6 +36,10 @@ namespace DogCrush.UI
         private TextMeshProUGUI bottomPillText;
         private TextMeshProUGUI levelText;
         private Image livesIcon;
+        private RectTransform portraitContentRect;
+        private RectTransform chainInfoPanelRect;
+        private RectTransform chainInfoTextRect;
+        private Coroutine chainPulseRoutine;
 
         private void Awake()
         {
@@ -107,7 +111,16 @@ namespace DogCrush.UI
                 scaler.matchWidthOrHeight = 0.5f;
             }
 
-            RectTransform canvasRect = runtimeCanvas.GetComponent<RectTransform>();
+            CanvasScaler runtimeScaler = runtimeCanvas.GetComponent<CanvasScaler>();
+            if (runtimeScaler == null)
+            {
+                runtimeScaler = runtimeCanvas.gameObject.AddComponent<CanvasScaler>();
+            }
+            runtimeScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            runtimeScaler.referenceResolution = new Vector2(1080, 2340);
+            runtimeScaler.matchWidthOrHeight = 0f;
+
+            RectTransform canvasRect = CreatePortraitContent(runtimeCanvas.GetComponent<RectTransform>());
 
             // === TOP TIME BAR CAPSULE (Matches reference image) ===
             GameObject topBarOuter = new GameObject("TopBarOuter_RT", typeof(RectTransform), typeof(Image));
@@ -134,7 +147,9 @@ namespace DogCrush.UI
             trackRect.offsetMin = Vector2.zero;
             trackRect.offsetMax = Vector2.zero;
             Image trackImg = topBarTrack.GetComponent<Image>();
-            trackImg.color = new Color(0.05f, 0.08f, 0.12f, 1f);
+            trackImg.sprite = CreateRoundedRectSprite();
+            trackImg.type = Image.Type.Sliced;
+            trackImg.color = new Color(0.12f, 0.06f, 0.025f, 0.96f);
 
             // Green gradient fill bar
             GameObject fillObj = new GameObject("TimerBarFill_RT", typeof(RectTransform), typeof(Image));
@@ -145,6 +160,7 @@ namespace DogCrush.UI
             fillRect.offsetMin = Vector2.zero;
             fillRect.offsetMax = Vector2.zero;
             timerBarFill = fillObj.GetComponent<Image>();
+            timerBarFill.sprite = CreateRoundedRectSprite();
             timerBarFill.color = new Color(0.25f, 0.9f, 0.35f, 1f);
             timerBarFill.type = Image.Type.Filled;
             timerBarFill.fillMethod = Image.FillMethod.Horizontal;
@@ -152,14 +168,14 @@ namespace DogCrush.UI
 
             // Timer text overlay (Center of top capsule)
             timerText = CreateText(topOuterRect, "TimerText_RT",
-                "60s", 28f, Color.white,
+                "60s", 40f, Color.white,
                 TextAlignmentOptions.Center,
                 new Vector2(0.57f, 0.18f), new Vector2(0.75f, 0.68f),
                 Vector2.zero, Vector2.zero);
             timerText.fontStyle = FontStyles.Bold;
 
             levelText = CreateText(topOuterRect, "LevelText_RT",
-                "NIVEL 1", 24f, Color.white,
+                "NIVEL 1", 34f, Color.white,
                 TextAlignmentOptions.Center,
                 new Vector2(0.04f, 0.18f), new Vector2(0.24f, 0.68f),
                 Vector2.zero, Vector2.zero);
@@ -172,8 +188,8 @@ namespace DogCrush.UI
             GameObject bottomPillObj = new GameObject("BottomPill_RT", typeof(RectTransform), typeof(Image));
             bottomPillObj.transform.SetParent(canvasRect, false);
             RectTransform bottomPillRect = bottomPillObj.GetComponent<RectTransform>();
-            bottomPillRect.anchorMin = new Vector2(0.10f, 0.025f);
-            bottomPillRect.anchorMax = new Vector2(0.90f, 0.115f);
+            bottomPillRect.anchorMin = new Vector2(0.10f, 0.035f);
+            bottomPillRect.anchorMax = new Vector2(0.90f, 0.135f);
             bottomPillRect.offsetMin = Vector2.zero;
             bottomPillRect.offsetMax = Vector2.zero;
             
@@ -196,7 +212,7 @@ namespace DogCrush.UI
 
             // Bottom capsule text (Score & Info)
             scoreText = CreateText(bottomPillRect, "ScoreText_RT",
-                "PUNTOS: 0", 24f, new Color(1f, 0.96f, 0.4f),
+                "PUNTOS: 0", 38f, new Color(1f, 0.96f, 0.4f),
                 TextAlignmentOptions.Center,
                 new Vector2(0.02f, 0.15f), new Vector2(0.23f, 0.85f),
                 Vector2.zero, Vector2.zero);
@@ -208,12 +224,12 @@ namespace DogCrush.UI
             CreateIconButton(bottomPillRect, "SettingsButton_RT", "button-settings", new Vector2(0.79f, 0.12f), new Vector2(0.94f, 0.88f));
 
             CreateImage(canvasRect, "DogCrushLogo_RT", LoadUISprite("dogcrush-logo"),
-                new Vector2(0.29f, 0.825f), new Vector2(0.71f, 0.905f));
+                new Vector2(0.27f, 0.78f), new Vector2(0.73f, 0.86f));
 
             // Keep the record in the second wood compartment, rather than
             // floating over the park when the device is portrait.
             highScoreText = CreateText(topOuterRect, "HighScoreText_RT",
-                "0", 22f, new Color(1f, 1f, 1f, 0.9f),
+                "RÉCORD\n0", 26f, new Color(1f, 1f, 1f, 0.9f),
                 TextAlignmentOptions.Center,
                 new Vector2(0.28f, 0.18f), new Vector2(0.53f, 0.68f),
                 Vector2.zero, Vector2.zero);
@@ -221,17 +237,25 @@ namespace DogCrush.UI
 
             // The live chain count gets its own compact badge, clear of the logo.
             chainInfoPanel = CreateImage(canvasRect, "ChainInfoPanel_RT", LoadUISprite("objective-panel"),
-                new Vector2(0.08f, 0.845f), new Vector2(0.28f, 0.885f));
-            chainInfoPanel.preserveAspect = false;
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
+            chainInfoPanel.sprite = CreateRoundedRectSprite();
+            chainInfoPanel.type = Image.Type.Sliced;
+            chainInfoPanel.color = new Color(0.20f, 0.09f, 0.025f, 0.96f);
+            chainInfoPanelRect = chainInfoPanel.rectTransform;
+            chainInfoPanelRect.sizeDelta = new Vector2(150f, 82f);
+            chainInfoPanelRect.pivot = new Vector2(0.5f, 0.5f);
             chainInfoPanel.gameObject.SetActive(false);
 
             // === CHAIN SELECTION FLOATING TEXT ===
             chainInfoText = CreateText(canvasRect, "ChainInfoText_RT",
-                "", 32f, new Color(1f, 0.92f, 0.25f),
+                "", 44f, new Color(1f, 0.92f, 0.25f),
                 TextAlignmentOptions.Center,
-                new Vector2(0.09f, 0.852f), new Vector2(0.27f, 0.878f),
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                 Vector2.zero, Vector2.zero);
             chainInfoText.fontStyle = FontStyles.Bold;
+            chainInfoTextRect = chainInfoText.rectTransform;
+            chainInfoTextRect.sizeDelta = new Vector2(150f, 82f);
+            chainInfoTextRect.pivot = new Vector2(0.5f, 0.5f);
             chainInfoText.gameObject.SetActive(false);
 
             // === COMBO BANNER ===
@@ -245,6 +269,61 @@ namespace DogCrush.UI
 
             // === GAME OVER OVERLAY ===
             BuildGameOverPanel(canvasRect);
+        }
+
+        private RectTransform CreatePortraitContent(RectTransform canvasRect)
+        {
+            GameObject content = new GameObject(
+                "PortraitContent_RT",
+                typeof(RectTransform),
+                typeof(AspectRatioFitter));
+            content.transform.SetParent(canvasRect, false);
+
+            portraitContentRect = content.GetComponent<RectTransform>();
+            portraitContentRect.anchorMin = Vector2.zero;
+            portraitContentRect.anchorMax = Vector2.one;
+            portraitContentRect.offsetMin = Vector2.zero;
+            portraitContentRect.offsetMax = Vector2.zero;
+
+            AspectRatioFitter fitter = content.GetComponent<AspectRatioFitter>();
+            fitter.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
+            fitter.aspectRatio = 9f / 19.5f;
+            return portraitContentRect;
+        }
+
+        private Sprite CreateRoundedRectSprite()
+        {
+            const int size = 64;
+            const float radius = 18f;
+            Texture2D texture = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            texture.name = "RoundedRectRuntime_RT";
+            texture.wrapMode = TextureWrapMode.Clamp;
+            texture.filterMode = FilterMode.Bilinear;
+
+            Color32[] pixels = new Color32[size * size];
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float dx = Mathf.Max(radius - x, 0f, x - (size - 1 - radius));
+                    float dy = Mathf.Max(radius - y, 0f, y - (size - 1 - radius));
+                    float distance = Mathf.Sqrt(dx * dx + dy * dy);
+                    byte alpha = (byte)Mathf.RoundToInt(
+                        255f * Mathf.Clamp01(radius + 1f - distance));
+                    pixels[y * size + x] = new Color32(255, 255, 255, alpha);
+                }
+            }
+
+            texture.SetPixels32(pixels);
+            texture.Apply(false, true);
+            return Sprite.Create(
+                texture,
+                new Rect(0f, 0f, size, size),
+                new Vector2(0.5f, 0.5f),
+                100f,
+                0,
+                SpriteMeshType.FullRect,
+                new Vector4(radius, radius, radius, radius));
         }
 
         private void BuildGameOverPanel(RectTransform canvasRect)
@@ -410,7 +489,7 @@ namespace DogCrush.UI
         public void UpdateHighScore(int highScore)
         {
             if (highScoreText != null)
-                highScoreText.text = $"{highScore:N0}";
+                highScoreText.text = $"RÉCORD\n{highScore:N0}";
         }
 
         public void UpdateTimer(float remainingSeconds, float progress01)
@@ -445,28 +524,73 @@ namespace DogCrush.UI
 
         public void UpdateChainInfo(int count, string typeName)
         {
+            UpdateChainInfo(count, typeName, Vector3.zero);
+        }
+
+        public void UpdateChainInfo(int count, string typeName, Vector3 worldPosition)
+        {
             if (chainInfoText == null) return;
 
-            if (count > 0)
+            if (count > 1)
             {
                 if (chainInfoPanel != null) chainInfoPanel.gameObject.SetActive(true);
                 chainInfoText.gameObject.SetActive(true);
-                string icon = "PET";
-                switch (typeName)
+                chainInfoText.text = $"x{count}";
+
+                if (portraitContentRect != null && Camera.main != null)
                 {
-                    case "Dog": icon = "DOG"; break;
-                    case "Bone": icon = "BONE"; break;
-                    case "Ball": icon = "BALL"; break;
-                    case "Food": icon = "FOOD"; break;
-                    case "Collar": icon = "COLLAR"; break;
+                    Vector2 screenPosition = Camera.main.WorldToScreenPoint(worldPosition);
+                    Camera eventCamera = runtimeCanvas.renderMode == RenderMode.ScreenSpaceOverlay
+                        ? null
+                        : runtimeCanvas.worldCamera;
+                    if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                        portraitContentRect,
+                        screenPosition,
+                        eventCamera,
+                        out Vector2 localPosition))
+                    {
+                        localPosition += new Vector2(0f, 92f);
+                        Rect contentRect = portraitContentRect.rect;
+                        localPosition.x = Mathf.Clamp(
+                            localPosition.x,
+                            contentRect.xMin + 90f,
+                            contentRect.xMax - 90f);
+                        localPosition.y = Mathf.Clamp(
+                            localPosition.y,
+                            contentRect.yMin + 90f,
+                            contentRect.yMax - 90f);
+                        chainInfoPanelRect.anchoredPosition = localPosition;
+                        chainInfoTextRect.anchoredPosition = localPosition;
+                    }
                 }
-                chainInfoText.text = $"{icon} x{count}";
+
+                if (chainPulseRoutine != null) StopCoroutine(chainPulseRoutine);
+                chainPulseRoutine = StartCoroutine(PulseChainBadge());
             }
             else
             {
                 if (chainInfoPanel != null) chainInfoPanel.gameObject.SetActive(false);
                 chainInfoText.gameObject.SetActive(false);
             }
+        }
+
+        private IEnumerator PulseChainBadge()
+        {
+            float elapsed = 0f;
+            const float duration = 0.16f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+                float scale = Mathf.Lerp(1.28f, 1f, t);
+                if (chainInfoPanelRect != null) chainInfoPanelRect.localScale = Vector3.one * scale;
+                if (chainInfoTextRect != null) chainInfoTextRect.localScale = Vector3.one * scale;
+                yield return null;
+            }
+
+            if (chainInfoPanelRect != null) chainInfoPanelRect.localScale = Vector3.one;
+            if (chainInfoTextRect != null) chainInfoTextRect.localScale = Vector3.one;
+            chainPulseRoutine = null;
         }
 
         public void ShowComboBanner(string comboText, Color color)
