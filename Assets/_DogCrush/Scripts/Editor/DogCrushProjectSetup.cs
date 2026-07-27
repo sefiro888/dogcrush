@@ -196,7 +196,7 @@ namespace DogCrush.EditorTool
         public static void BuildWebGLAudit()
         {
             string scenePath = "Assets/_DogCrush/Scenes/Gameplay.unity";
-            string outputFolder = "Temp/CodexAudit/WebGL";
+            string outputFolder = "Builds/CodexPreview";
             Directory.CreateDirectory(outputFolder);
 
             BuildPlayerOptions options = new BuildPlayerOptions
@@ -688,8 +688,8 @@ namespace DogCrush.EditorTool
             if (config == null)
             {
                 config = ScriptableObject.CreateInstance<BoardConfig>();
-                config.columns = 7;
-                config.rows = 9;
+                config.columns = 8;
+                config.rows = 8;
                 config.typeCount = 5;
                 config.pieceSpacing = 1.15f;
                 config.fallSpeed = 16.0f;

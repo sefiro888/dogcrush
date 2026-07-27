@@ -126,7 +126,13 @@ namespace DogCrush.Core
 
             if (uiController != null)
             {
-                uiController.UpdateChainInfo(count, type.ToString());
+                List<PieceView> chain = selectionController != null
+                    ? selectionController.SelectedChain
+                    : null;
+                Vector3 lastPiecePosition = chain != null && chain.Count > 0
+                    ? chain[chain.Count - 1].transform.position
+                    : Vector3.zero;
+                uiController.UpdateChainInfo(count, type.ToString(), lastPiecePosition);
             }
             if (audioController != null && count > 1)
             {
@@ -147,6 +153,10 @@ namespace DogCrush.Core
             if (!stateController.CanSelectPieces()) return;
 
             stateController.ChangeState(GameState.Resolving);
+            if (uiController != null)
+            {
+                uiController.UpdateChainInfo(0, "");
+            }
 
             int pointsGained = scoreController != null ? scoreController.AddChainScore(chain.Count) : 0;
 

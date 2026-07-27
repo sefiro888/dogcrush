@@ -16,6 +16,7 @@ namespace DogCrush.Board
         public SpriteRenderer shadowRenderer;
 
         private Vector3 defaultScale = Vector3.one * 0.95f;
+        private CircleCollider2D interactionCollider;
         private Coroutine moveCoroutine;
         private Coroutine pulseCoroutine;
 
@@ -23,6 +24,7 @@ namespace DogCrush.Board
         {
             if (mainRenderer == null)
                 mainRenderer = GetComponent<SpriteRenderer>();
+            interactionCollider = GetComponent<CircleCollider2D>();
 
             defaultScale = transform.localScale;
             if (defaultScale == Vector3.zero) defaultScale = Vector3.one * 0.95f;
@@ -43,7 +45,45 @@ namespace DogCrush.Board
                 mainRenderer.color = pieceColor;
             }
 
+            NormalizeVisualSize(pieceType, iconSprite);
             SetSelected(false);
+        }
+
+        private void NormalizeVisualSize(PieceType pieceType, Sprite iconSprite)
+        {
+            if (iconSprite == null)
+            {
+                defaultScale = Vector3.one;
+                transform.localScale = defaultScale;
+                return;
+            }
+
+            Vector2 spriteSize = iconSprite.bounds.size;
+            float largestSide = Mathf.Max(spriteSize.x, spriteSize.y);
+            float targetVisualSize = pieceType switch
+            {
+                PieceType.Dog => 0.60f,
+                PieceType.Bone => 0.53f,
+                PieceType.Ball => 0.55f,
+                PieceType.Food => 0.57f,
+                PieceType.Collar => 0.57f,
+                _ => 0.55f
+            };
+            float uniformScale = largestSide > 0.001f
+                ? targetVisualSize / largestSide
+                : 1f;
+
+            defaultScale = Vector3.one * uniformScale;
+            transform.localScale = defaultScale;
+
+            // The illustrations are normalized by scaling the piece root.
+            // Compensate the collider so its world-space hit area remains
+            // finger-friendly instead of shrinking to just a few pixels.
+            if (interactionCollider != null && uniformScale > 0.001f)
+            {
+                const float desiredWorldRadius = 0.25f;
+                interactionCollider.radius = desiredWorldRadius / uniformScale;
+            }
         }
 
         public void SetGridPosition(int x, int y)

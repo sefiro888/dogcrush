@@ -6,12 +6,12 @@ namespace DogCrush.Board
     public class BoardConfig : ScriptableObject
     {
         [Header("Grid Dimensions")]
-        [Range(3, 12)] public int columns = 7;
-        [Range(3, 12)] public int rows = 9;
+        [Range(3, 12)] public int columns = 8;
+        [Range(3, 12)] public int rows = 8;
         [Range(3, 6)] public int typeCount = 5;
 
         [Header("Piece Settings")]
-        public float pieceSpacing = 1.15f;
+        public float pieceSpacing = 0.55f;
         public float fallSpeed = 12.0f;
         public float bounceHeight = 0.2f;
         public float selectionScale = 1.18f;

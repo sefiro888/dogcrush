@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a742a6d1c9333948b09a8d5065b70d4, type: 3}
   m_Name: DefaultBoardConfig
   m_EditorClassIdentifier: DogCrush.Runtime::DogCrush.Board.BoardConfig
-  columns: 7
-  rows: 9
+  columns: 8
+  rows: 8
   typeCount: 5
-  pieceSpacing: 0.87
+  pieceSpacing: 0.55
   fallSpeed: 14
   bounceHeight: 0.2
   selectionScale: 1.18

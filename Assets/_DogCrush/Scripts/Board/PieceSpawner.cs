@@ -34,11 +34,11 @@ namespace DogCrush.Board
             // Prefer the Resources copies at runtime. This avoids relying on a
             // serialized Sprite sub-asset reference that can be stripped or
             // become invalid in a WebGL build.
-            dogSprite = LoadResourceSprite("Pieces/dog_icon") ?? dogSprite;
-            boneSprite = LoadResourceSprite("Pieces/bone_icon") ?? boneSprite;
-            ballSprite = LoadResourceSprite("Pieces/ball_icon") ?? ballSprite;
-            foodSprite = LoadResourceSprite("Pieces/food_icon") ?? foodSprite;
-            collarSprite = LoadResourceSprite("Pieces/collar_icon") ?? collarSprite;
+            dogSprite = LoadResourceSprite("Pieces/piece-dog-v2") ?? dogSprite;
+            boneSprite = LoadResourceSprite("Pieces/piece-bone-v2") ?? boneSprite;
+            ballSprite = LoadResourceSprite("Pieces/piece-ball-v2") ?? ballSprite;
+            foodSprite = LoadResourceSprite("Pieces/piece-food-v2") ?? foodSprite;
+            collarSprite = LoadResourceSprite("Pieces/piece-collar-v2") ?? collarSprite;
         }
 
         private static Sprite LoadResourceSprite(string path)
@@ -106,15 +106,10 @@ namespace DogCrush.Board
 
         public Color GetColorForType(PieceType type)
         {
-            switch (type)
-            {
-                case PieceType.Dog: return dogColor;
-                case PieceType.Bone: return boneColor;
-                case PieceType.Ball: return ballColor;
-                case PieceType.Food: return foodColor;
-                case PieceType.Collar: return collarColor;
-                default: return Color.white;
-            }
+            // The canonical v2 sprites are final-color illustrations. Tinting
+            // them here made the dog orange, the bone grey and the collar
+            // fluorescent in WebGL.
+            return Color.white;
         }
     }
 }
