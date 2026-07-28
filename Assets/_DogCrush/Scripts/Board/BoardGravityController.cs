@@ -59,6 +59,9 @@ namespace DogCrush.Board
             // 2. Compact columns downward
             int movingPiecesCount = 0;
             float fallSpeed = boardController.config != null ? boardController.config.fallSpeed : 12f;
+            int availableTypeCount = boardController.config != null
+                ? Mathf.Clamp(boardController.config.typeCount, 1, (int)PieceType.Collar + 1)
+                : (int)PieceType.Collar + 1;
 
             for (int x = 0; x < boardController.Columns; x++)
             {
@@ -90,7 +93,7 @@ namespace DogCrush.Board
                 for (int fillIndex = 0; fillIndex < emptySlotsBelow; fillIndex++)
                 {
                     int targetY = boardController.Rows - emptySlotsBelow + fillIndex;
-                    PieceType randomType = (PieceType)Random.Range(0, boardController.config.typeCount);
+                    PieceType randomType = (PieceType)Random.Range(0, availableTypeCount);
 
                     Vector3 spawnWorldPos = boardController.GridToWorldPosition(x, boardController.Rows + fillIndex + 1);
                     Vector3 targetWorldPos = boardController.GridToWorldPosition(x, targetY);
