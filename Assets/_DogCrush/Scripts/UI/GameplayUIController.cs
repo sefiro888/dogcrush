@@ -1040,13 +1040,14 @@ namespace DogCrush.UI
             bool widerViewport = aspect >= 0.52f;
             if (widerViewport)
             {
-                logoRect.anchorMin = new Vector2(0.30f, 0.77f);
-                logoRect.anchorMax = new Vector2(0.70f, 0.89f);
+                logoRect.anchorMin = new Vector2(0.38f, 0.755f);
+                logoRect.anchorMax = new Vector2(0.62f, 0.805f);
             }
             else
             {
-                logoRect.anchorMin = new Vector2(0.23f, 0.675f);
-                logoRect.anchorMax = new Vector2(0.77f, 0.845f);
+                // Compact 30%-scale logo: the board is the visual focus.
+                logoRect.anchorMin = new Vector2(0.35f, 0.735f);
+                logoRect.anchorMax = new Vector2(0.65f, 0.795f);
             }
 
             logoRect.offsetMin = Vector2.zero;
