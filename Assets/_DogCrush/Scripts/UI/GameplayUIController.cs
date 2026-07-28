@@ -65,6 +65,7 @@ namespace DogCrush.UI
         private Button boneBoosterButton;
         private Button foodBoosterButton;
         private GameObject levelSelectPanel;
+        private GameObject tutorialPanel;
         private readonly List<Button> levelButtons = new List<Button>();
         private readonly List<TextMeshProUGUI> levelButtonLabels = new List<TextMeshProUGUI>();
         private int unlockedLevel = 1;
@@ -294,6 +295,7 @@ namespace DogCrush.UI
 
             BuildSettingsPanel(canvasRect);
             BuildLevelSelectPanel(canvasRect);
+            BuildTutorialPanel(canvasRect);
 
             // === GAME OVER OVERLAY ===
             BuildGameOverPanel(canvasRect);
@@ -698,7 +700,67 @@ namespace DogCrush.UI
                 new Vector2(0.25f, 0.045f), new Vector2(0.75f, 0.14f), out TextMeshProUGUI closeLabel);
             closeLabel.text = "CERRAR";
             closeButton.onClick.AddListener(() => SetLevelSelectVisible(false));
+
+            Button helpButton = CreateSettingsButton(cardRect, "TutorialOpen_RT",
+                new Vector2(0.30f, 0.79f), new Vector2(0.70f, 0.85f), out TextMeshProUGUI helpLabel);
+            helpLabel.text = "¿CÓMO JUGAR?";
+            helpLabel.fontSize = 20f;
+            helpButton.onClick.AddListener(() => SetTutorialVisible(true));
             levelSelectPanel.SetActive(false);
+        }
+
+        private void BuildTutorialPanel(RectTransform canvasRect)
+        {
+            tutorialPanel = new GameObject("TutorialPanel_RT", typeof(RectTransform), typeof(Image));
+            tutorialPanel.transform.SetParent(canvasRect, false);
+            RectTransform overlayRect = tutorialPanel.GetComponent<RectTransform>();
+            overlayRect.anchorMin = Vector2.zero;
+            overlayRect.anchorMax = Vector2.one;
+            overlayRect.offsetMin = Vector2.zero;
+            overlayRect.offsetMax = Vector2.zero;
+            tutorialPanel.GetComponent<Image>().color = new Color(0.035f, 0.025f, 0.02f, 0.82f);
+
+            GameObject card = new GameObject("TutorialCard_RT", typeof(RectTransform), typeof(Image));
+            card.transform.SetParent(overlayRect, false);
+            RectTransform cardRect = card.GetComponent<RectTransform>();
+            cardRect.anchorMin = new Vector2(0.09f, 0.20f);
+            cardRect.anchorMax = new Vector2(0.91f, 0.80f);
+            cardRect.offsetMin = Vector2.zero;
+            cardRect.offsetMax = Vector2.zero;
+            Image cardImage = card.GetComponent<Image>();
+            cardImage.sprite = CreateRoundedRectSprite();
+            cardImage.type = Image.Type.Sliced;
+            cardImage.color = new Color(0.20f, 0.09f, 0.025f, 0.98f);
+
+            TextMeshProUGUI title = CreateText(cardRect, "TutorialTitle_RT", "CÓMO JUGAR", 38f,
+                new Color(1f, 0.88f, 0.25f), TextAlignmentOptions.Center,
+                new Vector2(0.05f, 0.84f), new Vector2(0.95f, 0.96f), Vector2.zero, Vector2.zero);
+            title.fontStyle = FontStyles.Bold;
+
+            string instructions =
+                "1. Mantén pulsada una ficha y arrastra en horizontal o vertical.\n\n" +
+                "2. Une 3 o más fichas iguales para eliminarlas y sumar puntos.\n\n" +
+                "3. Pata: tablero nuevo · Hueso: limpia una fila · Bolsa: reorganiza.\n\n" +
+                "4. Alcanza el objetivo antes de que termine el tiempo.";
+            TextMeshProUGUI body = CreateText(cardRect, "TutorialBody_RT", instructions, 23f,
+                Color.white, TextAlignmentOptions.Left,
+                new Vector2(0.10f, 0.24f), new Vector2(0.90f, 0.80f), Vector2.zero, Vector2.zero);
+            body.enableWordWrapping = true;
+            body.textWrappingMode = TextWrappingModes.Normal;
+            body.lineSpacing = 4f;
+
+            Button closeButton = CreateSettingsButton(cardRect, "TutorialClose_RT",
+                new Vector2(0.25f, 0.07f), new Vector2(0.75f, 0.19f), out TextMeshProUGUI closeLabel);
+            closeLabel.text = "ENTENDIDO";
+            closeButton.onClick.AddListener(() => SetTutorialVisible(false));
+            tutorialPanel.SetActive(false);
+        }
+
+        public void SetTutorialVisible(bool visible)
+        {
+            if (tutorialPanel == null) return;
+            tutorialPanel.SetActive(visible);
+            tutorialPanel.transform.SetAsLastSibling();
         }
 
         private void ShowLevelSelect()
