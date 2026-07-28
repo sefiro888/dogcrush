@@ -65,9 +65,15 @@ namespace DogCrush.Board
 
             for (int x = 0; x < boardController.Columns; x++)
             {
-                int emptySlotsBelow = 0;
-                for (int y = 0; y < boardController.Rows; y++)
+                List<int> playableRows = new List<int>();
+                for (int row = 0; row < boardController.Rows; row++)
                 {
+                    if (boardController.IsPlayableCell(x, row)) playableRows.Add(row);
+                }
+                int emptySlotsBelow = 0;
+                for (int rowIndex = 0; rowIndex < playableRows.Count; rowIndex++)
+                {
+                    int y = playableRows[rowIndex];
                     PieceView current = boardController.GetPieceAt(x, y);
                     if (current == null)
                     {
@@ -75,7 +81,7 @@ namespace DogCrush.Board
                     }
                     else if (emptySlotsBelow > 0)
                     {
-                        int newY = y - emptySlotsBelow;
+                        int newY = playableRows[rowIndex - emptySlotsBelow];
                         boardController.SetPieceAt(x, y, null);
                         boardController.SetPieceAt(x, newY, current);
 
@@ -92,10 +98,12 @@ namespace DogCrush.Board
                 // 3. Fill empty top slots
                 for (int fillIndex = 0; fillIndex < emptySlotsBelow; fillIndex++)
                 {
-                    int targetY = boardController.Rows - emptySlotsBelow + fillIndex;
+                    int targetY = playableRows[playableRows.Count - emptySlotsBelow + fillIndex];
                     PieceType randomType = (PieceType)Random.Range(0, availableTypeCount);
 
-                    Vector3 spawnWorldPos = boardController.GridToWorldPosition(x, boardController.Rows + fillIndex + 1);
+                    Vector3 spawnWorldPos = boardController.GridToWorldPosition(
+                        x,
+                        playableRows[playableRows.Count - 1] + fillIndex + 1);
                     Vector3 targetWorldPos = boardController.GridToWorldPosition(x, targetY);
 
                     PieceView newPiece = spawner.SpawnPiece(randomType, x, targetY, spawnWorldPos);

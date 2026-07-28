@@ -140,6 +140,20 @@ namespace DogCrush.Board
             return grid[x, y];
         }
 
+        public bool IsPlayableCell(int x, int y)
+        {
+            if (!IsValidGridPos(x, y)) return false;
+            if (config.boardShape == Core.BoardShape.Full) return true;
+
+            // Diamond rows remain contiguous in each column, so gravity can
+            // compact them safely without crossing blocked cells.
+            float centerX = (Columns - 1) * 0.5f;
+            float centerY = (Rows - 1) * 0.5f;
+            float verticalRatio = Mathf.Abs(y - centerY) / Mathf.Max(0.5f, centerY);
+            float halfWidth = Mathf.Lerp(0.5f, centerX + 0.5f, 1f - verticalRatio);
+            return Mathf.Abs(x - centerX) <= halfWidth;
+        }
+
         public void SetPieceAt(int x, int y, PieceView piece)
         {
             if (IsValidGridPos(x, y))
@@ -162,6 +176,7 @@ namespace DogCrush.Board
             {
                 for (int y = 0; y < config.rows; y++)
                 {
+                    if (!IsPlayableCell(x, y)) continue;
                     PieceType type = (PieceType)Random.Range(0, availableTypeCount);
                     Vector3 targetWorldPos = GridToWorldPosition(x, y);
                     PieceView piece = spawner.SpawnPiece(type, x, y, targetWorldPos);
@@ -245,8 +260,23 @@ namespace DogCrush.Board
             if (grid == null || spawner == null || config == null ||
                 config.columns < 2 || config.rows < 2) return;
 
-            int x = Mathf.Clamp(config.columns / 2, 0, config.columns - 2);
-            int y = Mathf.Clamp(config.rows / 2, 0, config.rows - 2);
+            int x = -1;
+            int y = -1;
+            for (int candidateX = 0; candidateX < config.columns - 1 && x < 0; candidateX++)
+            {
+                for (int candidateY = 0; candidateY < config.rows - 1; candidateY++)
+                {
+                    if (IsPlayableCell(candidateX, candidateY) &&
+                        IsPlayableCell(candidateX + 1, candidateY) &&
+                        IsPlayableCell(candidateX, candidateY + 1))
+                    {
+                        x = candidateX;
+                        y = candidateY;
+                        break;
+                    }
+                }
+            }
+            if (x < 0) return;
             PieceType forcedType = PieceType.Dog;
             PieceView[] pattern =
             {
@@ -320,6 +350,7 @@ namespace DogCrush.Board
                 for (int y = 0; y < Rows; y++)
                 {
                     if (grid[x, y] != null) continue;
+                    if (!IsPlayableCell(x, y)) continue;
                     PieceType type = (PieceType)Random.Range(0, availableTypeCount);
                     grid[x, y] = spawner.SpawnPiece(type, x, y, GridToWorldPosition(x, y));
                 }

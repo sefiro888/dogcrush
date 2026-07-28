@@ -1,7 +1,21 @@
 using System;
+using DogCrush.Board;
 
 namespace DogCrush.Core
 {
+    public enum LevelObjectiveType
+    {
+        Score,
+        CollectPieces,
+        LongChain
+    }
+
+    public enum BoardShape
+    {
+        Full,
+        Diamond
+    }
+
     /// <summary>
     /// Data for one playable level. Keeping this separate from the game loop
     /// lets new levels change dimensions, pacing and goals without code edits.
@@ -16,5 +30,9 @@ namespace DogCrush.Core
         public int targetScore = 5000;
         public int typeCount = 5;
         public int minChainLength = 3;
+        public LevelObjectiveType objectiveType = LevelObjectiveType.Score;
+        public PieceType targetPieceType = PieceType.Dog;
+        public int targetAmount = 5000;
+        public BoardShape boardShape = BoardShape.Full;
     }
 }

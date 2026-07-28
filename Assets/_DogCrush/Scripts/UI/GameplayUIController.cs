@@ -47,6 +47,9 @@ namespace DogCrush.UI
         private int targetScore = 0;
         private int displayedScore = 0;
         private int levelTargetScore = 5000;
+        private int objectiveProgress = 0;
+        private string objectiveLabel = "PUNTOS";
+        private bool scoreIsObjective = true;
         private bool lastResultWasVictory;
         private Coroutine comboRoutine;
 
@@ -1053,11 +1056,33 @@ namespace DogCrush.UI
 
         public void SetLevelObjective(int level, int objectiveScore)
         {
+            scoreIsObjective = true;
+            objectiveLabel = "PUNTOS";
             levelTargetScore = Mathf.Max(1, objectiveScore);
+            objectiveProgress = 0;
             if (levelText != null)
             {
                 levelText.text = Mathf.Max(1, level).ToString();
             }
+            RefreshObjectiveText();
+        }
+
+        public void SetCustomObjective(int level, string label, int target, int initialProgress = 0)
+        {
+            scoreIsObjective = false;
+            objectiveLabel = string.IsNullOrWhiteSpace(label) ? "OBJETIVO" : label.ToUpperInvariant();
+            levelTargetScore = Mathf.Max(1, target);
+            objectiveProgress = Mathf.Clamp(initialProgress, 0, levelTargetScore);
+            if (levelText != null)
+            {
+                levelText.text = Mathf.Max(1, level).ToString();
+            }
+            RefreshObjectiveText();
+        }
+
+        public void UpdateObjectiveProgress(int progress)
+        {
+            objectiveProgress = Mathf.Clamp(progress, 0, levelTargetScore);
             RefreshObjectiveText();
         }
 
@@ -1082,7 +1107,8 @@ namespace DogCrush.UI
         {
             if (scoreText != null)
             {
-                scoreText.text = $"{displayedScore:N0} / {levelTargetScore:N0}";
+                int progress = scoreIsObjective ? displayedScore : objectiveProgress;
+                scoreText.text = $"{objectiveLabel} {progress:N0} / {levelTargetScore:N0}";
             }
         }
 

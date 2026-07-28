@@ -39,6 +39,8 @@ namespace DogCrush.Core
         private bool shuffleBoosterAvailable;
         private bool boneBoosterAvailable;
         private bool foodBoosterAvailable;
+        private int objectiveProgress;
+        private int longestChain;
         private const string UnlockedLevelKey = "DogCrush_UnlockedLevel";
         private const string LevelStarsKeyPrefix = "DogCrush_LevelStars_";
         private const string LivesKey = "DogCrush_Lives";
@@ -149,7 +151,9 @@ namespace DogCrush.Core
             {
                 uiController.HideGameOver();
                 uiController.UpdateChainInfo(0, "");
-                uiController.SetLevelObjective(currentLevel, CurrentTargetScore);
+                objectiveProgress = 0;
+                longestChain = 0;
+                ApplyCurrentObjectiveToUI();
                 uiController.UpdateLives(lives, MaxLives);
                 shuffleBoosterAvailable = true;
                 boneBoosterAvailable = true;
@@ -190,6 +194,67 @@ namespace DogCrush.Core
             // and would render as a blank cell on higher levels.
             boardController.config.typeCount = Mathf.Clamp(definition.typeCount, 1, 5);
             boardController.config.minChainLength = Mathf.Clamp(definition.minChainLength, 3, 5);
+            boardController.config.boardShape = definition.boardShape;
+        }
+
+        private void ApplyCurrentObjectiveToUI()
+        {
+            if (uiController == null) return;
+            LevelDefinition definition = CurrentLevelDefinition;
+            switch (definition.objectiveType)
+            {
+                case LevelObjectiveType.CollectPieces:
+                    uiController.SetCustomObjective(
+                        currentLevel,
+                        $"{definition.targetPieceType} x",
+                        definition.targetAmount,
+                        objectiveProgress);
+                    break;
+                case LevelObjectiveType.LongChain:
+                    uiController.SetCustomObjective(
+                        currentLevel,
+                        "CADENA",
+                        definition.targetAmount,
+                        longestChain);
+                    break;
+                default:
+                    uiController.SetLevelObjective(currentLevel, definition.targetScore);
+                    break;
+            }
+        }
+
+        private void UpdateObjectiveProgress(List<PieceView> chain)
+        {
+            LevelDefinition definition = CurrentLevelDefinition;
+            if (definition.objectiveType == LevelObjectiveType.CollectPieces && chain != null)
+            {
+                foreach (PieceView piece in chain)
+                {
+                    if (piece != null && piece.type == definition.targetPieceType)
+                        objectiveProgress++;
+                }
+            }
+            else if (definition.objectiveType == LevelObjectiveType.LongChain && chain != null)
+            {
+                longestChain = Mathf.Max(longestChain, chain.Count);
+                objectiveProgress = longestChain;
+            }
+
+            if (definition.objectiveType == LevelObjectiveType.Score)
+            {
+                objectiveProgress = scoreController != null ? scoreController.CurrentScore : 0;
+            }
+            uiController?.UpdateObjectiveProgress(objectiveProgress);
+        }
+
+        private bool IsCurrentObjectiveComplete()
+        {
+            LevelDefinition definition = CurrentLevelDefinition;
+            if (definition.objectiveType == LevelObjectiveType.Score)
+            {
+                return scoreController != null && scoreController.CurrentScore >= definition.targetScore;
+            }
+            return objectiveProgress >= definition.targetAmount;
         }
 
         private void EnsureLevelDefinitions()
@@ -209,7 +274,19 @@ namespace DogCrush.Core
                     durationSeconds = Mathf.Max(45f, 60f - (level - 1) * 2f),
                     targetScore = baseTargetScore + (level - 1) * targetIncreasePerLevel,
                     typeCount = 5,
-                    minChainLength = 3
+                    minChainLength = 3,
+                    objectiveType = level <= 3
+                        ? LevelObjectiveType.Score
+                        : level % 3 == 1
+                            ? LevelObjectiveType.CollectPieces
+                            : level % 3 == 2
+                                ? LevelObjectiveType.LongChain
+                                : LevelObjectiveType.Score,
+                    targetPieceType = level % 2 == 0 ? PieceType.Food : PieceType.Dog,
+                    targetAmount = level % 3 == 2 ? 6 : 10 + level * 2,
+                    boardShape = level >= 7 && level % 2 == 1
+                        ? BoardShape.Diamond
+                        : BoardShape.Full
                 });
             }
         }
@@ -225,6 +302,9 @@ namespace DogCrush.Core
             definition.columns = Mathf.Max(2, definition.columns);
             definition.durationSeconds = Mathf.Max(15f, definition.durationSeconds);
             definition.targetScore = Mathf.Max(100, definition.targetScore);
+            definition.targetAmount = Mathf.Max(1, definition.targetAmount);
+            definition.typeCount = Mathf.Clamp(definition.typeCount, 1, 5);
+            definition.minChainLength = Mathf.Clamp(definition.minChainLength, 3, 5);
             return definition;
         }
 
@@ -271,6 +351,7 @@ namespace DogCrush.Core
             }
 
             int pointsGained = scoreController != null ? scoreController.AddChainScore(chain.Count) : 0;
+            UpdateObjectiveProgress(chain);
 
             if (chain != null && chain.Count > 0)
             {
@@ -313,7 +394,7 @@ namespace DogCrush.Core
             {
                 StartCoroutine(gravityController.ProcessRemovalAndRefill(chain, () =>
                 {
-                    if (scoreController != null && scoreController.CurrentScore >= CurrentTargetScore)
+                    if (IsCurrentObjectiveComplete())
                     {
                         EndMatch(true);
                     }

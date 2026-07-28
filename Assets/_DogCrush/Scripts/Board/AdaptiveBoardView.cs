@@ -116,9 +116,11 @@ namespace DogCrush.Board
                         $"Cell_{x}_{y}",
                         0f,
                         cellSize,
-                        ((x + y) & 1) == 0
-                            ? new Color(0.31f, 0.12f, 0.055f, 1f)
-                            : new Color(0.265f, 0.09f, 0.04f, 1f),
+                        !board.IsPlayableCell(x, y)
+                            ? new Color(0.075f, 0.025f, 0.018f, 0.92f)
+                            : ((x + y) & 1) == 0
+                                ? new Color(0.31f, 0.12f, 0.055f, 1f)
+                                : new Color(0.265f, 0.09f, 0.04f, 1f),
                         -34);
                     Vector3 gridPosition = board.GridToWorldPosition(x, y);
                     cell.transform.position = new Vector3(

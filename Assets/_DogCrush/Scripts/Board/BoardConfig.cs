@@ -9,6 +9,7 @@ namespace DogCrush.Board
         [Range(3, 12)] public int columns = 8;
         [Range(3, 12)] public int rows = 8;
         [Range(3, 6)] public int typeCount = 5;
+        public DogCrush.Core.BoardShape boardShape = DogCrush.Core.BoardShape.Full;
 
         [Header("Piece Settings")]
         public float pieceSpacing = 0.55f;
