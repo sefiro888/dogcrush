@@ -48,6 +48,7 @@ namespace DogCrush.Core
         private const string LevelStarsKeyPrefix = "DogCrush_LevelStars_";
         private const string LivesKey = "DogCrush_Lives";
         private const int MaxLives = 5;
+        private const int MaxPlayableLevel = 10;
         private int lives;
 
         private void Start()
@@ -57,7 +58,10 @@ namespace DogCrush.Core
 
         public void InitializeGame()
         {
-            currentLevel = Mathf.Max(currentLevel, PlayerPrefs.GetInt(UnlockedLevelKey, 1));
+            currentLevel = Mathf.Clamp(
+                Mathf.Max(currentLevel, PlayerPrefs.GetInt(UnlockedLevelKey, 1)),
+                1,
+                MaxPlayableLevel);
             lives = Mathf.Clamp(PlayerPrefs.GetInt(LivesKey, MaxLives), 0, MaxLives);
             if (stateController == null) stateController = GetComponent<GameStateController>();
             if (audioController == null) audioController = GetComponent<AudioPlaceholderController>();
@@ -123,7 +127,8 @@ namespace DogCrush.Core
                 uiController.OnFoodBoosterRequested += UseFoodBooster;
                 uiController.OnLevelSelected += SelectLevel;
                 uiController.OnLevelSelectVisibilityChanged += HandleLevelSelectVisibilityChanged;
-                uiController.SetUnlockedLevel(PlayerPrefs.GetInt(UnlockedLevelKey, 1));
+                uiController.SetUnlockedLevel(Mathf.Clamp(
+                    PlayerPrefs.GetInt(UnlockedLevelKey, 1), 1, MaxPlayableLevel));
                 uiController.OnSoundToggleRequested += HandleSoundToggleRequested;
                 uiController.OnHapticsToggleRequested += HandleHapticsToggleRequested;
                 uiController.OnSettingsVisibilityChanged += HandleSettingsVisibilityChanged;
@@ -350,7 +355,8 @@ namespace DogCrush.Core
                     int previousStars = PlayerPrefs.GetInt(starsKey, 0);
                     PlayerPrefs.SetInt(starsKey, Mathf.Max(previousStars, stars));
                     PlayerPrefs.SetInt(UnlockedLevelKey, Mathf.Max(
-                        PlayerPrefs.GetInt(UnlockedLevelKey, 1), currentLevel + 1));
+                        PlayerPrefs.GetInt(UnlockedLevelKey, 1),
+                        Mathf.Min(MaxPlayableLevel, currentLevel + 1)));
                     PlayerPrefs.Save();
                 }
                 else
@@ -390,15 +396,15 @@ namespace DogCrush.Core
 
         public void StartNextLevel()
         {
-            currentLevel++;
+            currentLevel = Mathf.Min(MaxPlayableLevel, currentLevel + 1);
             StartNewMatch();
         }
 
         private void SelectLevel(int level)
         {
             int unlockedLevel = PlayerPrefs.GetInt(UnlockedLevelKey, 1);
-            if (level < 1 || level > unlockedLevel) return;
-            currentLevel = level;
+            if (level < 1 || level > unlockedLevel || level > MaxPlayableLevel) return;
+            currentLevel = Mathf.Clamp(level, 1, MaxPlayableLevel);
             StartNewMatch();
         }
 
