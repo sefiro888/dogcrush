@@ -10,9 +10,22 @@ namespace DogCrush.Board
         public PieceSpawner spawner;
 
         public bool IsResolving { get; private set; }
+        private int resolutionVersion;
+
+        /// <summary>
+        /// Invalidates an in-flight gravity operation before a new match or
+        /// board is created. This prevents delayed animation callbacks from
+        /// writing into the replacement grid.
+        /// </summary>
+        public void CancelResolution()
+        {
+            resolutionVersion++;
+            IsResolving = false;
+        }
 
         public IEnumerator ProcessRemovalAndRefill(List<PieceView> removedPieces, System.Action onComplete)
         {
+            int operationVersion = ++resolutionVersion;
             IsResolving = true;
 
             // 1. Despawn removed pieces
@@ -27,13 +40,19 @@ namespace DogCrush.Board
                 despawnIndex++;
                 piece.AnimateDespawn(despawnDelay, () =>
                 {
-                    spawner.RecyclePiece(piece);
+                    // Do not recycle a pooled view that may already belong to
+                    // the replacement board after a restart.
+                    if (operationVersion == resolutionVersion)
+                    {
+                        spawner.RecyclePiece(piece);
+                    }
                     pendingDespawns--;
                 });
             }
 
             while (pendingDespawns > 0)
             {
+                if (operationVersion != resolutionVersion) yield break;
                 yield return null;
             }
 
@@ -90,6 +109,7 @@ namespace DogCrush.Board
 
             while (movingPiecesCount > 0)
             {
+                if (operationVersion != resolutionVersion) yield break;
                 yield return null;
             }
 
@@ -100,6 +120,7 @@ namespace DogCrush.Board
             // Ensure grid has valid moves after refill
             boardController.EnsureHasValidMoves();
 
+            if (operationVersion != resolutionVersion) yield break;
             IsResolving = false;
             onComplete?.Invoke();
         }

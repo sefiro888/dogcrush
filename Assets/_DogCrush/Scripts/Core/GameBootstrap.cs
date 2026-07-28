@@ -137,6 +137,9 @@ namespace DogCrush.Core
 
         public void StartNewMatch()
         {
+            // Invalidate any delayed gravity/refill callbacks from the
+            // previous match before replacing its board.
+            gravityController?.CancelResolution();
             stateController.ChangeState(GameState.Initializing);
 
             ConfigureCurrentLevel();
