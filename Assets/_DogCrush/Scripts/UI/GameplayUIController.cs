@@ -168,8 +168,8 @@ namespace DogCrush.UI
             RectTransform topHudRect = CreateHudShell(
                 canvasRect,
                 "TopHud_RT",
-                new Vector2(0.055f, 0.90f),
-                new Vector2(0.945f, 0.975f));
+                new Vector2(0.035f, 0.875f),
+                new Vector2(0.965f, 0.985f));
 
             RectTransform levelSlot = CreateHudSlot(
                 topHudRect, "LevelSlot_RT", new Vector2(0.025f, 0.12f), new Vector2(0.245f, 0.88f));
@@ -235,8 +235,8 @@ namespace DogCrush.UI
             RectTransform bottomPillRect = CreateHudShell(
                 canvasRect,
                 "BottomHud_RT",
-                new Vector2(0.055f, 0.022f),
-                new Vector2(0.945f, 0.145f));
+                new Vector2(0.035f, 0.018f),
+                new Vector2(0.965f, 0.165f));
             bottomPillBg = bottomPillRect.GetComponent<Image>();
 
             RectTransform scoreSlot = CreateHudSlot(
@@ -258,6 +258,8 @@ namespace DogCrush.UI
             Image logo = CreateImage(canvasRect, "DogCrushLogo_RT", LoadUISprite("dogcrush-logo"),
                 new Vector2(0.23f, 0.675f), new Vector2(0.77f, 0.845f));
             logoRect = logo.rectTransform;
+            logo.gameObject.SetActive(false);
+            logoRect = null;
             ApplyResponsiveHudLayout();
 
             // The live chain count gets its own compact badge, clear of the logo.
@@ -452,6 +454,9 @@ namespace DogCrush.UI
             label.fontSizeMax = 14f;
             label.overflowMode = TextOverflowModes.Truncate;
             label.margin = new Vector4(4f, 0f, 4f, 0f);
+            Outline labelOutline = label.gameObject.AddComponent<Outline>();
+            labelOutline.effectColor = new Color(0.12f, 0.025f, 0.008f, 0.85f);
+            labelOutline.effectDistance = new Vector2(1.2f, -1.2f);
         }
 
         private TextMeshProUGUI CreateHudValue(
@@ -477,6 +482,9 @@ namespace DogCrush.UI
             value.fontSizeMax = fontSize;
             value.overflowMode = TextOverflowModes.Truncate;
             value.margin = new Vector4(5f, 0f, 5f, 0f);
+            Outline valueOutline = value.gameObject.AddComponent<Outline>();
+            valueOutline.effectColor = new Color(0.10f, 0.018f, 0.006f, 0.92f);
+            valueOutline.effectDistance = new Vector2(1.8f, -1.8f);
             return value;
         }
 
