@@ -87,7 +87,19 @@ namespace DogCrush.Gameplay
                 if (swapOrigin == null) return;
                 PieceView candidate = GetPieceAtPosition(worldPos);
                 if (candidate != null && IsCurrentBoardPiece(candidate) && BoardController.AreAdjacent(swapOrigin.gridX, swapOrigin.gridY, candidate.gridX, candidate.gridY))
-                    swapTarget = candidate;
+                {
+                    if (candidate != swapTarget)
+                    {
+                        if (swapTarget != null) boardController?.RestorePreviewSwap(swapOrigin, swapTarget);
+                        swapTarget = candidate;
+                        boardController?.PreviewSwap(swapOrigin, swapTarget);
+                    }
+                }
+                else if (swapTarget != null)
+                {
+                    boardController?.RestorePreviewSwap(swapOrigin, swapTarget);
+                    swapTarget = null;
+                }
                 return;
             }
             if (!IsSelecting) return;
@@ -156,6 +168,10 @@ namespace DogCrush.Gameplay
                     {
                         swapAnimating = true;
                         StartCoroutine(CompleteSwapAfterAnimation(matches));
+                    }
+                    else
+                    {
+                        boardController.RestorePreviewSwap(swapOrigin, swapTarget);
                     }
                 }
                 swapOrigin = null;

@@ -413,6 +413,20 @@ namespace DogCrush.Board
             return true;
         }
 
+        public void PreviewSwap(PieceView first, PieceView second)
+        {
+            if (first == null || second == null) return;
+            first.MoveToWorldPosition(GridToWorldPosition(second.gridX, second.gridY), 14f);
+            second.MoveToWorldPosition(GridToWorldPosition(first.gridX, first.gridY), 14f);
+        }
+
+        public void RestorePreviewSwap(PieceView first, PieceView second)
+        {
+            if (first == null || second == null) return;
+            first.MoveToWorldPosition(GridToWorldPosition(first.gridX, first.gridY), 14f);
+            second.MoveToWorldPosition(GridToWorldPosition(second.gridX, second.gridY), 14f);
+        }
+
         public List<PieceView> FindMatches()
         {
             var result = new HashSet<PieceView>();
