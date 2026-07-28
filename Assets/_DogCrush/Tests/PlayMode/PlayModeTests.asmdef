@@ -3,7 +3,8 @@
     "rootNamespace": "DogCrush.Tests.PlayMode",
     "references": [
         "UnityEngine.TestRunner",
-        "DogCrush.Runtime"
+        "DogCrush.Runtime",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

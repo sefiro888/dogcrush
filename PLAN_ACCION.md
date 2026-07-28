@@ -23,14 +23,14 @@ Antes de comenzar cada bloque importante se creará una rama `codex/...`. Solo s
 
 ## Estado funcional confirmado
 
-- [x] Tablero cuadrado `8x8` con 64 fichas.
+- [x] Tablero vertical `8x10` con 80 fichas.
 - [x] Cinco tipos de ficha visibles e interactivos.
 - [x] Selección por arrastre y multiplicador vivo.
 - [x] Puntuación, eliminación, gravedad y reposición.
 - [x] Temporizador, nivel, récord y reinicio.
 - [x] Reinicio sin conservar fichas de la partida anterior.
 - [x] Fondo vertical, marco, logo y controles inferiores integrados.
-- [x] Tres pruebas PlayMode aprobadas.
+- [x] Siete pruebas PlayMode y siete pruebas EditMode aprobadas.
 - [x] Compilación WebGL con cero errores.
 - [x] Validación manual en resolución móvil `390x844`.
 - [x] Publicación mediante GitHub Pages.
@@ -61,24 +61,24 @@ Antes de comenzar cada bloque importante se creará una rama `codex/...`. Solo s
 ## Fase 2 — Composición móvil definitiva
 
 - [ ] Definir una composición maestra vertical basada en `resultadodeseado.png`.
-- [ ] Separar claramente fondo, cabecera, logo, tablero, fichas y barra inferior.
+- [x] Separar claramente fondo, cabecera, logo, tablero, fichas y barra inferior.
 - [ ] Ajustar jerarquía y separación entre HUD, logo y tablero.
-- [ ] Mantener el tablero cuadrado sin deformación en todas las resoluciones.
+- [x] Mantener el tablero cuadrado sin deformación en todas las resoluciones.
 - [ ] Aplicar zonas seguras superiores e inferiores.
-- [ ] Evitar fondos blancos, huecos accidentales y recortes del marco.
-- [ ] Validar `360x800`, `390x844` y `430x932`.
+- [x] Evitar fondos blancos, huecos accidentales y recortes del marco.
+- [x] Validar `360x800`, `390x844` y `430x932`.
 - [ ] Mantener una composición de escritorio razonable sin perjudicar el móvil.
 
 **Criterio de salida:** la pantalla completa se ve equilibrada y sin deformaciones en los tres tamaños móviles.
 
 ## Fase 3 — Tablero definitivo
 
-- [ ] Convertir el tablero en un componente independiente y predecible.
-- [ ] Separar marco de madera, fondo interior y cuadrícula.
+- [x] Convertir el tablero en un componente independiente y predecible.
+- [x] Separar marco de madera, fondo interior y cuadrícula.
 - [ ] Ajustar el marco al aspecto cálido, compacto y redondeado de la referencia.
-- [ ] Hacer visibles las 64 casillas sin competir con las fichas.
-- [ ] Normalizar márgenes interiores y separación entre fichas.
-- [ ] Impedir que una sustitución del marco altere posiciones o tamaño de las fichas.
+- [x] Hacer visibles las 80 casillas sin competir con las fichas.
+- [x] Normalizar márgenes interiores y separación entre fichas.
+- [x] Impedir que una sustitución del marco altere posiciones o tamaño de las fichas.
 
 **Criterio de salida:** el tablero puede cambiar de arte sin romper la cuadrícula ni la interacción.
 
@@ -110,15 +110,15 @@ Antes de comenzar cada bloque importante se creará una rama `codex/...`. Solo s
 
 ## Fase 6 — Sensación de juego
 
-- [ ] Añadir contorno o brillo controlado durante la selección.
-- [ ] Añadir línea suave entre las fichas seleccionadas.
-- [ ] Aplicar un pequeño aumento de escala a la cadena activa.
-- [ ] Animar el multiplicador vivo.
-- [ ] Añadir desaparición, destello y partículas al completar una cadena.
-- [ ] Añadir caída con rebote ligero.
-- [ ] Incorporar sonidos coherentes y control de volumen.
-- [ ] Añadir vibración opcional en dispositivos compatibles.
-- [ ] Mantener estabilidad y claridad con cadenas largas.
+- [x] Añadir contorno o brillo controlado durante la selección.
+- [x] Añadir línea suave entre las fichas seleccionadas.
+- [x] Aplicar un pequeño aumento de escala a la cadena activa.
+- [x] Animar el multiplicador vivo.
+- [x] Añadir desaparición, destello y partículas al completar una cadena.
+- [x] Añadir caída y reposición escalonadas con movimiento suave.
+- [x] Incorporar sonidos coherentes y control de volumen persistente.
+- [x] Añadir vibración opcional en dispositivos compatibles.
+- [x] Mantener estabilidad y claridad con cadenas largas.
 
 **Criterio de salida:** seleccionar y eliminar fichas transmite respuesta inmediata sin saturar la pantalla.
 
@@ -144,7 +144,9 @@ Antes de comenzar cada bloque importante se creará una rama `codex/...`. Solo s
 
 ## Próximo objetivo inmediato
 
-Trabajar únicamente en **Fase 2 — Composición móvil definitiva**, conservando la jugabilidad y las fichas actuales. Cuando las tres resoluciones objetivo estén aprobadas, se cerrará esa fase antes de modificar el tablero o volver a generar ilustraciones.
+Iniciar la **Fase 4 — Familia visual de fichas** como un conjunto completo, conservando la composición móvil, el tablero y la sensación de juego ya aprobados.
+
+**Estado validado en la rama `codex/tablero-adaptable`:** tablero adaptable 8×10, selección únicamente horizontal y vertical, brillo y escala de cadena, línea de conexión, contador vivo, desaparición con destello, partículas, reposición escalonada, efectos de sonido generados en tiempo real, volumen persistente y vibración opcional. Validado con 7 pruebas EditMode, 7 pruebas PlayMode, WebGL sin errores de compilación y revisión local a 390×844.
 
 ## Método de trabajo
 

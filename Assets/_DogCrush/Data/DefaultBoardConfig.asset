@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DefaultBoardConfig
   m_EditorClassIdentifier: DogCrush.Runtime::DogCrush.Board.BoardConfig
   columns: 8
-  rows: 8
+  rows: 10
   typeCount: 5
   pieceSpacing: 0.55
   fallSpeed: 14

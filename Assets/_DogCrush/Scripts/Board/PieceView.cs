@@ -16,15 +16,22 @@ namespace DogCrush.Board
         public SpriteRenderer shadowRenderer;
 
         private Vector3 defaultScale = Vector3.one * 0.95f;
+        private Color baseColor = Color.white;
+        private int defaultMainSortingOrder;
+        private int defaultGlowSortingOrder;
         private CircleCollider2D interactionCollider;
         private Coroutine moveCoroutine;
         private Coroutine pulseCoroutine;
+
+        public bool IsSelected { get; private set; }
 
         private void Awake()
         {
             if (mainRenderer == null)
                 mainRenderer = GetComponent<SpriteRenderer>();
             interactionCollider = GetComponent<CircleCollider2D>();
+            defaultMainSortingOrder = mainRenderer != null ? mainRenderer.sortingOrder : 10;
+            defaultGlowSortingOrder = selectionGlow != null ? selectionGlow.sortingOrder : 9;
 
             defaultScale = transform.localScale;
             if (defaultScale == Vector3.zero) defaultScale = Vector3.one * 0.95f;
@@ -43,6 +50,8 @@ namespace DogCrush.Board
             {
                 mainRenderer.sprite = iconSprite;
                 mainRenderer.color = pieceColor;
+                mainRenderer.sortingOrder = defaultMainSortingOrder;
+                baseColor = pieceColor;
             }
 
             NormalizeVisualSize(pieceType, iconSprite);
@@ -94,9 +103,26 @@ namespace DogCrush.Board
 
         public void SetSelected(bool isSelected)
         {
+            SetSelected(isSelected, 0);
+        }
+
+        public void SetSelected(bool isSelected, int selectionOrder)
+        {
+            IsSelected = isSelected;
+
             if (selectionGlow != null)
             {
                 selectionGlow.gameObject.SetActive(isSelected);
+                selectionGlow.sortingOrder = isSelected
+                    ? 19 + Mathf.Clamp(selectionOrder, 0, 8)
+                    : defaultGlowSortingOrder;
+            }
+
+            if (mainRenderer != null)
+            {
+                mainRenderer.sortingOrder = isSelected
+                    ? 20 + Mathf.Clamp(selectionOrder, 0, 8)
+                    : defaultMainSortingOrder;
             }
 
             if (isSelected)
@@ -114,6 +140,7 @@ namespace DogCrush.Board
                     pulseCoroutine = null;
                 }
                 transform.localScale = defaultScale;
+                if (mainRenderer != null) mainRenderer.color = baseColor;
             }
         }
 
@@ -121,20 +148,37 @@ namespace DogCrush.Board
         {
             while (true)
             {
-                float scale = 1.22f + Mathf.Sin(Time.time * 12f) * 0.08f;
+                float wave = Mathf.Sin(Time.time * 9f);
+                float scale = 1.14f + wave * 0.025f;
                 transform.localScale = defaultScale * scale;
+
+                if (selectionGlow != null)
+                {
+                    Color glowColor = selectionGlow.color;
+                    glowColor.a = 0.58f + wave * 0.16f;
+                    selectionGlow.color = glowColor;
+                }
                 yield return null;
             }
         }
 
         public void MoveToWorldPosition(Vector3 targetPos, float speed, System.Action onComplete = null)
         {
+            MoveToWorldPosition(targetPos, speed, 0f, onComplete);
+        }
+
+        public void MoveToWorldPosition(
+            Vector3 targetPos,
+            float speed,
+            float delay,
+            System.Action onComplete = null)
+        {
             if (moveCoroutine != null)
                 StopCoroutine(moveCoroutine);
 
             if (gameObject.activeInHierarchy)
             {
-                moveCoroutine = StartCoroutine(MoveWithFluidBounceRoutine(targetPos, speed, onComplete));
+                moveCoroutine = StartCoroutine(MoveWithFluidBounceRoutine(targetPos, speed, delay, onComplete));
             }
             else
             {
@@ -143,8 +187,17 @@ namespace DogCrush.Board
             }
         }
 
-        private IEnumerator MoveWithFluidBounceRoutine(Vector3 targetPos, float speed, System.Action onComplete)
+        private IEnumerator MoveWithFluidBounceRoutine(
+            Vector3 targetPos,
+            float speed,
+            float delay,
+            System.Action onComplete)
         {
+            if (delay > 0f)
+            {
+                yield return new WaitForSeconds(delay);
+            }
+
             Vector3 startPos = transform.position;
             float totalDistance = Vector3.Distance(startPos, targetPos);
             if (totalDistance < 0.001f)
@@ -203,9 +256,14 @@ namespace DogCrush.Board
 
         public void AnimateDespawn(System.Action onComplete)
         {
+            AnimateDespawn(0f, onComplete);
+        }
+
+        public void AnimateDespawn(float delay, System.Action onComplete)
+        {
             if (gameObject.activeInHierarchy)
             {
-                StartCoroutine(DespawnRoutine(onComplete));
+                StartCoroutine(DespawnRoutine(delay, onComplete));
             }
             else
             {
@@ -213,31 +271,49 @@ namespace DogCrush.Board
             }
         }
 
-        private IEnumerator DespawnRoutine(System.Action onComplete)
+        private IEnumerator DespawnRoutine(float delay, System.Action onComplete)
         {
+            if (delay > 0f)
+            {
+                yield return new WaitForSeconds(delay);
+            }
+
             float elapsed = 0f;
-            float duration = 0.18f;
+            float duration = 0.22f;
             Vector3 startScale = transform.localScale;
-            Vector3 popScale = startScale * 1.35f;
+            Vector3 popScale = startScale * 1.28f;
 
             while (elapsed < duration)
             {
                 elapsed += Time.deltaTime;
                 float t = elapsed / duration;
 
-                if (t < 0.3f)
+                if (t < 0.28f)
                 {
-                    transform.localScale = Vector3.Lerp(startScale, popScale, t / 0.3f);
+                    float popT = t / 0.28f;
+                    transform.localScale = Vector3.Lerp(startScale, popScale, popT);
+                    if (mainRenderer != null)
+                    {
+                        mainRenderer.color = Color.Lerp(baseColor, Color.white, popT);
+                    }
                 }
                 else
                 {
-                    transform.localScale = Vector3.Lerp(popScale, Vector3.zero, (t - 0.3f) / 0.7f);
+                    float vanishT = (t - 0.28f) / 0.72f;
+                    transform.localScale = Vector3.Lerp(popScale, Vector3.zero, vanishT);
+                    if (mainRenderer != null)
+                    {
+                        Color fadingColor = Color.Lerp(Color.white, baseColor, vanishT);
+                        fadingColor.a = 1f - vanishT;
+                        mainRenderer.color = fadingColor;
+                    }
                 }
 
                 yield return null;
             }
 
             transform.localScale = defaultScale;
+            if (mainRenderer != null) mainRenderer.color = baseColor;
             onComplete?.Invoke();
         }
     }

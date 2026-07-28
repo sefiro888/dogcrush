@@ -721,7 +721,7 @@ namespace DogCrush.EditorTool
             {
                 config = ScriptableObject.CreateInstance<BoardConfig>();
                 config.columns = 8;
-                config.rows = 8;
+                config.rows = 10;
                 config.typeCount = 5;
                 config.pieceSpacing = 1.15f;
                 config.fallSpeed = 16.0f;
@@ -812,6 +812,7 @@ namespace DogCrush.EditorTool
             GameTimer gameTimer = managerGo.AddComponent<GameTimer>();
             FeedbackController feedbackController = managerGo.AddComponent<FeedbackController>();
             AudioPlaceholderController audioController = managerGo.AddComponent<AudioPlaceholderController>();
+            HapticFeedbackController hapticController = managerGo.AddComponent<HapticFeedbackController>();
             ParticleEffectController particleController = managerGo.AddComponent<ParticleEffectController>();
             particleController.pawSprite = pawParticle;
             GameBootstrap bootstrap = managerGo.AddComponent<GameBootstrap>();
@@ -841,8 +842,8 @@ namespace DogCrush.EditorTool
             lineView.lineRenderer = lr;
             lr.startColor = new Color(1f, 0.85f, 0.15f, 0.95f);
             lr.endColor = new Color(1f, 0.48f, 0.1f, 0.95f);
-            lr.startWidth = 0.28f;
-            lr.endWidth = 0.28f;
+            lr.startWidth = 0.13f;
+            lr.endWidth = 0.13f;
 
             // Wire Controller Dependencies
             boardController.config = config;
@@ -864,6 +865,7 @@ namespace DogCrush.EditorTool
             bootstrap.feedbackController = feedbackController;
             bootstrap.particleController = particleController;
             bootstrap.audioController = audioController;
+            bootstrap.hapticController = hapticController;
 
             // 7. Canvas UI Setup
             Canvas canvas = CreateGameplayCanvas(bootstrap, feedbackController, timerFill);
