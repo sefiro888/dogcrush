@@ -127,11 +127,13 @@ namespace DogCrush.Board
         {
             ClearBoard();
 
+            int availableTypeCount = Mathf.Clamp(config.typeCount, 1, (int)PieceType.Collar + 1);
+
             for (int x = 0; x < config.columns; x++)
             {
                 for (int y = 0; y < config.rows; y++)
                 {
-                    PieceType type = (PieceType)Random.Range(0, config.typeCount);
+                    PieceType type = (PieceType)Random.Range(0, availableTypeCount);
                     Vector3 targetWorldPos = GridToWorldPosition(x, y);
                     PieceView piece = spawner.SpawnPiece(type, x, y, targetWorldPos);
                     grid[x, y] = piece;
@@ -198,6 +200,44 @@ namespace DogCrush.Board
                 ShuffleBoardTypes();
                 safetyCounter++;
             }
+
+            // A shuffled distribution can still be unlucky, especially on
+            // small/custom boards. Never leave the player with a dead board:
+            // create one guaranteed orthogonal triplet as a deterministic
+            // fallback after the shuffle budget is exhausted.
+            if (!HasAnyValidMove())
+            {
+                ForceValidMovePattern();
+            }
+        }
+
+        private void ForceValidMovePattern()
+        {
+            if (grid == null || spawner == null || config == null ||
+                config.columns < 2 || config.rows < 2) return;
+
+            int x = Mathf.Clamp(config.columns / 2, 0, config.columns - 2);
+            int y = Mathf.Clamp(config.rows / 2, 0, config.rows - 2);
+            PieceType forcedType = PieceType.Dog;
+            PieceView[] pattern =
+            {
+                grid[x, y],
+                grid[x + 1, y],
+                grid[x, y + 1]
+            };
+
+            foreach (PieceView piece in pattern)
+            {
+                if (piece != null)
+                {
+                    piece.Initialize(
+                        forcedType,
+                        piece.gridX,
+                        piece.gridY,
+                        spawner.GetSpriteForType(forcedType),
+                        spawner.GetColorForType(forcedType));
+                }
+            }
         }
 
         public void ShuffleBoardTypes()
@@ -245,12 +285,13 @@ namespace DogCrush.Board
         public void FillMissingCells()
         {
             if (config == null || grid == null || spawner == null) return;
+            int availableTypeCount = Mathf.Clamp(config.typeCount, 1, (int)PieceType.Collar + 1);
             for (int x = 0; x < Columns; x++)
             {
                 for (int y = 0; y < Rows; y++)
                 {
                     if (grid[x, y] != null) continue;
-                    PieceType type = (PieceType)Random.Range(0, config.typeCount);
+                    PieceType type = (PieceType)Random.Range(0, availableTypeCount);
                     grid[x, y] = spawner.SpawnPiece(type, x, y, GridToWorldPosition(x, y));
                 }
             }
