@@ -172,7 +172,7 @@ namespace DogCrush.UI
                 new Vector2(0.965f, 0.985f));
 
             RectTransform levelSlot = CreateHudSlot(
-                topHudRect, "LevelSlot_RT", new Vector2(0.025f, 0.10f), new Vector2(0.235f, 0.90f));
+                topHudRect, "LevelSlot_RT", new Vector2(0.025f, 0.12f), new Vector2(0.245f, 0.88f));
             CreateHudLabel(levelSlot, "LevelLabel_RT", "NIVEL");
             levelText = CreateHudValue(levelSlot, "LevelText_RT", "1", 27f);
             Button levelSelectButton = levelSlot.gameObject.AddComponent<Button>();
@@ -180,12 +180,12 @@ namespace DogCrush.UI
             levelSelectButton.onClick.AddListener(ShowLevelSelect);
 
             RectTransform recordSlot = CreateHudSlot(
-                topHudRect, "RecordSlot_RT", new Vector2(0.245f, 0.10f), new Vector2(0.405f, 0.90f));
+                topHudRect, "RecordSlot_RT", new Vector2(0.26f, 0.12f), new Vector2(0.50f, 0.88f));
             CreateHudLabel(recordSlot, "RecordLabel_RT", "RÉCORD");
             highScoreText = CreateHudValue(recordSlot, "HighScoreText_RT", "0", 24f);
 
             RectTransform timerSlot = CreateHudSlot(
-                topHudRect, "TimerSlot_RT", new Vector2(0.415f, 0.06f), new Vector2(0.675f, 0.94f));
+                topHudRect, "TimerSlot_RT", new Vector2(0.515f, 0.12f), new Vector2(0.755f, 0.88f));
             CreateHudLabel(timerSlot, "TimerLabel_RT", "TIEMPO");
             timerText = CreateHudValue(timerSlot, "TimerText_RT", "60s", 27f);
 
@@ -206,7 +206,7 @@ namespace DogCrush.UI
             timerBarFill.fillAmount = 1f;
 
             RectTransform livesSlot = CreateHudSlot(
-                topHudRect, "LivesSlot_RT", new Vector2(0.685f, 0.10f), new Vector2(0.975f, 0.90f));
+                topHudRect, "LivesSlot_RT", new Vector2(0.77f, 0.12f), new Vector2(0.975f, 0.88f));
             CreateHudLabel(livesSlot, "LivesLabel_RT", "VIDAS");
             livesIcon = CreateImage(
                 livesSlot,
@@ -357,7 +357,7 @@ namespace DogCrush.UI
                 $"{name}Frame",
                 Vector2.zero,
                 Vector2.one,
-                new Color(0.035f, 0.075f, 0.12f, 1f));
+                new Color(0.30f, 0.075f, 0.018f, 1f));
             outer.raycastTarget = false;
 
             Image wood = CreatePanelImage(
@@ -365,7 +365,7 @@ namespace DogCrush.UI
                 $"{name}Wood",
                 new Vector2(0.009f, 0.055f),
                 new Vector2(0.991f, 0.955f),
-                new Color(0.035f, 0.22f, 0.32f, 1f));
+                new Color(0.69f, 0.26f, 0.055f, 1f));
             wood.raycastTarget = false;
 
             Image surface = CreatePanelImage(
@@ -373,7 +373,7 @@ namespace DogCrush.UI
                 $"{name}Surface",
                 new Vector2(0.018f, 0.10f),
                 new Vector2(0.982f, 0.90f),
-                new Color(0.045f, 0.12f, 0.20f, 1f));
+                new Color(0.47f, 0.14f, 0.035f, 1f));
             surface.raycastTarget = false;
 
             Image sheen = CreatePanelImage(
@@ -381,12 +381,8 @@ namespace DogCrush.UI
                 $"{name}Sheen",
                 new Vector2(0.045f, 0.80f),
                 new Vector2(0.955f, 0.89f),
-                new Color(0.55f, 0.88f, 1f, 0.20f));
+                new Color(1f, 0.72f, 0.32f, 0.22f));
             sheen.raycastTarget = false;
-
-            Outline frameOutline = outer.gameObject.AddComponent<Outline>();
-            frameOutline.effectColor = new Color(1f, 0.62f, 0.16f, 0.78f);
-            frameOutline.effectDistance = new Vector2(2f, -2f);
 
             return surface.rectTransform;
         }
@@ -402,7 +398,7 @@ namespace DogCrush.UI
                 name,
                 anchorMin,
                 anchorMax,
-                new Color(0.025f, 0.07f, 0.12f, 0.94f));
+                new Color(0.16f, 0.04f, 0.018f, 0.94f));
             slot.raycastTarget = false;
 
             Image glow = CreatePanelImage(
@@ -410,7 +406,7 @@ namespace DogCrush.UI
                 $"{name}Glow",
                 new Vector2(0.035f, 0.68f),
                 new Vector2(0.965f, 0.90f),
-                new Color(1f, 0.68f, 0.22f, 0.18f));
+                new Color(1f, 0.52f, 0.16f, 0.11f));
             glow.raycastTarget = false;
             return slot.rectTransform;
         }
