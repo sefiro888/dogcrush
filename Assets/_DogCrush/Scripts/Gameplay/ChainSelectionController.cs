@@ -207,6 +207,13 @@ namespace DogCrush.Gameplay
 
         private PieceView GetPieceAtPosition(Vector2 worldPos)
         {
+            // Prefer the logical grid hitbox. It gives each cell a forgiving
+            // finger-sized target without overlapping neighbouring colliders.
+            PieceView gridPiece = boardController != null
+                ? boardController.GetPieceAtWorldPosition(worldPos)
+                : null;
+            if (gridPiece != null) return gridPiece;
+
             Collider2D hit = Physics2D.OverlapPoint(worldPos);
             if (hit != null)
             {

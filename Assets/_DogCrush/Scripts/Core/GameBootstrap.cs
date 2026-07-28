@@ -27,7 +27,7 @@ namespace DogCrush.Core
         [Header("Level Progress")]
         [Min(1)] public int currentLevel = 1;
         [Min(100)] public int baseTargetScore = 5000;
-        [Min(0)] public int targetIncreasePerLevel = 2500;
+        [Min(0)] public int targetIncreasePerLevel = 2000;
 
         private int CurrentTargetScore =>
             baseTargetScore + Mathf.Max(0, currentLevel - 1) * targetIncreasePerLevel;
@@ -40,7 +40,9 @@ namespace DogCrush.Core
             _ => 11
         };
         private int CurrentBoardColumns => currentLevel >= 4 ? 9 : 8;
-        private float CurrentLevelDuration => Mathf.Max(35f, 60f - Mathf.Max(0, currentLevel - 1) * 3f);
+        // Keep later levels challenging without making progression impossible
+        // on a phone: the timer drops gently and never below 45 seconds.
+        private float CurrentLevelDuration => Mathf.Max(45f, 60f - Mathf.Max(0, currentLevel - 1) * 2f);
         private bool shuffleBoosterAvailable;
         private bool boneBoosterAvailable;
         private bool foodBoosterAvailable;
@@ -429,8 +431,9 @@ namespace DogCrush.Core
         {
             if (!foodBoosterAvailable || stateController == null || !stateController.CanSelectPieces()) return;
             foodBoosterAvailable = false;
-            boardController?.ShuffleBoardTypes();
-            boardController?.EnsureHasValidMoves();
+            // The food bag is the time-support booster: it grants ten seconds
+            // instead of duplicating the paw's board refresh behaviour.
+            gameTimer?.AddTime(10f);
             uiController?.SetBoosterAvailability(shuffleBoosterAvailable, boneBoosterAvailable, false);
             audioController?.PlayUISound();
             hapticController?.PulseSelection();

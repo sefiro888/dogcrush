@@ -80,6 +80,35 @@ namespace DogCrush.Board
             return boardOrigin + new Vector3(x * activePieceSpacing, y * activePieceSpacing, 0f);
         }
 
+        /// <summary>
+        /// Resolves a finger position to the nearest logical cell. Using the
+        /// grid layout instead of relying only on a small sprite collider is
+        /// much more forgiving on narrow mobile screens.
+        /// </summary>
+        public bool TryGetGridPosition(Vector2 worldPosition, out int x, out int y)
+        {
+            x = 0;
+            y = 0;
+            if (grid == null || activePieceSpacing <= 0.001f) return false;
+
+            float localX = (worldPosition.x - boardOrigin.x) / activePieceSpacing;
+            float localY = (worldPosition.y - boardOrigin.y) / activePieceSpacing;
+            x = Mathf.RoundToInt(localX);
+            y = Mathf.RoundToInt(localY);
+            if (!IsValidGridPos(x, y)) return false;
+
+            Vector2 cellCenter = GridToWorldPosition(x, y);
+            float hitRadius = activePieceSpacing * 0.54f;
+            return Vector2.Distance(worldPosition, cellCenter) <= hitRadius;
+        }
+
+        public PieceView GetPieceAtWorldPosition(Vector2 worldPosition)
+        {
+            return TryGetGridPosition(worldPosition, out int x, out int y)
+                ? GetPieceAt(x, y)
+                : null;
+        }
+
         public void RefreshAdaptiveLayout()
         {
             if (config == null || grid == null) return;
