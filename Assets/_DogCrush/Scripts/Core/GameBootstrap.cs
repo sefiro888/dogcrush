@@ -73,6 +73,7 @@ namespace DogCrush.Core
                 selectionController.OnChainCompleted += HandleChainCompleted;
                 selectionController.OnChainCancelled += HandleChainCancelled;
                 selectionController.OnChainUpdated += HandleChainUpdated;
+                selectionController.OnMoveCompleted += HandleMatch3Move;
             }
 
             if (scoreController != null)
@@ -406,6 +407,12 @@ namespace DogCrush.Core
                     {
                         EndMatch(true);
                     }
+                    else if (boardController != null && boardController.FindMatches().Count >= 3)
+                    {
+                        // Resolve automatic cascades before unlocking input.
+                        stateController.ChangeState(GameState.Playing);
+                        HandleMatch3Move(boardController.FindMatches());
+                    }
                     else if (gameTimer != null && gameTimer.RemainingTime <= 0)
                     {
                         EndMatch(false);
@@ -416,6 +423,12 @@ namespace DogCrush.Core
                     }
                 }));
             }
+        }
+
+        private void HandleMatch3Move(List<PieceView> matches)
+        {
+            if (matches == null || matches.Count < 3 || !stateController.CanSelectPieces()) return;
+            HandleChainCompleted(matches);
         }
 
         private static Color GetPieceAccentColor(PieceType type)

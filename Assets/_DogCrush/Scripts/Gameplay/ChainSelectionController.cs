@@ -16,8 +16,13 @@ namespace DogCrush.Gameplay
         public System.Action<List<PieceView>> OnChainCompleted;
         public System.Action OnChainCancelled;
         public System.Action<int, PieceType> OnChainUpdated;
+        public System.Action<List<PieceView>> OnMoveCompleted;
+        [Header("Input mode")]
+        public bool adjacentSwapMode = true;
 
         private readonly List<PieceView> selectedChain = new List<PieceView>();
+        private PieceView swapOrigin;
+        private PieceView swapTarget;
         public List<PieceView> SelectedChain => selectedChain;
 
         public bool IsSelecting { get; private set; }
@@ -55,6 +60,13 @@ namespace DogCrush.Gameplay
             PieceView piece = GetPieceAtPosition(worldPos);
             if (!IsCurrentBoardPiece(piece)) return;
 
+            if (adjacentSwapMode)
+            {
+                swapOrigin = piece;
+                swapTarget = null;
+                return;
+            }
+
             IsSelecting = true;
             selectedChain.Clear();
             ActiveChainType = piece.type;
@@ -68,6 +80,14 @@ namespace DogCrush.Gameplay
 
         private void HandlePointerDrag(Vector2 worldPos)
         {
+            if (adjacentSwapMode)
+            {
+                if (swapOrigin == null) return;
+                PieceView candidate = GetPieceAtPosition(worldPos);
+                if (candidate != null && IsCurrentBoardPiece(candidate) && BoardController.AreAdjacent(swapOrigin.gridX, swapOrigin.gridY, candidate.gridX, candidate.gridY))
+                    swapTarget = candidate;
+                return;
+            }
             if (!IsSelecting) return;
             if (stateController != null && !stateController.CanSelectPieces())
             {
@@ -126,6 +146,17 @@ namespace DogCrush.Gameplay
 
         private void HandlePointerUp()
         {
+            if (adjacentSwapMode)
+            {
+                if (swapOrigin != null && swapTarget != null && boardController != null)
+                {
+                    if (boardController.TrySwapAndFindMatches(swapOrigin, swapTarget, out List<PieceView> matches))
+                        OnMoveCompleted?.Invoke(matches);
+                }
+                swapOrigin = null;
+                swapTarget = null;
+                return;
+            }
             if (!IsSelecting) return;
             IsSelecting = false;
 

@@ -213,23 +213,21 @@ namespace DogCrush.Board
                 {
                     PieceView current = grid[x, y];
                     if (current == null) continue;
-
-                    int matchingNeighbors = 0;
                     foreach (Vector2Int direction in OrthogonalDirections)
                     {
                         int nx = x + direction.x;
                         int ny = y + direction.y;
-                        if (IsValidGridPos(nx, ny) &&
-                            grid[nx, ny] != null &&
-                            grid[nx, ny].type == current.type)
+                        if (!IsValidGridPos(nx, ny) || grid[nx, ny] == null) continue;
+                        PieceView other = grid[nx, ny];
+                        grid[x, y] = other;
+                        grid[nx, ny] = current;
+                        bool createsMatch = FindMatches().Count >= 3;
+                        grid[x, y] = current;
+                        grid[nx, ny] = other;
+                        if (createsMatch)
                         {
-                            matchingNeighbors++;
+                            return true;
                         }
-                    }
-
-                    if (matchingNeighbors >= 2)
-                    {
-                        return true;
                     }
                 }
             }
@@ -391,6 +389,60 @@ namespace DogCrush.Board
                 }
             }
             return pieces.Count == 0 ? null : pieces[Random.Range(0, pieces.Count)];
+        }
+
+        public bool TrySwapAndFindMatches(PieceView first, PieceView second, out List<PieceView> matches)
+        {
+            matches = new List<PieceView>();
+            if (first == null || second == null || !AreAdjacent(first.gridX, first.gridY, second.gridX, second.gridY)) return false;
+            int ax = first.gridX, ay = first.gridY, bx = second.gridX, by = second.gridY;
+            grid[ax, ay] = second; grid[bx, by] = first;
+            first.SetGridPosition(bx, by); second.SetGridPosition(ax, ay);
+            first.transform.position = GridToWorldPosition(bx, by);
+            second.transform.position = GridToWorldPosition(ax, ay);
+            matches = FindMatches();
+            if (matches.Count < 3)
+            {
+                grid[ax, ay] = first; grid[bx, by] = second;
+                first.SetGridPosition(ax, ay); second.SetGridPosition(bx, by);
+                first.transform.position = GridToWorldPosition(ax, ay);
+                second.transform.position = GridToWorldPosition(bx, by);
+                matches.Clear();
+                return false;
+            }
+            return true;
+        }
+
+        public List<PieceView> FindMatches()
+        {
+            var result = new HashSet<PieceView>();
+            for (int y = 0; y < Rows; y++)
+            {
+                int runStart = 0;
+                while (runStart < Columns)
+                {
+                    PieceView start = GetPieceAt(runStart, y);
+                    if (start == null) { runStart++; continue; }
+                    int end = runStart + 1;
+                    while (end < Columns && GetPieceAt(end, y) != null && GetPieceAt(end, y).type == start.type) end++;
+                    if (end - runStart >= 3) for (int x = runStart; x < end; x++) result.Add(GetPieceAt(x, y));
+                    runStart = end;
+                }
+            }
+            for (int x = 0; x < Columns; x++)
+            {
+                int runStart = 0;
+                while (runStart < Rows)
+                {
+                    PieceView start = GetPieceAt(x, runStart);
+                    if (start == null) { runStart++; continue; }
+                    int end = runStart + 1;
+                    while (end < Rows && GetPieceAt(x, end) != null && GetPieceAt(x, end).type == start.type) end++;
+                    if (end - runStart >= 3) for (int y = runStart; y < end; y++) result.Add(GetPieceAt(x, y));
+                    runStart = end;
+                }
+            }
+            return new List<PieceView>(result);
         }
     }
 }
