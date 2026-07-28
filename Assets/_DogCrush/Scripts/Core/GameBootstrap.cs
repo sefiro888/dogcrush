@@ -28,21 +28,14 @@ namespace DogCrush.Core
         [Min(1)] public int currentLevel = 1;
         [Min(100)] public int baseTargetScore = 5000;
         [Min(0)] public int targetIncreasePerLevel = 2000;
+        [Tooltip("Optional per-level data. Empty lists receive the balanced defaults at runtime.")]
+        public List<LevelDefinition> levelDefinitions = new List<LevelDefinition>();
 
-        private int CurrentTargetScore =>
-            baseTargetScore + Mathf.Max(0, currentLevel - 1) * targetIncreasePerLevel;
-        private int CurrentBoardRows => currentLevel switch
-        {
-            1 => 8,
-            2 => 9,
-            3 => 10,
-            4 => 10,
-            _ => 11
-        };
-        private int CurrentBoardColumns => currentLevel >= 4 ? 9 : 8;
-        // Keep later levels challenging without making progression impossible
-        // on a phone: the timer drops gently and never below 45 seconds.
-        private float CurrentLevelDuration => Mathf.Max(45f, 60f - Mathf.Max(0, currentLevel - 1) * 2f);
+        private LevelDefinition CurrentLevelDefinition => GetLevelDefinition(currentLevel);
+        private int CurrentTargetScore => CurrentLevelDefinition.targetScore;
+        private int CurrentBoardRows => CurrentLevelDefinition.rows;
+        private int CurrentBoardColumns => CurrentLevelDefinition.columns;
+        private float CurrentLevelDuration => CurrentLevelDefinition.durationSeconds;
         private bool shuffleBoosterAvailable;
         private bool boneBoosterAvailable;
         private bool foodBoosterAvailable;
@@ -60,6 +53,7 @@ namespace DogCrush.Core
 
         public void InitializeGame()
         {
+            EnsureLevelDefinitions();
             currentLevel = Mathf.Clamp(
                 Mathf.Max(currentLevel, PlayerPrefs.GetInt(UnlockedLevelKey, 1)),
                 1,
@@ -188,12 +182,50 @@ namespace DogCrush.Core
         private void ConfigureCurrentLevel()
         {
             if (boardController == null || boardController.config == null) return;
+            LevelDefinition definition = CurrentLevelDefinition;
             boardController.config.columns = CurrentBoardColumns;
             boardController.config.rows = CurrentBoardRows;
             boardController.config.gameDurationSeconds = CurrentLevelDuration;
             // Only five real piece sprites exist. A sixth enum value is None
             // and would render as a blank cell on higher levels.
-            boardController.config.typeCount = 5;
+            boardController.config.typeCount = Mathf.Clamp(definition.typeCount, 1, 5);
+            boardController.config.minChainLength = Mathf.Clamp(definition.minChainLength, 3, 5);
+        }
+
+        private void EnsureLevelDefinitions()
+        {
+            if (levelDefinitions == null) levelDefinitions = new List<LevelDefinition>();
+            if (levelDefinitions.Count > 0) return;
+
+            // Balanced starting campaign. These values can later be edited in
+            // the inspector or replaced by custom board/obstacle definitions.
+            for (int level = 1; level <= MaxPlayableLevel; level++)
+            {
+                levelDefinitions.Add(new LevelDefinition
+                {
+                    level = level,
+                    rows = level == 1 ? 8 : level == 2 ? 9 : level <= 4 ? 10 : 11,
+                    columns = level >= 4 ? 9 : 8,
+                    durationSeconds = Mathf.Max(45f, 60f - (level - 1) * 2f),
+                    targetScore = baseTargetScore + (level - 1) * targetIncreasePerLevel,
+                    typeCount = 5,
+                    minChainLength = 3
+                });
+            }
+        }
+
+        private LevelDefinition GetLevelDefinition(int level)
+        {
+            EnsureLevelDefinitions();
+            int index = Mathf.Clamp(level - 1, 0, levelDefinitions.Count - 1);
+            LevelDefinition definition = levelDefinitions[index];
+            if (definition == null) definition = new LevelDefinition { level = level };
+            definition.level = level;
+            definition.rows = Mathf.Max(2, definition.rows);
+            definition.columns = Mathf.Max(2, definition.columns);
+            definition.durationSeconds = Mathf.Max(15f, definition.durationSeconds);
+            definition.targetScore = Mathf.Max(100, definition.targetScore);
+            return definition;
         }
 
         private void HandleChainUpdated(int count, PieceType type)

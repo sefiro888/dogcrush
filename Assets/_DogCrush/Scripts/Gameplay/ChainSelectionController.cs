@@ -113,6 +113,13 @@ namespace DogCrush.Gameplay
             {
                 AddPieceToChain(piece);
             }
+            else if (piece.type == ActiveChainType && !selectedChain.Contains(piece))
+            {
+                // A quick finger movement can skip over one or more cells
+                // between input frames. Fill a straight orthogonal path so
+                // fast swipes still select the intended chain.
+                AddSkippedOrthogonalPath(lastPiece, piece);
+            }
 
             UpdateLineView(worldPos);
         }
@@ -165,6 +172,38 @@ namespace DogCrush.Gameplay
 
             UpdateLineView();
             OnChainUpdated?.Invoke(selectedChain.Count, ActiveChainType);
+        }
+
+        private void AddSkippedOrthogonalPath(PieceView from, PieceView to)
+        {
+            if (from == null || to == null || boardController == null) return;
+            bool sameColumn = from.gridX == to.gridX;
+            bool sameRow = from.gridY == to.gridY;
+            if (!sameColumn && !sameRow) return;
+
+            int stepX = sameColumn ? 0 : (to.gridX > from.gridX ? 1 : -1);
+            int stepY = sameRow ? 0 : (to.gridY > from.gridY ? 1 : -1);
+            int x = from.gridX + stepX;
+            int y = from.gridY + stepY;
+            int checkX = x;
+            int checkY = y;
+            while (checkX != to.gridX || checkY != to.gridY)
+            {
+                PieceView intermediate = boardController.GetPieceAt(checkX, checkY);
+                if (intermediate == null || intermediate.type != ActiveChainType ||
+                    selectedChain.Contains(intermediate)) return;
+                checkX += stepX;
+                checkY += stepY;
+            }
+
+            while (x != to.gridX || y != to.gridY)
+            {
+                PieceView intermediate = boardController.GetPieceAt(x, y);
+                AddPieceToChain(intermediate);
+                x += stepX;
+                y += stepY;
+            }
+            AddPieceToChain(to);
         }
 
         private void ClearSelectionVisuals()
