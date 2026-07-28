@@ -143,7 +143,7 @@ namespace DogCrush.Board
         public bool IsPlayableCell(int x, int y)
         {
             if (!IsValidGridPos(x, y)) return false;
-            if (config.boardShape == Core.BoardShape.Full) return true;
+            if (config.boardShape == DogCrush.Core.BoardShape.Full) return true;
 
             // Diamond rows remain contiguous in each column, so gravity can
             // compact them safely without crossing blocked cells.
@@ -364,6 +364,17 @@ namespace DogCrush.Board
             for (int x = 0; x < Columns; x++)
             {
                 if (grid[x, row] != null) result.Add(grid[x, row]);
+            }
+            return result;
+        }
+
+        public List<PieceView> GetColumnPieces(int column)
+        {
+            var result = new List<PieceView>();
+            if (config == null || column < 0 || column >= Columns) return result;
+            for (int y = 0; y < Rows; y++)
+            {
+                if (grid[column, y] != null) result.Add(grid[column, y]);
             }
             return result;
         }

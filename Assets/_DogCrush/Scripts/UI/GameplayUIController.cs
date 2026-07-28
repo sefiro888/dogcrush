@@ -67,6 +67,9 @@ namespace DogCrush.UI
         private Button movesBoosterButton;
         private Button boneBoosterButton;
         private Button foodBoosterButton;
+        private TextMeshProUGUI movesCountText;
+        private TextMeshProUGUI boneCountText;
+        private TextMeshProUGUI foodCountText;
         private GameObject levelSelectPanel;
         private GameObject tutorialPanel;
         private readonly List<Button> levelButtons = new List<Button>();
@@ -489,12 +492,34 @@ namespace DogCrush.UI
                 $"{name}Slot",
                 new Vector2(anchorMinX, 0.10f),
                 new Vector2(anchorMaxX, 0.90f));
-            return CreateIconButton(
+            Button button = CreateIconButton(
                 slot,
                 name,
                 spriteName,
                 new Vector2(0.04f, 0.02f),
                 new Vector2(0.96f, 0.98f));
+            TextMeshProUGUI countText = CreateText(
+                slot,
+                $"{name}Count_RT",
+                "1",
+                16f,
+                Color.white,
+                TextAlignmentOptions.Center,
+                new Vector2(0.70f, 0.02f),
+                new Vector2(0.98f, 0.28f),
+                Vector2.zero,
+                Vector2.zero);
+            countText.fontStyle = FontStyles.Bold;
+            countText.enableAutoSizing = true;
+            countText.fontSizeMin = 10f;
+            countText.fontSizeMax = 18f;
+            countText.outlineWidth = 0.25f;
+            countText.raycastTarget = false;
+
+            if (name == "MovesButton_RT") movesCountText = countText;
+            else if (name == "BoneButton_RT") boneCountText = countText;
+            else if (name == "FoodButton_RT") foodCountText = countText;
+            return button;
         }
 
         private Sprite CreateRoundedRectSprite()
@@ -1091,6 +1116,13 @@ namespace DogCrush.UI
             if (movesBoosterButton != null) movesBoosterButton.interactable = shuffle;
             if (boneBoosterButton != null) boneBoosterButton.interactable = bone;
             if (foodBoosterButton != null) foodBoosterButton.interactable = food;
+        }
+
+        public void SetBoosterCounts(int shuffle, int bone, int food)
+        {
+            if (movesCountText != null) movesCountText.text = Mathf.Max(0, shuffle).ToString();
+            if (boneCountText != null) boneCountText.text = Mathf.Max(0, bone).ToString();
+            if (foodCountText != null) foodCountText.text = Mathf.Max(0, food).ToString();
         }
 
         public void UpdateLives(int currentLives, int maxLives = 5)

@@ -36,9 +36,9 @@ namespace DogCrush.Core
         private int CurrentBoardRows => CurrentLevelDefinition.rows;
         private int CurrentBoardColumns => CurrentLevelDefinition.columns;
         private float CurrentLevelDuration => CurrentLevelDefinition.durationSeconds;
-        private bool shuffleBoosterAvailable;
-        private bool boneBoosterAvailable;
-        private bool foodBoosterAvailable;
+        private int shuffleBoosterCount;
+        private int boneBoosterCount;
+        private int foodBoosterCount;
         private int objectiveProgress;
         private int longestChain;
         private const string UnlockedLevelKey = "DogCrush_UnlockedLevel";
@@ -155,10 +155,15 @@ namespace DogCrush.Core
                 longestChain = 0;
                 ApplyCurrentObjectiveToUI();
                 uiController.UpdateLives(lives, MaxLives);
-                shuffleBoosterAvailable = true;
-                boneBoosterAvailable = true;
-                foodBoosterAvailable = true;
-                uiController.SetBoosterAvailability(true, true, true);
+                LevelDefinition level = CurrentLevelDefinition;
+                shuffleBoosterCount = Mathf.Max(0, level.pawBoosterCount);
+                boneBoosterCount = Mathf.Max(0, level.boneBoosterCount);
+                foodBoosterCount = Mathf.Max(0, level.foodBoosterCount);
+                uiController.SetBoosterAvailability(
+                    shuffleBoosterCount > 0,
+                    boneBoosterCount > 0,
+                    foodBoosterCount > 0);
+                uiController.SetBoosterCounts(shuffleBoosterCount, boneBoosterCount, foodBoosterCount);
                 uiController.SetSettingsVisible(false);
             }
 
@@ -286,7 +291,10 @@ namespace DogCrush.Core
                     targetAmount = level % 3 == 2 ? 6 : 10 + level * 2,
                     boardShape = level >= 7 && level % 2 == 1
                         ? BoardShape.Diamond
-                        : BoardShape.Full
+                        : BoardShape.Full,
+                    pawBoosterCount = 1,
+                    boneBoosterCount = 1,
+                    foodBoosterCount = 1
                 });
             }
         }
@@ -530,43 +538,49 @@ namespace DogCrush.Core
 
         private void UseShuffleBooster()
         {
-            if (!shuffleBoosterAvailable || stateController == null || !stateController.CanSelectPieces() || boardController == null) return;
-            shuffleBoosterAvailable = false;
+            if (shuffleBoosterCount <= 0 || stateController == null || !stateController.CanSelectPieces() || boardController == null) return;
+            shuffleBoosterCount--;
             // The paw booster creates a completely fresh board.
             boardController.InitializeBoard();
             boardController.EnsureHasValidMoves();
-            uiController?.SetBoosterAvailability(false, boneBoosterAvailable, foodBoosterAvailable);
+            uiController?.SetBoosterAvailability(shuffleBoosterCount > 0, boneBoosterCount > 0, foodBoosterCount > 0);
+            uiController?.SetBoosterCounts(shuffleBoosterCount, boneBoosterCount, foodBoosterCount);
             audioController?.PlayUISound();
             hapticController?.PulseSelection();
         }
 
         private void UseFoodBooster()
         {
-            if (!foodBoosterAvailable || stateController == null || !stateController.CanSelectPieces()) return;
-            foodBoosterAvailable = false;
+            if (foodBoosterCount <= 0 || stateController == null || !stateController.CanSelectPieces()) return;
+            foodBoosterCount--;
             // The food bag is the time-support booster: it grants ten seconds
             // instead of duplicating the paw's board refresh behaviour.
             gameTimer?.AddTime(10f);
-            uiController?.SetBoosterAvailability(shuffleBoosterAvailable, boneBoosterAvailable, false);
+            uiController?.SetBoosterAvailability(shuffleBoosterCount > 0, boneBoosterCount > 0, foodBoosterCount > 0);
+            uiController?.SetBoosterCounts(shuffleBoosterCount, boneBoosterCount, foodBoosterCount);
             audioController?.PlayUISound();
             hapticController?.PulseSelection();
         }
 
         private void UseBoneBooster()
         {
-            if (!boneBoosterAvailable || stateController == null || !stateController.CanSelectPieces() || boardController == null || gravityController == null) return;
-            List<PieceView> row = boardController.GetRowPieces(boardController.Rows / 2);
-            if (row.Count == 0) return;
-            boneBoosterAvailable = false;
+            if (boneBoosterCount <= 0 || stateController == null || !stateController.CanSelectPieces() || boardController == null || gravityController == null) return;
+            bool clearsColumn = currentLevel % 2 == 0;
+            List<PieceView> line = clearsColumn
+                ? boardController.GetColumnPieces(boardController.Columns / 2)
+                : boardController.GetRowPieces(boardController.Rows / 2);
+            if (line.Count == 0) return;
+            boneBoosterCount--;
             stateController.ChangeState(GameState.Resolving);
-            uiController?.SetBoosterAvailability(shuffleBoosterAvailable, false, foodBoosterAvailable);
-            StartCoroutine(gravityController.ProcessRemovalAndRefill(row, () =>
+            uiController?.SetBoosterAvailability(shuffleBoosterCount > 0, boneBoosterCount > 0, foodBoosterCount > 0);
+            uiController?.SetBoosterCounts(shuffleBoosterCount, boneBoosterCount, foodBoosterCount);
+            StartCoroutine(gravityController.ProcessRemovalAndRefill(line, () =>
             {
                 if (gameTimer != null && gameTimer.RemainingTime <= 0f) EndMatch(false);
                 else stateController.ChangeState(GameState.Playing);
             }));
-            audioController?.PlayMatchSound(row.Count);
-            hapticController?.PulseMatch(row.Count);
+            audioController?.PlayMatchSound(line.Count);
+            hapticController?.PulseMatch(line.Count);
         }
 
         private void HandleSoundToggleRequested()
