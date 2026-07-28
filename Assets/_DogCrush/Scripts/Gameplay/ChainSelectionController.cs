@@ -53,7 +53,7 @@ namespace DogCrush.Gameplay
         {
             if (stateController != null && !stateController.CanSelectPieces()) return;
             PieceView piece = GetPieceAtPosition(worldPos);
-            if (piece == null) return;
+            if (!IsCurrentBoardPiece(piece)) return;
 
             IsSelecting = true;
             selectedChain.Clear();
@@ -77,6 +77,14 @@ namespace DogCrush.Gameplay
 
             PieceView piece = GetPieceAtPosition(worldPos);
             if (piece == null)
+            {
+                UpdateLineView(worldPos);
+                return;
+            }
+
+            // Ignore pooled/hidden views that may still receive a collider hit
+            // for one frame while the board is being rebuilt.
+            if (!IsCurrentBoardPiece(piece))
             {
                 UpdateLineView(worldPos);
                 return;
@@ -213,6 +221,13 @@ namespace DogCrush.Gameplay
             }
 
             return null;
+        }
+
+        private bool IsCurrentBoardPiece(PieceView piece)
+        {
+            if (piece == null || piece.type == PieceType.None || boardController == null)
+                return false;
+            return boardController.GetPieceAt(piece.gridX, piece.gridY) == piece;
         }
     }
 }
