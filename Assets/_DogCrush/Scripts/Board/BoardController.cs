@@ -398,18 +398,18 @@ namespace DogCrush.Board
             int ax = first.gridX, ay = first.gridY, bx = second.gridX, by = second.gridY;
             grid[ax, ay] = second; grid[bx, by] = first;
             first.SetGridPosition(bx, by); second.SetGridPosition(ax, ay);
-            first.transform.position = GridToWorldPosition(bx, by);
-            second.transform.position = GridToWorldPosition(ax, ay);
             matches = FindMatches();
             if (matches.Count < 3)
             {
                 grid[ax, ay] = first; grid[bx, by] = second;
                 first.SetGridPosition(ax, ay); second.SetGridPosition(bx, by);
-                first.transform.position = GridToWorldPosition(ax, ay);
-                second.transform.position = GridToWorldPosition(bx, by);
                 matches.Clear();
                 return false;
             }
+            // Keep the logical swap immediate, but animate both views toward
+            // the opposite cell so the player clearly sees the exchange.
+            first.MoveToWorldPosition(GridToWorldPosition(bx, by), 10f);
+            second.MoveToWorldPosition(GridToWorldPosition(ax, ay), 10f);
             return true;
         }
 

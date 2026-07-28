@@ -23,6 +23,7 @@ namespace DogCrush.Gameplay
         private readonly List<PieceView> selectedChain = new List<PieceView>();
         private PieceView swapOrigin;
         private PieceView swapTarget;
+        private bool swapAnimating;
         public List<PieceView> SelectedChain => selectedChain;
 
         public bool IsSelecting { get; private set; }
@@ -62,6 +63,7 @@ namespace DogCrush.Gameplay
 
             if (adjacentSwapMode)
             {
+                if (swapAnimating) return;
                 swapOrigin = piece;
                 swapTarget = null;
                 return;
@@ -151,7 +153,10 @@ namespace DogCrush.Gameplay
                 if (swapOrigin != null && swapTarget != null && boardController != null)
                 {
                     if (boardController.TrySwapAndFindMatches(swapOrigin, swapTarget, out List<PieceView> matches))
-                        OnMoveCompleted?.Invoke(matches);
+                    {
+                        swapAnimating = true;
+                        StartCoroutine(CompleteSwapAfterAnimation(matches));
+                    }
                 }
                 swapOrigin = null;
                 swapTarget = null;
@@ -182,6 +187,15 @@ namespace DogCrush.Gameplay
 
             selectedChain.Clear();
             ActiveChainType = PieceType.None;
+        }
+
+        private System.Collections.IEnumerator CompleteSwapAfterAnimation(List<PieceView> matches)
+        {
+            // Match resolution starts after both pieces have visibly crossed
+            // into their new cells, avoiding an instant teleport effect.
+            yield return new WaitForSeconds(0.28f);
+            swapAnimating = false;
+            OnMoveCompleted?.Invoke(matches);
         }
 
         private void AddPieceToChain(PieceView piece)
