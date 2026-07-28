@@ -181,7 +181,9 @@ namespace DogCrush.Core
             boardController.config.columns = CurrentBoardColumns;
             boardController.config.rows = CurrentBoardRows;
             boardController.config.gameDurationSeconds = CurrentLevelDuration;
-            boardController.config.typeCount = currentLevel >= 5 ? 6 : 5;
+            // Only five real piece sprites exist. A sixth enum value is None
+            // and would render as a blank cell on higher levels.
+            boardController.config.typeCount = 5;
         }
 
         private void HandleChainUpdated(int count, PieceType type)
@@ -355,7 +357,7 @@ namespace DogCrush.Core
                     PlayerPrefs.Save();
                     uiController.UpdateLives(lives, MaxLives);
                 }
-                uiController.ShowLevelResult(victory, finalScore, isNewRecord, stars);
+                uiController.ShowLevelResult(victory, finalScore, isNewRecord, stars, lives);
             }
         }
 
@@ -404,21 +406,14 @@ namespace DogCrush.Core
 
         private void UseShuffleBooster()
         {
-            if (!shuffleBoosterAvailable || stateController == null || !stateController.CanSelectPieces() || boardController == null || gravityController == null) return;
-            PieceView piece = boardController.GetRandomPiece();
-            if (piece == null) return;
+            if (!shuffleBoosterAvailable || stateController == null || !stateController.CanSelectPieces() || boardController == null) return;
             shuffleBoosterAvailable = false;
+            // The paw booster creates a completely fresh board.
+            boardController.InitializeBoard();
+            boardController.EnsureHasValidMoves();
             uiController?.SetBoosterAvailability(false, boneBoosterAvailable, foodBoosterAvailable);
-            stateController.ChangeState(GameState.Resolving);
-            StartCoroutine(gravityController.ProcessRemovalAndRefill(
-                new List<PieceView> { piece },
-                () =>
-                {
-                    if (gameTimer != null && gameTimer.RemainingTime <= 0f) EndMatch(false);
-                    else stateController.ChangeState(GameState.Playing);
-                }));
-            audioController?.PlayMatchSound(3);
-            hapticController?.PulseMatch(3);
+            audioController?.PlayUISound();
+            hapticController?.PulseSelection();
         }
 
         private void UseFoodBooster()

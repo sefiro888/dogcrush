@@ -721,8 +721,8 @@ namespace DogCrush.UI
                 levelButtons[i].interactable = available;
                 int stars = PlayerPrefs.GetInt("DogCrush_LevelStars_" + level, 0);
                 levelButtonLabels[i].text = available
-                    ? $"NIVEL {level}   {(stars > 0 ? new string('★', stars) : "—")}"
-                    : $"NIVEL {level}   🔒";
+                    ? $"NIVEL {level}   {(stars > 0 ? "ESTRELLAS " + new string('*', stars) : "-")}"
+                    : $"NIVEL {level}   BLOQUEADO";
             }
         }
 
@@ -1207,10 +1207,10 @@ namespace DogCrush.UI
 
         public void ShowGameOver(int finalScore, bool isNewRecord)
         {
-            ShowLevelResult(false, finalScore, isNewRecord, 0);
+            ShowLevelResult(false, finalScore, isNewRecord, 0, 0);
         }
 
-        public void ShowLevelResult(bool victory, int finalScore, bool isNewRecord, int stars)
+        public void ShowLevelResult(bool victory, int finalScore, bool isNewRecord, int stars, int remainingLives = 0)
         {
             lastResultWasVictory = victory;
             if (gameOverPanel != null)
@@ -1228,12 +1228,16 @@ namespace DogCrush.UI
             if (resultLabelText != null)
             {
                 resultLabelText.text = victory
-                    ? $"{new string('★', Mathf.Clamp(stars, 1, 3))}\nPUNTUACIÓN"
-                    : "PUNTUACIÓN";
+                    ? $"ESTRELLAS {new string('*', Mathf.Clamp(stars, 1, 3))}\nPUNTUACIÓN"
+                    : remainingLives > 0
+                        ? $"PUNTUACIÓN\nVIDAS RESTANTES: {remainingLives}"
+                        : "PUNTUACIÓN\nSIN VIDAS";
             }
             if (resultButtonText != null)
             {
-                resultButtonText.text = victory ? "SIGUIENTE NIVEL" : "JUGAR DE NUEVO";
+                resultButtonText.text = victory
+                    ? "SIGUIENTE NIVEL"
+                    : remainingLives > 0 ? "JUGAR DE NUEVO" : "RECUPERAR VIDAS";
             }
             if (finalScoreText != null)
             {
